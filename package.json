@@ -3,21 +3,40 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "trustedDependencies": [
+    "fallow"
+  ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "format": "biome check --write",
+    "fmt:check": "biome format .",
+    "lint": "biome lint",
+    "lint:ci": "biome ci --formatter-enabled=false",
+    "typecheck": "tsc --noEmit",
+    "check": "biome check",
+    "fallow": "fallow --summary",
+    "fallow:audit": "fallow audit",
+    "clippy": "cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings",
+    "fmt:rust": "cargo fmt --manifest-path src-tauri/Cargo.toml",
+    "fmt:rust:check": "cargo fmt --manifest-path src-tauri/Cargo.toml --check"
   },
   "dependencies": {
-    "preact": "^10.25.1",
     "@tauri-apps/api": "^2",
-    "@tauri-apps/plugin-opener": "^2"
+    "@tauri-apps/plugin-opener": "^2",
+    "@vanilla-extract/css": "^1.20.1",
+    "preact": "^10.25.1"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.4.5",
     "@preact/preset-vite": "^2.9.3",
+    "@tauri-apps/cli": "^2",
+    "@vanilla-extract/vite-plugin": "^5.2.2",
+    "fallow": "2.66.1",
     "typescript": "~5.6.2",
     "vite": "^6.0.3",
-    "@tauri-apps/cli": "^2"
+    "vite-tsconfig-paths": "^6.1.1"
   }
 }

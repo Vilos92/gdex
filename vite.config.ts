@@ -1,12 +1,22 @@
-import { defineConfig } from "vite";
-import preact from "@preact/preset-vite";
+import preact from '@preact/preset-vite';
+import {vanillaExtractPlugin} from '@vanilla-extract/vite-plugin';
+import {defineConfig} from 'vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
+
+/*
+ * Constants.
+ */
 
 // @ts-expect-error process is a nodejs global
 const host = process.env.TAURI_DEV_HOST;
 
+/*
+ * Config.
+ */
+
 // https://vite.dev/config/
 export default defineConfig(async () => ({
-  plugins: [preact()],
+  plugins: [tsconfigPaths(), vanillaExtractPlugin(), preact()],
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //
@@ -19,14 +29,14 @@ export default defineConfig(async () => ({
     host: host || false,
     hmr: host
       ? {
-          protocol: "ws",
+          protocol: 'ws',
           host,
-          port: 1421,
+          port: 1421
         }
       : undefined,
     watch: {
       // 3. tell Vite to ignore watching `src-tauri`
-      ignored: ["**/src-tauri/**"],
-    },
-  },
+      ignored: ['**/src-tauri/**']
+    }
+  }
 }));
