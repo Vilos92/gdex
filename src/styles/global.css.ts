@@ -37,10 +37,7 @@ globalStyle('a', {
 });
 
 globalStyle('a:hover', {
-  color: palette.linkHover
-});
-
-globalStyle('a:hover', {
+  color: palette.linkHover,
   '@media': {
     '(prefers-color-scheme: dark)': {
       color: palette.linkHoverDark
@@ -82,10 +79,7 @@ globalStyle('button:hover', {
 
 globalStyle('button:active', {
   borderColor: palette.controlBorderActive,
-  backgroundColor: palette.controlBgActive
-});
-
-globalStyle('button:active', {
+  backgroundColor: palette.controlBgActive,
   '@media': {
     '(prefers-color-scheme: dark)': {
       backgroundColor: palette.controlBgActiveDark
