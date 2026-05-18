@@ -1,4 +1,14 @@
-import { render } from "preact";
-import App from "./App";
+import {render} from 'preact';
+import App from '@/app/App';
+import '@/styles/global.css';
 
-render(<App />, document.getElementById("root")!);
+/*
+ * Script.
+ */
+
+const root = document.getElementById('root');
+if (!root) {
+  throw new Error('Root element #root not found');
+}
+
+render(<App />, root);
