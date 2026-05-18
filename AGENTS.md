@@ -15,7 +15,7 @@ Living conventions for this repo. Order and wording can evolve—ask whether new
 - **`??` vs `||`:** use **`??`** to default `null`/`undefined` only. Reserve **`||`** for boolean conditions and deliberate truthiness. Treating `''` as absent belongs in a named helper, not `value || fallback`.
 - **Avoid redundant nullish coalescing:** do not write `x ?? undefined` when `x` is already `T | undefined` with no `null`.
 - **Exports:** do not export types, functions, or constants unless another file imports them (or we deliberately expose a stable public API). Prefer module-private symbols until then.
-- **`?` vs `| undefined`:** use optional properties (`prop?:`) only when callers often omit the key entirely. For **internal** components and modules, prefer required keys with `T | undefined` when a value may be absent.
+- **`?` vs `| undefined`:** use optional properties (`prop?:`) when callers often omit the key entirely (e.g. wide public or library-style surfaces). For **internal** components and modules, prefer required keys with `T | undefined` when a value may be absent—every call site passes the prop explicitly, and absence is `undefined`, not “key not passed.” **Exception:** props normally omitted when unused—especially **`class?`** and other familiar DOM-style optional props—stay `prop?: T`; do not write `prop={undefined}` at call sites.
 
 ## Imports
 
@@ -25,6 +25,7 @@ Living conventions for this repo. Order and wording can evolve—ask whether new
 ## Preact components
 
 - **Props types** are named **`{ComponentName}Props`** (e.g. `TaskListProps` for `TaskList`). Do not type props inline on the component; declare them under **Types.** in the file layout below. With **`children`**, use **`PropsWithChildren<{ … }>`** (other props in the generic object).
+- **`class`:** optional (`class?: string`); omit at call sites when unused. Prefer Vanilla Extract `class={styles.foo}` over ad-hoc strings.
 
 ## Vanilla Extract
 
@@ -116,6 +117,13 @@ No custom `clippy.toml` yet—defaults plus `-D warnings`. If we add lint groups
 - **Permanent** (e.g. generated export): comment at the ignore explaining why.
 
 No fallow/lint waivers or “reserved for later” files without human approval and that documentation. Do not use **`fallow-rs/fallow@v2`** or Actions cache for **`.fallow/`**—run the lockfile-pinned CLI via **`bun run fallow:audit`**.
+
+**Baselines** (paths in `.fallowrc.jsonc`; versioned, not hand-edited):
+
+- **`dupes-baseline.json`** — grandfathered duplicate clone groups. Audit compares the PR diff against this snapshot; with default **new-only** gating, only **new** clones fail. Empty `clone_groups` means none accepted yet—dedupe in code, do not patch the JSON to greenwash.
+- **`health-baseline.json`** — grandfathered health findings (complexity, coverage gaps, etc.); same new-only comparison. Empty `runtime_coverage_findings` / `target_keys` means a clean slate.
+- **Refreshing baselines** is intentional debt recording: `fallow dupes --save-baseline` and `fallow health --save-baseline` (human-driven after review—not an agent default when audit fails).
+- **`cache/`** and **`cache.bin`** are local-only (`.fallow/.gitignore`); CI needs the baseline JSON files present in the repo.
 
 ## Keeping this file useful
 
