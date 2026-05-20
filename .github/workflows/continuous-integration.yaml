@@ -46,3 +46,26 @@ jobs:
       - uses: ./.github/actions/install-bun-and-dependencies
       - name: Fallow audit
         run: bun run fallow:audit -- --base ${{ github.event.pull_request.base.sha || 'origin/main' }}
+
+  rust-fmt:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/install-rust
+      - uses: ./.github/actions/install-bun-and-dependencies
+      - name: Rust format
+        run: bun run fmt:rust:check
+
+  rust-clippy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/install-rust
+        with:
+          cache: "true"
+          tauri-deps: "true"
+      - uses: ./.github/actions/install-bun-and-dependencies
+      - name: Clippy
+        run: bun run clippy
