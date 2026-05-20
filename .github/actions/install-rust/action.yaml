@@ -1,12 +1,12 @@
 name: Install Rust
-description: Toolchain from rust-toolchain.toml, optional Linux Tauri deps and cargo cache
+description: Rust toolchain and optional cargo cache. Mirrors rust-toolchain.toml but hardcodes channel/components here—composite actions cannot read that file, so values must stay in sync manually.
 inputs:
   cache:
     description: Restore/save ~/.cargo and src-tauri/target via rust-cache (keyed on Cargo.lock)
     required: false
     default: "false"
   tauri-deps:
-    description: apt packages required to compile Tauri on ubuntu-latest (Clippy only)
+    description: Linux apt packages needed to compile Tauri on ubuntu-latest. Enable for rust-clippy only—rust-fmt runs cargo fmt and does not compile the app.
     required: false
     default: "false"
 runs:
