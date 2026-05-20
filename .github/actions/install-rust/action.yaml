@@ -12,7 +12,12 @@ inputs:
 runs:
   using: composite
   steps:
+    # Composite actions pass an empty toolchain input unless set explicitly (won't read rust-toolchain.toml).
+    # Keep channel/components in sync with rust-toolchain.toml at repo root.
     - uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
+      with:
+        toolchain: 1.95.0
+        components: rustfmt, clippy
 
     - name: Install Tauri Linux dependencies
       if: inputs.tauri-deps == 'true'
