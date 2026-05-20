@@ -18,7 +18,7 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
-            let dex_path = resolve_dex_binary_path().map_err(|error| error.to_string())?;
+            let dex_path = resolve_dex_binary_path()?;
             app.manage(DexClient::new(dex_path));
             Ok(())
         })

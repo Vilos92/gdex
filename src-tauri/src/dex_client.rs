@@ -1,12 +1,15 @@
 //! Read-only `dex` CLI client; Tauri commands will call `list_tasks` / `show_task`.
 #![allow(dead_code)]
 
-use std::io::ErrorKind;
+use std::io::{ErrorKind, Read};
 use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::process::{Command, Stdio};
+use std::time::{Duration, Instant};
 
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+
+const DEX_COMMAND_TIMEOUT: Duration = Duration::from_secs(30);
 
 /* Types. */
 
@@ -49,6 +52,16 @@ pub enum DexError {
     #[error("dex exited with status {status}: {stderr}")]
     CommandFailed { status: i32, stderr: String },
 
+    #[error(
+        "dex command timed out after {timeout_secs}s (binary: `{binary}`; config: `{config}`; storage: `{storage}`)"
+    )]
+    CommandTimedOut {
+        timeout_secs: u64,
+        binary: PathBuf,
+        config: PathBuf,
+        storage: PathBuf,
+    },
+
     #[error("failed to parse dex JSON output: {0}")]
     Parse(#[from] serde_json::Error),
 }
@@ -84,22 +97,51 @@ impl DexClient {
 
 impl DexClient {
     fn run_dex(&self, project: &DexProject, args: &[&str]) -> Result<String, DexError> {
-        let output = Command::new(&self.binary_path)
+        let mut child = Command::new(&self.binary_path)
             .arg("--config")
             .arg(&project.config_path)
             .arg("--storage-path")
             .arg(&project.storage_path)
             .args(args)
-            .output()
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
             .map_err(|error| map_spawn_error(error, &self.binary_path))?;
 
-        if output.status.success() {
-            return Ok(String::from_utf8_lossy(&output.stdout).into_owned());
+        let deadline = Instant::now() + DEX_COMMAND_TIMEOUT;
+        let status = loop {
+            match child.try_wait().map_err(DexError::Io)? {
+                Some(status) => break status,
+                None if Instant::now() >= deadline => {
+                    let _ = child.kill();
+                    let _ = child.wait();
+                    return Err(DexError::CommandTimedOut {
+                        timeout_secs: DEX_COMMAND_TIMEOUT.as_secs(),
+                        binary: self.binary_path.clone(),
+                        config: project.config_path.clone(),
+                        storage: project.storage_path.clone(),
+                    });
+                }
+                None => std::thread::sleep(Duration::from_millis(50)),
+            }
+        };
+
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        if let Some(mut pipe) = child.stdout.take() {
+            pipe.read_to_end(&mut stdout).map_err(DexError::Io)?;
+        }
+        if let Some(mut pipe) = child.stderr.take() {
+            pipe.read_to_end(&mut stderr).map_err(DexError::Io)?;
+        }
+
+        if status.success() {
+            return Ok(String::from_utf8_lossy(&stdout).into_owned());
         }
 
         Err(DexError::CommandFailed {
-            status: output.status.code().unwrap_or(-1),
-            stderr: String::from_utf8_lossy(&output.stderr).into_owned(),
+            status: status.code().unwrap_or(-1),
+            stderr: String::from_utf8_lossy(&stderr).into_owned(),
         })
     }
 }
