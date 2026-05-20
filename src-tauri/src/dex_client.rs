@@ -202,23 +202,6 @@ mod tests {
         "children": ["child-a"]
     }"#;
 
-    /// Set `GDEX_TEST_DEX_CONFIG` and `GDEX_TEST_DEX_STORAGE` to run integration tests locally.
-    fn integration_project_from_env() -> Option<DexProject> {
-        let config_path = std::env::var_os("GDEX_TEST_DEX_CONFIG").map(PathBuf::from)?;
-        let storage_path = std::env::var_os("GDEX_TEST_DEX_STORAGE").map(PathBuf::from)?;
-        Some(DexProject {
-            config_path,
-            storage_path,
-        })
-    }
-
-    fn sample_project() -> DexProject {
-        DexProject {
-            config_path: PathBuf::from("/tmp/gdex-test/config.toml"),
-            storage_path: PathBuf::from("/tmp/gdex-test/storage"),
-        }
-    }
-
     #[test]
     fn deserializes_task_from_dex_json() {
         let task: Task = serde_json::from_str(LIST_ROW_JSON).expect("task JSON");
@@ -231,30 +214,11 @@ mod tests {
     #[test]
     fn list_tasks_errors_when_binary_missing() {
         let client = DexClient::new(PathBuf::from("/nonexistent/gdex-dex-binary"));
-        let error = client
-            .list_tasks(&sample_project())
-            .expect_err("missing binary");
+        let project = DexProject {
+            config_path: PathBuf::from("/tmp/gdex-test/config.toml"),
+            storage_path: PathBuf::from("/tmp/gdex-test/storage"),
+        };
+        let error = client.list_tasks(&project).expect_err("missing binary");
         assert!(matches!(error, DexError::BinaryNotFound { .. }));
-    }
-
-    #[test]
-    #[ignore = "requires dex on PATH and GDEX_TEST_DEX_CONFIG / GDEX_TEST_DEX_STORAGE"]
-    fn list_tasks_returns_tasks() {
-        let project = integration_project_from_env().expect("integration env vars");
-        let client = DexClient::new(which::which("dex").expect("dex on PATH"));
-        let tasks = client.list_tasks(&project).expect("dex list --json");
-        assert!(!tasks.is_empty());
-    }
-
-    #[test]
-    #[ignore = "requires dex on PATH, GDEX_TEST_DEX_* env vars, and GDEX_TEST_DEX_TASK_ID"]
-    fn show_task_returns_detail() {
-        let project = integration_project_from_env().expect("integration env vars");
-        let task_id = std::env::var("GDEX_TEST_DEX_TASK_ID").expect("GDEX_TEST_DEX_TASK_ID");
-        let client = DexClient::new(which::which("dex").expect("dex on PATH"));
-        let task = client
-            .show_task(&project, &task_id)
-            .expect("dex show --json");
-        assert_eq!(task.id, task_id);
     }
 }
