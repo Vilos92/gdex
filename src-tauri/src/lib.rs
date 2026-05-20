@@ -1,5 +1,7 @@
+mod commands;
 mod dex;
 mod dex_client;
+mod project_store;
 
 use dex::resolve_dex_binary_path;
 use dex_client::DexClient;
@@ -22,7 +24,16 @@ pub fn run() {
             app.manage(DexClient::new(dex_path));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            commands::add_project,
+            commands::remove_project,
+            commands::list_projects,
+            commands::set_active_project,
+            commands::get_active_project,
+            commands::get_tasks,
+            commands::get_task,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
