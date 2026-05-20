@@ -1,6 +1,8 @@
 mod dex;
+mod dex_client;
 
-use dex::{resolve_dex_binary_path, DexBinaryPath};
+use dex::resolve_dex_binary_path;
+use dex_client::DexClient;
 use tauri::Manager;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -16,8 +18,8 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
-            let dex_path = resolve_dex_binary_path().map_err(|error| error.to_string())?;
-            app.manage(DexBinaryPath(dex_path));
+            let dex_path = resolve_dex_binary_path()?;
+            app.manage(DexClient::new(dex_path));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![greet])
