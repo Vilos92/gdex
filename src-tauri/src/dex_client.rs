@@ -108,6 +108,9 @@ impl DexClient {
             .spawn()
             .map_err(|error| map_spawn_error(error, &self.binary_path))?;
 
+        let stdout_reader = child.stdout.take().map(spawn_pipe_reader);
+        let stderr_reader = child.stderr.take().map(spawn_pipe_reader);
+
         let deadline = Instant::now() + DEX_COMMAND_TIMEOUT;
         let status = loop {
             match child.try_wait().map_err(DexError::Io)? {
@@ -115,6 +118,7 @@ impl DexClient {
                 None if Instant::now() >= deadline => {
                     let _ = child.kill();
                     let _ = child.wait();
+                    let _ = join_pipe_readers(stdout_reader, stderr_reader);
                     return Err(DexError::CommandTimedOut {
                         timeout_secs: DEX_COMMAND_TIMEOUT.as_secs(),
                         binary: self.binary_path.clone(),
@@ -126,14 +130,7 @@ impl DexClient {
             }
         };
 
-        let mut stdout = Vec::new();
-        let mut stderr = Vec::new();
-        if let Some(mut pipe) = child.stdout.take() {
-            pipe.read_to_end(&mut stdout).map_err(DexError::Io)?;
-        }
-        if let Some(mut pipe) = child.stderr.take() {
-            pipe.read_to_end(&mut stderr).map_err(DexError::Io)?;
-        }
+        let (stdout, stderr) = join_pipe_readers(stdout_reader, stderr_reader)?;
 
         if status.success() {
             return Ok(String::from_utf8_lossy(&stdout).into_owned());
@@ -144,6 +141,36 @@ impl DexClient {
             stderr: String::from_utf8_lossy(&stderr).into_owned(),
         })
     }
+}
+
+type PipeReader = std::thread::JoinHandle<Result<Vec<u8>, std::io::Error>>;
+
+fn spawn_pipe_reader(mut pipe: impl Read + Send + 'static) -> PipeReader {
+    std::thread::spawn(move || {
+        let mut buffer = Vec::new();
+        pipe.read_to_end(&mut buffer).map(|_| buffer)
+    })
+}
+
+fn join_pipe_readers(
+    stdout: Option<PipeReader>,
+    stderr: Option<PipeReader>,
+) -> Result<(Vec<u8>, Vec<u8>), DexError> {
+    let stdout = match stdout {
+        Some(reader) => reader
+            .join()
+            .map_err(|_| std::io::Error::other("stdout reader thread panicked"))?
+            .map_err(DexError::Io)?,
+        None => Vec::new(),
+    };
+    let stderr = match stderr {
+        Some(reader) => reader
+            .join()
+            .map_err(|_| std::io::Error::other("stderr reader thread panicked"))?
+            .map_err(DexError::Io)?,
+        None => Vec::new(),
+    };
+    Ok((stdout, stderr))
 }
 
 fn map_spawn_error(error: std::io::Error, binary_path: &Path) -> DexError {
