@@ -3,7 +3,7 @@
 use std::path::PathBuf;
 use std::sync::{
     atomic::{AtomicU64, Ordering},
-    Arc,
+    Arc, Mutex,
 };
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -16,6 +16,8 @@ use crate::dex_client::DexProject;
 const STORE_FILE: &str = "settings.json";
 const PROJECTS_KEY: &str = "projects";
 const ACTIVE_PROJECT_KEY: &str = "active_project_id";
+
+static STORE_WRITE_MUTEX: Mutex<()> = Mutex::new(());
 
 /* Types. */
 
@@ -36,6 +38,7 @@ pub fn add_project(
     config_path: String,
     storage_path: String,
 ) -> Result<Project, String> {
+    let _guard = store_write_lock()?;
     let store = open_store(app)?;
     let mut projects = load_projects(&store)?;
     let project = Project {
@@ -50,6 +53,7 @@ pub fn add_project(
 }
 
 pub fn remove_project(app: &AppHandle, id: &str) -> Result<(), String> {
+    let _guard = store_write_lock()?;
     let store = open_store(app)?;
     let mut projects = load_projects(&store)?;
     let before = projects.len();
@@ -71,6 +75,7 @@ pub fn list_projects(app: &AppHandle) -> Result<Vec<Project>, String> {
 }
 
 pub fn set_active_project(app: &AppHandle, id: &str) -> Result<(), String> {
+    let _guard = store_write_lock()?;
     let store = open_store(app)?;
     if !load_projects(&store)?
         .iter()
@@ -109,6 +114,12 @@ impl From<&Project> for DexProject {
 }
 
 type SettingsStore = Arc<tauri_plugin_store::Store<tauri::Wry>>;
+
+fn store_write_lock() -> Result<std::sync::MutexGuard<'static, ()>, String> {
+    STORE_WRITE_MUTEX
+        .lock()
+        .map_err(|_| "project store lock poisoned".to_owned())
+}
 
 fn open_store(app: &AppHandle) -> Result<SettingsStore, String> {
     app.store(STORE_FILE).map_err(|error| error.to_string())
