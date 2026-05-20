@@ -88,11 +88,13 @@ Blank line before and after each section block, and between the comment and the 
 
 **Clippy** is Rust’s built-in linter (like Biome for TS). It catches suspicious patterns, needless clones, bad `Option`/`Result` handling, and APIs that are easy to misuse. We run it with **warnings denied** so anything Clippy flags fails the command.
 
-- **`bun run clippy`** — `cargo clippy` on `src-tauri` with **`-D warnings`** (warnings become errors).
+- **`bun run clippy`** — `cargo clippy` on `src-tauri` with **`-D warnings`** (warnings become errors). Compiles the crate (typecheck is implicit; no separate `cargo check` script).
 - **`bun run fmt:rust`** — format Rust in place.
 - **`bun run fmt:rust:check`** — CI-style “would `cargo fmt` change files?” check.
 
-**rustfmt** is the standard Rust formatter (like Biome format for TS). Use it on every Rust touch before commit; pair with Clippy when `src-tauri/` changes matter.
+**rustfmt** is the standard Rust formatter (like Biome format for TS). Run **`fmt:rust:check`** / **`fmt:rust`** on every Rust touch; pair with Clippy only when that touch is non-trivial (see Validation).
+
+**`rust-toolchain.toml`** (repo root) pins the Rust version and installs **rustfmt** + **clippy** via rustup so local machines and CI match. Bump the `channel` when upgrading Rust project-wide.
 
 No custom `clippy.toml` yet—defaults plus `-D warnings`. If we add lint groups or `allow` attributes, document the **why** here.
 
@@ -100,14 +102,27 @@ No custom `clippy.toml` yet—defaults plus `-D warnings`. If we add lint groups
 
 **When:** after a **large diff** or **high-impact** touch (`src/`, `src-tauri/`, `vite.config.ts`, capabilities) and **always before commit**.
 
-**Loop** (shortest → longest; stop on first failure):
+**Loop** before commit (shortest → longest; stop on first failure):
 
 1. `bun run check` — Biome format + lint (CI: `fmt:check`, `lint:ci`)
 2. `bun run typecheck`
 3. `bun run fallow:audit` — dead code, unused exports, baselines (CI passes `--base`; see workflow)
-4. **`bun run clippy`** and **`bun run fmt:rust:check`** when `src-tauri/` changes are non-trivial
+4. **`bun run fmt:rust:check`** then **`bun run clippy`** — only when the diff touches **`src-tauri/`**, **`rust-toolchain.toml`**, or **`src-tauri/Cargo.toml`** / **`Cargo.lock`**
 
-**CI** (`.github/workflows/continuous-integration.yaml`) runs fmt, lint, typecheck, and fallow in parallel. It does **not** run `bun run build` or Tauri packaging—those stay local or in a release workflow later.
+**Rust locally:** skip step 4 on TS-only or tooling-only work. Clippy compiles the full Tauri dependency graph and is slow; CI **`rust-clippy`** / **`rust-fmt`** run on every push and PR. Run step 4 after substantive Rust edits or when fixing a Clippy or rustfmt failure—not as a default “run the whole loop” step.
+
+**CI** (`.github/workflows/continuous-integration.yaml`) runs these jobs in parallel on every push and PR:
+
+| Job | Local equivalent |
+|-----|------------------|
+| `fmt` | `bun run fmt:check` |
+| `lint` | `bun run lint:ci` |
+| `typecheck` | `bun run typecheck` |
+| `fallow` | `bun run fallow:audit` |
+| `rust-fmt` | `bun run fmt:rust:check` |
+| `rust-clippy` | `bun run clippy` |
+
+Rust jobs use **`rust-toolchain.toml`**, Linux Tauri system deps (Clippy only), and **[rust-cache](https://github.com/Swatinem/rust-cache)** keyed on **`src-tauri/Cargo.lock`** (and registry) so PR builds reuse compiled deps. CI does **not** run `bun run build`, `cargo test`, or Tauri packaging—those stay local or in a release workflow later.
 
 **Findings:** fix—wire code, add or extend **`entry`** in `.fallowrc.jsonc`, or delete. Do not suppress to greenwash.
 
