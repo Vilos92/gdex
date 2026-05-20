@@ -61,11 +61,10 @@ pub fn remove_project(app: &AppHandle, id: &str) -> Result<(), String> {
     if projects.len() == before {
         return Err(format!("project not found: {id}"));
     }
-    save_projects(&store, &projects)?;
     if load_active_project_id(&store)? == Some(id.to_owned()) {
         store.delete(ACTIVE_PROJECT_KEY);
-        store.save().map_err(|error| error.to_string())?;
     }
+    save_projects(&store, &projects)?;
     Ok(())
 }
 
