@@ -28,7 +28,7 @@ export function ProjectsLayout({projects, activeProjectId, onProjectsChange}: Pr
       />
       <main class={styles.main}>
         <p class={styles.placeholder}>
-          {activeProject !== undefined ? `Project selected: ${activeProject.name}` : 'Project selected'}
+          {activeProject !== undefined ? `Project selected: ${activeProject.name}` : 'Select a project'}
         </p>
       </main>
     </div>

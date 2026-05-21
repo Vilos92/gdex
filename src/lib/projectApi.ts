@@ -23,8 +23,7 @@ export async function listProjects(): Promise<Projects> {
 }
 
 export async function getActiveProjectId(): Promise<string | undefined> {
-  const activeId = await invoke<string | undefined>('get_active_project');
-  return activeId ?? undefined;
+  return invoke<string | undefined>('get_active_project');
 }
 
 export async function setActiveProject(id: string): Promise<void> {

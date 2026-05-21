@@ -23,8 +23,8 @@ export function useProjectRegistration(onRegistered: (project: Project) => void 
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
 
   const trimmedName = name.trim();
-  const pathsSelected = configPath !== undefined && storagePath !== undefined;
-  const canRegister = trimmedName.length > 0 && pathsSelected && !isRegistering;
+  const hasSelectedPaths = configPath !== undefined && storagePath !== undefined;
+  const canRegister = trimmedName.length > 0 && hasSelectedPaths && !isRegistering;
 
   const buildRegistrationInput = () => {
     if (!canRegister || configPath === undefined || storagePath === undefined) {
@@ -35,31 +35,44 @@ export function useProjectRegistration(onRegistered: (project: Project) => void 
 
   const selectConfig = async () => {
     setErrorMessage(undefined);
-    const pickedConfigFile = await pickConfigFile();
-    if (pickedConfigFile !== undefined) {
-      setConfigPath(pickedConfigFile);
+    try {
+      const pickedConfigFile = await pickConfigFile();
+      if (pickedConfigFile !== undefined) {
+        setConfigPath(pickedConfigFile);
+      }
+    } catch (error) {
+      console.error('pickConfigFile failed', error);
+      setErrorMessage('Could not open the config file picker.');
     }
   };
 
   const selectStorage = async () => {
     setErrorMessage(undefined);
-    const pickedStoragePath = await pickStorageDirectory();
-    if (pickedStoragePath !== undefined) {
-      setStoragePath(pickedStoragePath);
+    try {
+      const pickedStoragePath = await pickStorageDirectory();
+      if (pickedStoragePath !== undefined) {
+        setStoragePath(pickedStoragePath);
+      }
+    } catch (error) {
+      console.error('pickStorageDirectory failed', error);
+      setErrorMessage('Could not open the storage directory picker.');
     }
   };
 
   const submitRegistration = async () => {
     setIsRegistering(true);
     setErrorMessage(undefined);
-    await applyRegistrationResult(await submitProjectRegistration(buildRegistrationInput()), {
-      setName,
-      setConfigPath,
-      setStoragePath,
-      setErrorMessage,
-      onRegistered
-    });
-    setIsRegistering(false);
+    try {
+      await applyRegistrationResult(await submitProjectRegistration(buildRegistrationInput()), {
+        setName,
+        setConfigPath,
+        setStoragePath,
+        setErrorMessage,
+        onRegistered
+      });
+    } finally {
+      setIsRegistering(false);
+    }
   };
 
   return {

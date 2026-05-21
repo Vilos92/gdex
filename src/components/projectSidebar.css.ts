@@ -79,3 +79,9 @@ export const addToggle = style({
   padding: '0.4em 0.75em',
   fontSize: '0.875rem'
 });
+
+export const selectError = style({
+  margin: 0,
+  fontSize: '0.875rem',
+  color: palette.danger
+});

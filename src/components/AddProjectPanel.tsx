@@ -52,9 +52,9 @@ export function AddProjectPanel({projects, activeProjectId, onProjectsChange}: A
 function renderRegisterForm(
   isFormOpen: boolean,
   onRegistered: (project: Project) => void | Promise<void>
-): JSX.Element | null {
+): JSX.Element | undefined {
   if (!isFormOpen) {
-    return null;
+    return undefined;
   }
   return <ProjectRegisterForm onRegistered={onRegistered} />;
 }
