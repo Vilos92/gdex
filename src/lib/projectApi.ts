@@ -11,7 +11,6 @@ export type Project = {
   storage_path: string;
 };
 
-/** Immutable project collection — use for props and read-only parameters. */
 export type Projects = readonly Project[];
 
 /*

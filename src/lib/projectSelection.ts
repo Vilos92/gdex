@@ -4,7 +4,6 @@ import {getActiveProjectId, type Projects, setActiveProject} from '@/lib/project
  * Helpers.
  */
 
-/** Load projects and ensure an active id when the store already has one. */
 export async function loadProjectSelection(projects: Projects): Promise<string | undefined> {
   const activeId = await getActiveProjectId();
   if (activeId !== undefined && projects.some(project => project.id === activeId)) {
