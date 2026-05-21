@@ -1,5 +1,4 @@
-//! Read-only `dex` CLI client; Tauri commands will call `list_tasks` / `show_task`.
-#![allow(dead_code)]
+//! Read-only `dex` CLI client; Tauri commands call `list_tasks` / `show_task`.
 
 use std::io::{ErrorKind, Read};
 use std::path::{Path, PathBuf};
