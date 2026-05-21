@@ -1,10 +1,10 @@
 import type {JSX} from 'preact';
 
-import type {useAppProjects} from '@/app/hooks/useAppProjects';
-import {ProjectsLayout} from '@/app/views/ProjectsLayout';
-import {SplashView} from '@/app/views/SplashView';
-import * as styles from '@/app/views/views.css';
+import type {useAppProjects} from '@/hooks/useAppProjects';
 import {setActiveProject} from '@/lib/projectApi';
+import {ProjectsLayout} from '@/views/ProjectsLayout';
+import {SplashView} from '@/views/SplashView';
+import * as styles from '@/views/views.css';
 
 /*
  * Types.

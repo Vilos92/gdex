@@ -1,6 +1,6 @@
-import {ProjectRegisterForm} from '@/app/components/ProjectRegisterForm';
-import * as styles from '@/app/views/views.css';
+import {ProjectRegisterForm} from '@/components/ProjectRegisterForm';
 import type {Project} from '@/lib/projectApi';
+import * as styles from '@/views/views.css';
 
 /*
  * Types.

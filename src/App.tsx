@@ -1,5 +1,5 @@
-import {AppViews} from '@/app/AppViews';
-import {useAppProjects} from '@/app/hooks/useAppProjects';
+import {AppViews} from '@/AppViews';
+import {useAppProjects} from '@/hooks/useAppProjects';
 
 /*
  * Component.

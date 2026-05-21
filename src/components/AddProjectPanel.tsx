@@ -1,8 +1,8 @@
 import type {JSX} from 'preact';
 import {useState} from 'preact/hooks';
 
-import {ProjectRegisterForm} from '@/app/components/ProjectRegisterForm';
-import * as styles from '@/app/components/projectSidebar.css';
+import {ProjectRegisterForm} from '@/components/ProjectRegisterForm';
+import * as styles from '@/components/projectSidebar.css';
 import {type Project, type Projects, setActiveProject} from '@/lib/projectApi';
 
 /*

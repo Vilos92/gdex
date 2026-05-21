@@ -20,7 +20,8 @@ Living conventions for this repo. Order and wording can evolve—ask whether new
 
 ## Imports
 
-- **`@/*` → `./src/*`** in `tsconfig` `paths`. Import every `src/` module via `@/` (`@/app/App`, `@/styles/tokens`); no relative paths between `src/` files.
+- **`@/*` → `./src/*`** in `tsconfig` `paths`. Import every `src/` module via `@/` (`@/App`, `@/styles/tokens`); no relative paths between `src/` files.
+- **UI under `src/`:** `App.tsx` / `AppViews.tsx` at the root; **`views/`**, **`components/`**, **`hooks/`** next to **`lib/`** and **`styles/`** (not `src/app/`).
 - No **`.ts` / `.tsx`** suffixes on import paths (`allowImportingTsExtensions: false`).
 
 ## Preact components

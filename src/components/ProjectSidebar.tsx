@@ -1,6 +1,6 @@
-import {AddProjectPanel} from '@/app/components/AddProjectPanel';
-import {ProjectList} from '@/app/components/ProjectList';
-import * as styles from '@/app/components/projectSidebar.css';
+import {AddProjectPanel} from '@/components/AddProjectPanel';
+import {ProjectList} from '@/components/ProjectList';
+import * as styles from '@/components/projectSidebar.css';
 import {type Projects, setActiveProject} from '@/lib/projectApi';
 
 /*

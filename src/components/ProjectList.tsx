@@ -1,4 +1,4 @@
-import * as styles from '@/app/components/projectSidebar.css';
+import * as styles from '@/components/projectSidebar.css';
 import type {Projects} from '@/lib/projectApi';
 
 /*

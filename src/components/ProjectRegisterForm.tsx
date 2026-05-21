@@ -1,6 +1,6 @@
-import {PathPickerField} from '@/app/components/PathPickerField';
-import * as styles from '@/app/components/projectRegisterForm.css';
-import {useProjectRegistration} from '@/app/hooks/useProjectRegistration';
+import {PathPickerField} from '@/components/PathPickerField';
+import * as styles from '@/components/projectRegisterForm.css';
+import {useProjectRegistration} from '@/hooks/useProjectRegistration';
 import type {Project} from '@/lib/projectApi';
 
 /*

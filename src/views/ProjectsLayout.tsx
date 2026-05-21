@@ -1,6 +1,6 @@
-import {ProjectSidebar} from '@/app/components/ProjectSidebar';
-import * as styles from '@/app/views/views.css';
+import {ProjectSidebar} from '@/components/ProjectSidebar';
 import type {Projects} from '@/lib/projectApi';
+import * as styles from '@/views/views.css';
 
 /*
  * Types.

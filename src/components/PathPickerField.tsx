@@ -1,4 +1,4 @@
-import * as styles from '@/app/components/projectRegisterForm.css';
+import * as styles from '@/components/projectRegisterForm.css';
 
 /*
  * Types.
