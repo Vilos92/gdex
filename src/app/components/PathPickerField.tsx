@@ -1,0 +1,35 @@
+import * as styles from '@/app/components/projectRegisterForm.css';
+
+/*
+ * Types.
+ */
+
+export type PathPickerFieldProps = {
+  label: string;
+  path: string | undefined;
+  emptyLabel: string;
+  onPick: () => void | Promise<void>;
+};
+
+/*
+ * Component.
+ */
+
+export function PathPickerField({label, path, emptyLabel, onPick}: PathPickerFieldProps) {
+  return (
+    <div class={styles.field}>
+      <span class={styles.label}>{label}</span>
+      <div class={styles.pathRow}>
+        <span
+          class={[styles.pathValue, path !== undefined ? styles.pathValueSet : ''].filter(Boolean).join(' ')}
+          title={path}
+        >
+          {path ?? emptyLabel}
+        </span>
+        <button type="button" onClick={() => onPick()}>
+          Choose…
+        </button>
+      </div>
+    </div>
+  );
+}
