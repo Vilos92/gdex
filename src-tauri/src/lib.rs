@@ -2,6 +2,7 @@ mod commands;
 mod dex;
 mod dex_client;
 mod project_store;
+mod watcher;
 
 use dex::resolve_dex_binary_path;
 use dex_client::DexClient;
@@ -22,6 +23,12 @@ pub fn run() {
         .setup(|app| {
             let dex_path = resolve_dex_binary_path()?;
             app.manage(DexClient::new(dex_path));
+
+            // v0: only projects registered at startup are watched; dynamic watch-on-add is future work.
+            let projects = project_store::list_projects(app.handle())?;
+            let task_watcher = watcher::TaskWatcher::new(app.handle().clone(), projects)?;
+            app.manage(task_watcher);
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
