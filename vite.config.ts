@@ -7,7 +7,6 @@ import tsconfigPaths from 'vite-tsconfig-paths';
  * Constants.
  */
 
-// @ts-expect-error process is a nodejs global
 const host = process.env.TAURI_DEV_HOST;
 
 /*
@@ -17,6 +16,11 @@ const host = process.env.TAURI_DEV_HOST;
 // https://vite.dev/config/
 export default defineConfig(async () => ({
   plugins: [tsconfigPaths(), vanillaExtractPlugin(), preact()],
+
+  // Keep Tauri packages out of Vite pre-bundling so `window.__TAURI_INTERNALS__` resolves in the webview.
+  optimizeDeps: {
+    exclude: ['@tauri-apps/api', '@tauri-apps/plugin-dialog', '@tauri-apps/plugin-fs']
+  },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //

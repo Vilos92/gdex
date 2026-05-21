@@ -16,10 +16,12 @@ Living conventions for this repo. Order and wording can evolve—ask whether new
 - **Avoid redundant nullish coalescing:** do not write `x ?? undefined` when `x` is already `T | undefined` with no `null`.
 - **Exports:** do not export types, functions, or constants unless another file imports them (or we deliberately expose a stable public API). Prefer module-private symbols until then.
 - **`?` vs `| undefined`:** use optional properties (`prop?:`) when callers often omit the key entirely (e.g. wide public or library-style surfaces). For **internal** components and modules, prefer required keys with `T | undefined` when a value may be absent—every call site passes the prop explicitly, and absence is `undefined`, not “key not passed.” **Exception:** props normally omitted when unused—especially **`class?`** and other familiar DOM-style optional props—stay `prop?: T`; do not write `prop={undefined}` at call sites.
+- **Readonly arrays:** when a value is only read or copied (`.map`, spread, pass-through), type it as **`readonly T[]`** or a named alias (e.g. `Projects` in `projectApi.ts`). Mutable `T[]` is still assignable at call sites; use a fresh array when the callee must own writes.
 
 ## Imports
 
-- **`@/*` → `./src/*`** in `tsconfig` `paths`. Import every `src/` module via `@/` (`@/app/App`, `@/styles/tokens`); no relative paths between `src/` files.
+- **`@/*` → `./src/*`** in `tsconfig` `paths`. Import every `src/` module via `@/` (`@/App`, `@/styles/tokens`); no relative paths between `src/` files.
+- **UI under `src/`:** `App.tsx` / `AppViews.tsx` at the root; **`views/`**, **`components/`**, **`hooks/`** next to **`lib/`** and **`styles/`** (not `src/app/`).
 - No **`.ts` / `.tsx`** suffixes on import paths (`allowImportingTsExtensions: false`).
 
 ## Preact components
@@ -113,14 +115,14 @@ No custom `clippy.toml` yet—defaults plus `-D warnings`. If we add lint groups
 
 **CI** (`.github/workflows/continuous-integration.yaml`) runs these jobs in parallel on every push and PR:
 
-| Job | Local equivalent |
-|-----|------------------|
-| `fmt` | `bun run fmt:check` |
-| `lint` | `bun run lint:ci` |
-| `typecheck` | `bun run typecheck` |
-| `fallow` | `bun run fallow:audit` |
-| `rust-fmt` | `bun run fmt:rust:check` |
-| `rust-clippy` | `bun run clippy` |
+| Job           | Local equivalent         |
+| ------------- | ------------------------ |
+| `fmt`         | `bun run fmt:check`      |
+| `lint`        | `bun run lint:ci`        |
+| `typecheck`   | `bun run typecheck`      |
+| `fallow`      | `bun run fallow:audit`   |
+| `rust-fmt`    | `bun run fmt:rust:check` |
+| `rust-clippy` | `bun run clippy`         |
 
 Rust jobs use **`rust-toolchain.toml`**, Linux Tauri system deps (Clippy only), and **[rust-cache](https://github.com/Swatinem/rust-cache)** keyed on **`src-tauri/Cargo.lock`** (and registry) so PR builds reuse compiled deps. CI does **not** run `bun run build`, `cargo test`, or Tauri packaging—those stay local or in a release workflow later.
 

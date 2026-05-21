@@ -1,5 +1,5 @@
 import {render} from 'preact';
-import App from '@/app/App';
+import App from '@/App';
 import '@/styles/global.css';
 
 /*

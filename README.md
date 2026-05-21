@@ -1,7 +1,21 @@
-# Tauri + Preact + Typescript
+# gdex
 
-This template should help get you started developing with Tauri, Preact and Typescript in Vite.
+Desktop viewer for [dex](https://dex.rip/) tasks. Tauri + Preact + Vanilla Extract.
 
-## Recommended IDE Setup
+## Development
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+```sh
+bun run tauri dev
+```
+
+`bun run dev` is Vite only (started by Tauri internally). Do not open http://localhost:1420 in a browser — use the desktop window from `tauri dev`.
+
+## Validation
+
+```sh
+bun run check
+bun run typecheck
+bun run fallow:audit
+```
+
+Rust changes: `bun run fmt:rust:check` and `bun run clippy`.
