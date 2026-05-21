@@ -26,7 +26,13 @@ impl TaskWatcher {
         let mut debouncers = Vec::with_capacity(projects.len());
 
         for project in projects {
-            debouncers.push(watch_project_storage(&app, &project)?);
+            match watch_project_storage(&app, &project) {
+                Ok(debouncer) => debouncers.push(debouncer),
+                Err(error) => eprintln!(
+                    "task watcher: skipping project {} ({}): {error}",
+                    project.id, project.storage_path
+                ),
+            }
         }
 
         Ok(Self {
@@ -54,10 +60,19 @@ fn watch_project_storage(
     let mut debouncer = new_debouncer(
         Duration::from_millis(DEBOUNCE_MS),
         move |result: DebounceEventResult| {
-            if let Ok(events) = result {
-                if !events.is_empty() {
-                    let _ = app.emit(EVENT_TASKS_CHANGED, project_id.clone());
+            match result {
+                Ok(events) => {
+                    if !events.is_empty() {
+                        if let Err(error) = app.emit(EVENT_TASKS_CHANGED, project_id.clone()) {
+                            eprintln!(
+                                "task watcher: emit {EVENT_TASKS_CHANGED} for project {project_id}: {error}"
+                            );
+                        }
+                    }
                 }
+                Err(error) => eprintln!(
+                    "task watcher: debounce error for project {project_id}: {error}"
+                ),
             }
         },
     )
