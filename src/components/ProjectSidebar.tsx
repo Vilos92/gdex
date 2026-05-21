@@ -24,10 +24,10 @@ export function ProjectSidebar({projects, activeProjectId, onProjectsChange}: Pr
   const [selectError, setSelectError] = useState<string | undefined>(undefined);
 
   const selectProject = async (projectId: string) => {
+    setSelectError(undefined);
     if (projectId === activeProjectId) {
       return;
     }
-    setSelectError(undefined);
     try {
       await setActiveProject(projectId);
       onProjectsChange(projects, projectId);

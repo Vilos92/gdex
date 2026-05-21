@@ -1,4 +1,4 @@
-import {useState} from 'preact/hooks';
+import {useRef, useState} from 'preact/hooks';
 
 import {pickConfigFile, pickStorageDirectory} from '@/lib/paths';
 import type {Project} from '@/lib/projectApi';
@@ -20,6 +20,7 @@ export function useProjectRegistration(onRegistered: (project: Project) => void 
   const [configPath, setConfigPath] = useState<string | undefined>(undefined);
   const [storagePath, setStoragePath] = useState<string | undefined>(undefined);
   const [isRegistering, setIsRegistering] = useState(false);
+  const isRegisteringRef = useRef(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
 
   const trimmedName = name.trim();
@@ -60,10 +61,18 @@ export function useProjectRegistration(onRegistered: (project: Project) => void 
   };
 
   const submitRegistration = async () => {
+    if (isRegisteringRef.current) {
+      return;
+    }
+    const input = buildRegistrationInput();
+    if (input === undefined) {
+      return;
+    }
+    isRegisteringRef.current = true;
     setIsRegistering(true);
     setErrorMessage(undefined);
     try {
-      await applyRegistrationResult(await submitProjectRegistration(buildRegistrationInput()), {
+      await applyRegistrationResult(await submitProjectRegistration(input), {
         setName,
         setConfigPath,
         setStoragePath,
@@ -71,6 +80,7 @@ export function useProjectRegistration(onRegistered: (project: Project) => void 
         onRegistered
       });
     } finally {
+      isRegisteringRef.current = false;
       setIsRegistering(false);
     }
   };
