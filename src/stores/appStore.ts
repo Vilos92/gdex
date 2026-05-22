@@ -25,9 +25,11 @@ type AppData = {
   zoomParentId: string | undefined;
 };
 
+type WorkspacesUpdater = Workspaces | ((workspaces: Workspaces) => Workspaces);
+
 type AppActions = {
   setView: (view: AppView) => void;
-  setWorkspaces: (workspaces: Workspaces) => void;
+  setWorkspaces: (workspaces: WorkspacesUpdater) => void;
   setActiveWorkspaceId: (activeWorkspaceId: string | undefined) => void;
   selectTask: (taskId: string) => void;
   zoomTo: (parentId: string | undefined) => void;
@@ -67,7 +69,10 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setView: view => set({view}),
 
-  setWorkspaces: workspaces => set({workspaces}),
+  setWorkspaces: workspaces =>
+    set(state => ({
+      workspaces: typeof workspaces === 'function' ? workspaces(state.workspaces) : workspaces
+    })),
 
   setActiveWorkspaceId: activeWorkspaceId => {
     tasksLoadRequestId += 1;
@@ -98,7 +103,18 @@ export const useAppStore = create<AppState>((set, get) => ({
   reloadWorkspaces: async () => {
     const loadedWorkspaces = await listWorkspaces();
     if (loadedWorkspaces.length === 0) {
-      set({workspaces: [], activeWorkspaceId: undefined, workspacesLoadError: undefined, view: 'splash'});
+      tasksLoadRequestId += 1;
+      set({
+        workspaces: [],
+        activeWorkspaceId: undefined,
+        workspacesLoadError: undefined,
+        view: 'splash',
+        tasks: [],
+        isTasksLoading: false,
+        tasksLoadError: undefined,
+        selectedTaskId: undefined,
+        zoomParentId: undefined
+      });
       return;
     }
 

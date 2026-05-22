@@ -1,6 +1,6 @@
 //! Persisted dex workspace registry and active workspace selection (`settings.json`).
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::{
     atomic::{AtomicU64, Ordering},
     Arc, Mutex,
@@ -39,6 +39,7 @@ pub fn add_workspace(
     storage_path: String,
 ) -> Result<Workspace, String> {
     let _guard = store_write_lock()?;
+    validate_workspace_paths(&config_path, &storage_path)?;
     let store = open_store(app)?;
     let mut workspaces = load_workspaces(&store)?;
     let workspace = Workspace {
@@ -116,6 +117,26 @@ impl From<&Workspace> for DexProject {
 }
 
 type SettingsStore = Arc<tauri_plugin_store::Store<tauri::Wry>>;
+
+fn validate_workspace_paths(config_path: &str, storage_path: &str) -> Result<(), String> {
+    let config = Path::new(config_path);
+    if !config.exists() {
+        return Err(format!("config path not found: {config_path}"));
+    }
+    if !config.is_file() {
+        return Err(format!("config path is not a file: {config_path}"));
+    }
+
+    let storage = Path::new(storage_path);
+    if !storage.exists() {
+        return Err(format!("storage path not found: {storage_path}"));
+    }
+    if !storage.is_dir() {
+        return Err(format!("storage path is not a directory: {storage_path}"));
+    }
+
+    Ok(())
+}
 
 fn store_write_lock() -> Result<std::sync::MutexGuard<'static, ()>, String> {
     STORE_WRITE_MUTEX

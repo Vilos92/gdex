@@ -53,8 +53,9 @@ export async function applyRegistrationResult(
     return;
   }
 
+  await callbacks.onRegistered(result.workspace);
+
   callbacks.setName('');
   callbacks.setConfigPath(undefined);
   callbacks.setStoragePath(undefined);
-  await callbacks.onRegistered(result.workspace);
 }

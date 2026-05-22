@@ -3,21 +3,36 @@
 use tauri::{AppHandle, State};
 
 use crate::dex_client::{DexClient, DexTask};
+use crate::watcher::TaskWatcher;
 use crate::workspace_store::{self, Workspace};
 
 #[tauri::command]
 pub fn add_workspace(
     app: AppHandle,
+    watcher: State<'_, TaskWatcher>,
     name: String,
     config_path: String,
     storage_path: String,
 ) -> Result<Workspace, String> {
-    workspace_store::add_workspace(&app, name, config_path, storage_path)
+    let workspace = workspace_store::add_workspace(&app, name, config_path, storage_path)?;
+    if let Err(error) = watcher.register_workspace(&workspace) {
+        eprintln!(
+            "task watcher: could not watch workspace {} ({}): {error}",
+            workspace.id, workspace.storage_path
+        );
+    }
+    Ok(workspace)
 }
 
 #[tauri::command]
-pub fn remove_workspace(app: AppHandle, id: String) -> Result<(), String> {
-    workspace_store::remove_workspace(&app, &id)
+pub fn remove_workspace(
+    app: AppHandle,
+    watcher: State<'_, TaskWatcher>,
+    id: String,
+) -> Result<(), String> {
+    workspace_store::remove_workspace(&app, &id)?;
+    watcher.unregister_workspace(&id);
+    Ok(())
 }
 
 #[tauri::command]

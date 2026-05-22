@@ -24,9 +24,15 @@ pub fn run() {
             let dex_path = resolve_dex_binary_path()?;
             app.manage(DexClient::new(dex_path));
 
-            // v0: only workspaces registered at startup are watched; dynamic watch-on-add is future work.
-            let workspaces = workspace_store::list_workspaces(app.handle())?;
-            let task_watcher = watcher::TaskWatcher::new(app.handle().clone(), workspaces)?;
+            let task_watcher = watcher::TaskWatcher::new(app.handle().clone());
+            for workspace in workspace_store::list_workspaces(app.handle())? {
+                if let Err(error) = task_watcher.register_workspace(&workspace) {
+                    eprintln!(
+                        "task watcher: skipping workspace {} ({}): {error}",
+                        workspace.id, workspace.storage_path
+                    );
+                }
+            }
             app.manage(task_watcher);
 
             Ok(())

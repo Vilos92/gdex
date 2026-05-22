@@ -1,6 +1,8 @@
 //! Watch workspace storage paths and emit `tasks-changed` when task data updates.
 
+use std::collections::HashMap;
 use std::path::Path;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use notify_debouncer_mini::notify::RecursiveMode;
@@ -12,32 +14,43 @@ use crate::workspace_store::Workspace;
 const DEBOUNCE_MS: u64 = 30;
 const EVENT_TASKS_CHANGED: &str = "tasks-changed";
 
+type WatcherDebouncer = Debouncer<notify_debouncer_mini::notify::RecommendedWatcher>;
+
 /* Types. */
 
-/// Keeps filesystem debouncers alive for the app lifetime; dropping stops watches.
+/// Keeps filesystem debouncers alive per workspace; register/unregister as the store changes.
 pub struct TaskWatcher {
-    _debouncers: Vec<Debouncer<notify_debouncer_mini::notify::RecommendedWatcher>>,
+    app: AppHandle,
+    debouncers: Arc<Mutex<HashMap<String, WatcherDebouncer>>>,
 }
 
 /* Task watcher. */
 
 impl TaskWatcher {
-    pub fn new(app: AppHandle, workspaces: Vec<Workspace>) -> Result<Self, String> {
-        let mut debouncers = Vec::with_capacity(workspaces.len());
-
-        for workspace in workspaces {
-            match watch_workspace_storage(&app, &workspace) {
-                Ok(debouncer) => debouncers.push(debouncer),
-                Err(error) => eprintln!(
-                    "task watcher: skipping workspace {} ({}): {error}",
-                    workspace.id, workspace.storage_path
-                ),
-            }
+    pub fn new(app: AppHandle) -> Self {
+        Self {
+            app,
+            debouncers: Arc::new(Mutex::new(HashMap::new())),
         }
+    }
 
-        Ok(Self {
-            _debouncers: debouncers,
-        })
+    pub fn register_workspace(&self, workspace: &Workspace) -> Result<(), String> {
+        let mut debouncers = self
+            .debouncers
+            .lock()
+            .map_err(|_| "task watcher lock poisoned".to_owned())?;
+        if debouncers.contains_key(&workspace.id) {
+            return Ok(());
+        }
+        let debouncer = watch_workspace_storage(&self.app, workspace)?;
+        debouncers.insert(workspace.id.clone(), debouncer);
+        Ok(())
+    }
+
+    pub fn unregister_workspace(&self, workspace_id: &str) {
+        if let Ok(mut debouncers) = self.debouncers.lock() {
+            debouncers.remove(workspace_id);
+        }
     }
 }
 
@@ -46,7 +59,7 @@ impl TaskWatcher {
 fn watch_workspace_storage(
     app: &AppHandle,
     workspace: &Workspace,
-) -> Result<Debouncer<notify_debouncer_mini::notify::RecommendedWatcher>, String> {
+) -> Result<WatcherDebouncer, String> {
     let storage_path = workspace.storage_path.as_str();
     let path = Path::new(storage_path);
     if !path.exists() {
