@@ -88,10 +88,16 @@ function collectAncestorIds(tasks: Tasks, startId: string): readonly string[] {
   return parentId === undefined ? [startId] : [...collectAncestorIds(tasks, parentId), startId];
 }
 
+/** Resolve a task id to a breadcrumb segment (falls back to the raw id when the task is missing). */
+function toBreadcrumbSegment(tasks: Tasks, id: string): BreadcrumbSegment {
+  const task = tasks.find(entry => entry.id === id);
+  if (task === undefined) {
+    return {id, name: id};
+  }
+  return {id: task.id, name: task.name};
+}
+
 /** Breadcrumb segments for the zoomed task level: ancestors as links, current zoom parent as the label. */
 function zoomBreadcrumbTrail(tasks: Tasks, zoomParentId: string): readonly BreadcrumbSegment[] {
-  return collectAncestorIds(tasks, zoomParentId).map(id => {
-    const task = tasks.find(entry => entry.id === id);
-    return {id: task?.id ?? id, name: task?.name ?? id};
-  });
+  return collectAncestorIds(tasks, zoomParentId).map(id => toBreadcrumbSegment(tasks, id));
 }
