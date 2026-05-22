@@ -1,21 +1,10 @@
 import {useState} from 'preact/hooks';
-import {useShallow} from 'zustand/shallow';
 
-import {AddProjectPanel} from '@/components/AddProjectPanel';
-import {ProjectList} from '@/components/ProjectList';
+import {CollapsedProjectSidebarBody} from '@/components/CollapsedProjectSidebarBody';
+import {ExpandedProjectSidebarBody} from '@/components/ExpandedProjectSidebarBody';
+import {ProjectSidebarHeader} from '@/components/ProjectSidebarHeader';
 import * as styles from '@/components/projectSidebar.css';
-import {SidebarPanelIcon} from '@/components/SidebarPanelIcon';
-import {invokeErrorMessage} from '@/lib/error';
-import {setActiveProject} from '@/lib/projectApi';
-import {useAppStore} from '@/stores/appStore';
-
-/*
- * Styles.
- */
-
-function sidebarHeaderClass(isCollapsed: boolean): string {
-  return [styles.sidebarHeader, isCollapsed ? styles.sidebarHeaderCollapsed : ''].filter(Boolean).join(' ');
-}
+import {useProjectSelection} from '@/hooks/useProjectSelection';
 
 /*
  * Component.
@@ -23,65 +12,39 @@ function sidebarHeaderClass(isCollapsed: boolean): string {
 
 export function ProjectSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selectError, setSelectError] = useState<string | undefined>(undefined);
-  const {projects, activeProjectId, setActiveProjectId} = useProjectSidebarState();
-
-  const selectProject = async (projectId: string) => {
-    setSelectError(undefined);
-    if (projectId === activeProjectId) {
-      return;
-    }
-    try {
-      await setActiveProject(projectId);
-      setActiveProjectId(projectId);
-    } catch (error) {
-      console.error('set_active_project failed', error);
-      setSelectError(invokeErrorMessage(error, 'Could not set active project.'));
-    }
-  };
+  const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+  const {projects, activeProjectId, selectError, selectProject} = useProjectSelection();
 
   const toggleCollapsed = () => setIsCollapsed(collapsed => !collapsed);
+
+  const openAddProject = () => {
+    setIsAddFormOpen(true);
+    setIsCollapsed(false);
+  };
+
   const asideClass = isCollapsed ? styles.sidebarCollapsed : styles.sidebar;
 
   return (
     <aside class={asideClass} aria-label="Projects">
-      <div class={sidebarHeaderClass(isCollapsed)}>
-        {isCollapsed ? undefined : <h1 class={styles.title}>gdex</h1>}
-        <button
-          type="button"
-          class={styles.collapseToggle}
-          aria-label={isCollapsed ? 'Expand projects sidebar' : 'Collapse projects sidebar'}
-          aria-expanded={!isCollapsed}
-          onClick={toggleCollapsed}
-        >
-          <SidebarPanelIcon pointsRight={isCollapsed} />
-        </button>
-      </div>
-      {isCollapsed ? undefined : (
-        <div class={styles.sidebarBody}>
-          {selectError !== undefined ? (
-            <p class={styles.selectError} role="alert">
-              {selectError}
-            </p>
-          ) : undefined}
-          <ProjectList projects={projects} activeProjectId={activeProjectId} onSelect={selectProject} />
-          <AddProjectPanel />
-        </div>
+      <ProjectSidebarHeader isCollapsed={isCollapsed} onToggleCollapsed={toggleCollapsed} />
+      {isCollapsed ? (
+        <CollapsedProjectSidebarBody
+          projects={projects}
+          activeProjectId={activeProjectId}
+          selectError={selectError}
+          onSelect={selectProject}
+          onAddProject={openAddProject}
+        />
+      ) : (
+        <ExpandedProjectSidebarBody
+          projects={projects}
+          activeProjectId={activeProjectId}
+          selectError={selectError}
+          isAddFormOpen={isAddFormOpen}
+          onAddFormOpenChange={setIsAddFormOpen}
+          onSelect={selectProject}
+        />
       )}
     </aside>
-  );
-}
-
-/*
- * Hooks.
- */
-
-function useProjectSidebarState() {
-  return useAppStore(
-    useShallow(state => ({
-      projects: state.projects,
-      activeProjectId: state.activeProjectId,
-      setActiveProjectId: state.setActiveProjectId
-    }))
   );
 }

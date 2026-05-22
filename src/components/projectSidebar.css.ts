@@ -45,6 +45,7 @@ export const sidebarCollapsed = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
+  gap: '0.5rem',
   flex: '0 0 2.75rem',
   width: '2.75rem',
   minWidth: '2.75rem',
@@ -53,19 +54,99 @@ export const sidebarCollapsed = style({
   ...sidebarSurface
 });
 
-export const sidebarHeader = style({
+export const sidebarCollapsedBody = style({
   display: 'flex',
+  flexDirection: 'column',
   alignItems: 'center',
-  flexShrink: 0,
+  flex: 1,
+  minHeight: 0,
   width: '100%',
-  height: '1.75rem',
-  gap: '0.5rem',
-  minWidth: 0
+  gap: '0.5rem'
 });
 
-export const sidebarHeaderCollapsed = style({
+const scrollbarHidden = style({
+  scrollbarWidth: 'none',
+  msOverflowStyle: 'none',
+  selectors: {
+    '&::-webkit-scrollbar': {
+      display: 'none'
+    }
+  }
+});
+
+export const collapsedProjectStrip = style([
+  scrollbarHidden,
+  {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    flex: 1,
+    minHeight: 0,
+    width: '100%',
+    overflowY: 'auto',
+    overflowX: 'hidden',
+    padding: '0 0.1rem'
+  }
+]);
+
+export const collapsedProjectList = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '0.35rem',
+  margin: 0,
+  padding: 0,
+  listStyle: 'none',
+  width: '100%'
+});
+
+export const collapsedProjectSquare = style({
+  display: 'inline-flex',
+  alignItems: 'center',
   justifyContent: 'center',
-  gap: 0
+  width: '2rem',
+  height: '2rem',
+  margin: 0,
+  padding: 0,
+  border: `1px solid transparent`,
+  borderRadius: '8px',
+  backgroundColor: 'transparent',
+  boxShadow: 'none',
+  fontSize: '0.875rem',
+  fontWeight: 600,
+  lineHeight: 1,
+  color: palette.text,
+  selectors: {
+    '&:hover': {
+      backgroundColor: palette.accentMuted,
+      borderColor: 'transparent'
+    },
+    '&:focus-visible': {
+      outline: `2px solid ${palette.accent}`,
+      outlineOffset: '2px'
+    }
+  },
+  '@media': {
+    '(prefers-color-scheme: dark)': {
+      color: palette.textDark,
+      selectors: {
+        '&:hover': {
+          backgroundColor: palette.accentMutedDark
+        }
+      }
+    }
+  }
+});
+
+export const collapsedProjectSquareActive = style({
+  backgroundColor: palette.accentMuted,
+  borderColor: palette.accent,
+  '@media': {
+    '(prefers-color-scheme: dark)': {
+      backgroundColor: palette.accentMutedDark,
+      borderColor: palette.accent
+    }
+  }
 });
 
 export const collapseToggle = style({
@@ -113,6 +194,30 @@ export const collapseToggle = style({
       }
     }
   }
+});
+
+export const collapsedAddButton = style([
+  collapseToggle,
+  {
+    fontSize: '1.25rem',
+    fontWeight: 500,
+    lineHeight: 1
+  }
+]);
+
+export const sidebarHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  flexShrink: 0,
+  width: '100%',
+  height: '1.75rem',
+  gap: '0.5rem',
+  minWidth: 0
+});
+
+export const sidebarHeaderCollapsed = style({
+  justifyContent: 'center',
+  gap: 0
 });
 
 export const title = style({
