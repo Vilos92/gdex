@@ -18,10 +18,6 @@ type ProjectTaskNav = {
 export function useProjectTaskNav(activeProjectId: string | undefined) {
   const [taskNav, setTaskNav] = useState<ProjectTaskNav | undefined>(undefined);
 
-  const activeTaskNav = resolveActiveTaskNav(taskNav, activeProjectId);
-  const selectedTaskId = activeTaskNav?.selectedTaskId;
-  const zoomParentId = activeTaskNav?.zoomParentId;
-
   if (activeProjectId === undefined) {
     return {
       selectedTaskId: undefined,
@@ -32,6 +28,9 @@ export function useProjectTaskNav(activeProjectId: string | undefined) {
   }
 
   const projectId = activeProjectId;
+  const activeTaskNav = priorTaskNav(taskNav, projectId);
+  const selectedTaskId = activeTaskNav?.selectedTaskId;
+  const zoomParentId = activeTaskNav?.zoomParentId;
 
   const selectTask = (taskId: string) => {
     setTaskNav(previous => buildSelectTaskNav(previous, projectId, taskId));
@@ -47,16 +46,6 @@ export function useProjectTaskNav(activeProjectId: string | undefined) {
 /*
  * Helpers.
  */
-
-function resolveActiveTaskNav(
-  taskNav: ProjectTaskNav | undefined,
-  activeProjectId: string | undefined
-): ProjectTaskNav | undefined {
-  if (activeProjectId === undefined) {
-    return undefined;
-  }
-  return priorTaskNav(taskNav, activeProjectId);
-}
 
 function priorTaskNav(
   previous: ProjectTaskNav | undefined,
