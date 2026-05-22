@@ -35,18 +35,27 @@ export const splashSubtitle = style({
   }
 });
 
+export const appFrame = style({
+  display: 'flex',
+  flexDirection: 'column',
+  minHeight: '100vh'
+});
+
 export const shell = style({
   display: 'flex',
-  minHeight: '100vh'
+  flex: 1,
+  minHeight: 0
 });
 
 export const main = style({
   flex: 1,
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: '2rem'
+  alignItems: 'flex-start',
+  justifyContent: 'flex-start',
+  padding: '2rem',
+  overflow: 'auto',
+  minWidth: 0
 });
 
 export const placeholder = style({

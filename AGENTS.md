@@ -21,7 +21,7 @@ Living conventions for this repo. Order and wording can evolve—ask whether new
 ## Imports
 
 - **`@/*` → `./src/*`** in `tsconfig` `paths`. Import every `src/` module via `@/` (`@/App`, `@/styles/tokens`); no relative paths between `src/` files.
-- **UI under `src/`:** `App.tsx` / `AppViews.tsx` at the root; **`views/`**, **`components/`**, **`hooks/`** next to **`lib/`** and **`styles/`** (not `src/app/`).
+- **UI under `src/`:** `App.tsx` / `AppViews.tsx` at the root; **`views/`**, **`components/`**, **`hooks/`**, **`schemas/`** next to **`lib/`** and **`styles/`** (not `src/app/`).
 - No **`.ts` / `.tsx`** suffixes on import paths (`allowImportingTsExtensions: false`).
 
 ## Preact components
@@ -43,7 +43,7 @@ Use `/* Section name. */` blocks. Read top-down: main entry first, **Helpers.** 
 **Order** (omit unused sections; never add empty **Types.** / **Helpers.** blocks):
 
 1. **Types.** · **Constants.** — swap when paths or literals must come first
-2. **Schema.** — optional Zod, when we add validation
+2. **Schemas.** — Zod schemas; used in `src/schemas/` modules and inline when a single schema is local to one file
 3. Entry surface (one per file — pick what matches):
    - **Script.** — browser bootstrap (`main.tsx`)
    - **Component.** — Preact UI (`*.tsx` under `src/`)

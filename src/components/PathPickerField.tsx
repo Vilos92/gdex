@@ -12,6 +12,14 @@ export type PathPickerFieldProps = {
 };
 
 /*
+ * Styles.
+ */
+
+function pathValueClass(path: string | undefined): string {
+  return [styles.pathValue, path !== undefined ? styles.pathValueSet : ''].filter(Boolean).join(' ');
+}
+
+/*
  * Component.
  */
 
@@ -20,10 +28,7 @@ export function PathPickerField({label, path, emptyLabel, onPick}: PathPickerFie
     <div class={styles.field}>
       <span class={styles.label}>{label}</span>
       <div class={styles.pathRow}>
-        <span
-          class={[styles.pathValue, path !== undefined ? styles.pathValueSet : ''].filter(Boolean).join(' ')}
-          title={path}
-        >
+        <span class={pathValueClass(path)} title={path}>
           {path ?? emptyLabel}
         </span>
         <button type="button" onClick={() => onPick()}>

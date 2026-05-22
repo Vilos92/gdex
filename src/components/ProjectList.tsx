@@ -12,6 +12,14 @@ export type ProjectListProps = {
 };
 
 /*
+ * Styles.
+ */
+
+function projectButtonClass(isActive: boolean): string {
+  return [styles.projectButton, isActive ? styles.projectButtonActive : ''].filter(Boolean).join(' ');
+}
+
+/*
  * Component.
  */
 
@@ -24,9 +32,7 @@ export function ProjectList({projects, activeProjectId, onSelect}: ProjectListPr
           <li key={project.id}>
             <button
               type="button"
-              class={[styles.projectButton, isActive ? styles.projectButtonActive : '']
-                .filter(Boolean)
-                .join(' ')}
+              class={projectButtonClass(isActive)}
               aria-current={isActive ? 'true' : undefined}
               onClick={() => onSelect(project.id)}
             >

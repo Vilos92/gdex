@@ -2,7 +2,7 @@
 
 use tauri::{AppHandle, State};
 
-use crate::dex_client::{DexClient, Task};
+use crate::dex_client::{DexClient, DexTask};
 use crate::project_store::{self, Project};
 
 #[tauri::command]
@@ -40,7 +40,7 @@ pub fn get_tasks(
     app: AppHandle,
     dex: State<'_, DexClient>,
     project_id: String,
-) -> Result<Vec<Task>, String> {
+) -> Result<Vec<DexTask>, String> {
     let project = project_store::dex_project_for_id(&app, &project_id)?;
     dex.list_tasks(&project).map_err(|error| error.to_string())
 }
@@ -51,7 +51,7 @@ pub fn get_task(
     dex: State<'_, DexClient>,
     project_id: String,
     task_id: String,
-) -> Result<Task, String> {
+) -> Result<DexTask, String> {
     let project = project_store::dex_project_for_id(&app, &project_id)?;
     dex.show_task(&project, &task_id)
         .map_err(|error| error.to_string())
