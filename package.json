@@ -29,7 +29,9 @@
     "@tauri-apps/plugin-fs": "~2",
     "@tauri-apps/plugin-store": "~2",
     "@vanilla-extract/css": "^1.20.1",
-    "preact": "^10.25.1"
+    "preact": "^10.25.1",
+    "zod": "^4.4.3",
+    "zustand": "^5.0.13"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.5",

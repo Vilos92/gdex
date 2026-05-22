@@ -1,24 +1,16 @@
 import {invoke} from '@tauri-apps/api/core';
 
-/*
- * Types.
- */
+import {type Project, type Projects, projectSchema, projectsSchema} from '@/schemas/project';
 
-export type Project = {
-  id: string;
-  name: string;
-  config_path: string;
-  storage_path: string;
-};
-
-export type Projects = readonly Project[];
+export type {Project, Projects} from '@/schemas/project';
 
 /*
  * API.
  */
 
 export async function listProjects(): Promise<Projects> {
-  return invoke<Projects>('list_projects');
+  const rows = await invoke<unknown>('list_projects');
+  return projectsSchema.parse(rows);
 }
 
 export async function getActiveProjectId(): Promise<string | undefined> {
@@ -31,5 +23,6 @@ export async function setActiveProject(id: string): Promise<void> {
 }
 
 export async function addProject(name: string, configPath: string, storagePath: string): Promise<Project> {
-  return invoke<Project>('add_project', {name, configPath, storagePath});
+  const row = await invoke<unknown>('add_project', {name, configPath, storagePath});
+  return projectSchema.parse(row);
 }
