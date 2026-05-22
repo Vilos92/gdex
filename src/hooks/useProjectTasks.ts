@@ -29,6 +29,7 @@ export function useProjectTasks(activeProjectId: string | undefined) {
 
   const reloadTasks = useCallback(async () => {
     if (activeProjectId === undefined) {
+      loadRequestIdRef.current += 1;
       setTasks([]);
       setLoadErrorMessage(undefined);
       setIsLoading(false);
@@ -116,5 +117,7 @@ async function runTaskLoad(
     setters.setTasks([]);
   }
 
-  setters.setIsLoading(false);
+  if (checkIsCurrentLoadRequest(requestId, requestIdRef)) {
+    setters.setIsLoading(false);
+  }
 }
