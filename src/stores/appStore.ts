@@ -31,6 +31,8 @@ type AppActions = {
   setActiveProjectId: (activeProjectId: string | undefined) => void;
   selectTask: (taskId: string) => void;
   zoomTo: (parentId: string | undefined) => void;
+  /** Set list zoom and detail selection together (breadcrumb navigation). */
+  navigateToTask: (taskId: string | undefined) => void;
   reloadProjects: () => Promise<void>;
   handleProjectsLoadError: (error: unknown) => void;
   reloadTasks: () => Promise<void>;
@@ -82,6 +84,16 @@ export const useAppStore = create<AppState>((set, get) => ({
   selectTask: taskId => set({selectedTaskId: taskId}),
 
   zoomTo: parentId => set({zoomParentId: parentId}),
+
+  navigateToTask: taskId => {
+    if (taskId === undefined) {
+      set({zoomParentId: undefined, selectedTaskId: undefined});
+      return;
+    }
+
+    const task = get().tasks.find(row => row.id === taskId);
+    set({zoomParentId: task?.parentId, selectedTaskId: taskId});
+  },
 
   reloadProjects: async () => {
     const loadedProjects = await listProjects();

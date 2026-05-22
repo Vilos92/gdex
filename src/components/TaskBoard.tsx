@@ -11,24 +11,18 @@ export type TaskBoardProps = {
   zoomParentId: string | undefined;
   selectedTaskId: string | undefined;
   onSelectTask: (taskId: string) => void;
-  onZoomTask: (taskId: string) => void;
 };
 
 /*
  * Component.
  */
 
-export function TaskBoard({tasks, zoomParentId, selectedTaskId, onSelectTask, onZoomTask}: TaskBoardProps) {
+export function TaskBoard({tasks, zoomParentId, selectedTaskId, onSelectTask}: TaskBoardProps) {
   const levelTasks = tasksAtLevel(tasks, zoomParentId);
 
   return (
     <div class={styles.board}>
-      <TaskList
-        tasks={levelTasks}
-        selectedTaskId={selectedTaskId}
-        onSelectTask={onSelectTask}
-        onZoomTask={onZoomTask}
-      />
+      <TaskList tasks={levelTasks} selectedTaskId={selectedTaskId} onSelectTask={onSelectTask} />
     </div>
   );
 }

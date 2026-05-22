@@ -16,7 +16,8 @@ export type TaskBreadcrumbProps = {
   projectName: string | undefined;
   tasks: Tasks;
   zoomParentId: string | undefined;
-  onZoomTo: (taskId: string | undefined) => void;
+  selectedTaskId: string | undefined;
+  onNavigateTo: (taskId: string | undefined) => void;
 };
 
 type BreadcrumbLinkProps = {
@@ -43,7 +44,13 @@ function BreadcrumbLink({label, onNavigate}: BreadcrumbLinkProps) {
   );
 }
 
-export function TaskBreadcrumb({projectName, tasks, zoomParentId, onZoomTo}: TaskBreadcrumbProps) {
+export function TaskBreadcrumb({
+  projectName,
+  tasks,
+  zoomParentId,
+  selectedTaskId,
+  onNavigateTo
+}: TaskBreadcrumbProps) {
   if (projectName === undefined) {
     return (
       <nav class={styles.breadcrumb} aria-label="Location">
@@ -52,7 +59,9 @@ export function TaskBreadcrumb({projectName, tasks, zoomParentId, onZoomTo}: Tas
     );
   }
 
-  if (zoomParentId === undefined) {
+  const segments = breadcrumbSegments(tasks, zoomParentId, selectedTaskId);
+
+  if (segments.length === 0) {
     return (
       <nav class={styles.breadcrumb} aria-label="Task level">
         <span class={styles.breadcrumbCurrent}>{projectName}</span>
@@ -60,13 +69,11 @@ export function TaskBreadcrumb({projectName, tasks, zoomParentId, onZoomTo}: Tas
     );
   }
 
-  const trail = zoomBreadcrumbTrail(tasks, zoomParentId);
-
   return (
     <nav class={styles.breadcrumb} aria-label="Task level">
-      <BreadcrumbLink label={projectName} onNavigate={() => onZoomTo(undefined)} />
-      {trail.map((segment, index) => {
-        const isCurrent = index === trail.length - 1;
+      <BreadcrumbLink label={projectName} onNavigate={() => onNavigateTo(undefined)} />
+      {segments.map((segment, index) => {
+        const isCurrent = index === segments.length - 1;
 
         return (
           <Fragment key={segment.id}>
@@ -76,7 +83,7 @@ export function TaskBreadcrumb({projectName, tasks, zoomParentId, onZoomTo}: Tas
             {isCurrent ? (
               <span class={styles.breadcrumbCurrent}>{segment.name}</span>
             ) : (
-              <BreadcrumbLink label={segment.name} onNavigate={() => onZoomTo(segment.id)} />
+              <BreadcrumbLink label={segment.name} onNavigate={() => onNavigateTo(segment.id)} />
             )}
           </Fragment>
         );
@@ -147,8 +154,34 @@ function toBreadcrumbSegment(byId: Map<string, Task>, id: string): BreadcrumbSeg
   return {id: task.id, name: task.name};
 }
 
-/** Breadcrumb segments for the zoomed task level: ancestors as links, current zoom parent as the label. */
-function zoomBreadcrumbTrail(tasks: Tasks, zoomParentId: string): readonly BreadcrumbSegment[] {
+/** Trail for the list zoom level, plus the selected row when it is visible in that list. */
+function breadcrumbSegments(
+  tasks: Tasks,
+  zoomParentId: string | undefined,
+  selectedTaskId: string | undefined
+): readonly BreadcrumbSegment[] {
   const byId = taskByIdMap(tasks);
-  return collectAncestorIds(tasks, zoomParentId).map(id => toBreadcrumbSegment(byId, id));
+  const zoomTrail =
+    zoomParentId === undefined
+      ? []
+      : collectAncestorIds(tasks, zoomParentId).map(id => toBreadcrumbSegment(byId, id));
+
+  if (selectedTaskId === undefined) {
+    return zoomTrail;
+  }
+
+  const selected = byId.get(selectedTaskId);
+  if (selected === undefined || !isTaskInZoomList(selected, zoomParentId)) {
+    return zoomTrail;
+  }
+
+  if (selected.id === zoomParentId) {
+    return zoomTrail;
+  }
+
+  return [...zoomTrail, toBreadcrumbSegment(byId, selected.id)];
+}
+
+function isTaskInZoomList(task: Task, zoomParentId: string | undefined): boolean {
+  return task.parentId === zoomParentId;
 }

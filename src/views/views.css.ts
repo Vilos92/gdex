@@ -38,24 +38,36 @@ export const splashSubtitle = style({
 export const appFrame = style({
   display: 'flex',
   flexDirection: 'column',
-  minHeight: '100vh'
+  height: '100%',
+  overflow: 'hidden'
 });
 
 export const shell = style({
   display: 'flex',
   flex: 1,
-  minHeight: 0
+  minHeight: 0,
+  minWidth: 0
 });
 
 export const main = style({
   flex: 1,
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'flex-start',
-  justifyContent: 'flex-start',
-  padding: '2rem',
-  overflow: 'auto',
-  minWidth: 0
+  minWidth: 0,
+  minHeight: 0,
+  overflow: 'hidden',
+  padding: '1rem 1.25rem'
+});
+
+export const projectWorkspace = style({
+  display: 'flex',
+  flex: 1,
+  gap: '1rem',
+  width: '100%',
+  alignItems: 'stretch',
+  minHeight: 0,
+  minWidth: 0,
+  overflow: 'hidden'
 });
 
 export const placeholder = style({

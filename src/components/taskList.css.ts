@@ -10,8 +10,12 @@ export const board = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '1rem',
-  width: '100%',
-  maxWidth: '42rem'
+  flex: '0 1 13rem',
+  alignSelf: 'stretch',
+  minWidth: '7rem',
+  maxWidth: '16rem',
+  minHeight: 0,
+  overflow: 'hidden'
 });
 
 export const list = style({

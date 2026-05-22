@@ -26,8 +26,15 @@ globalStyle(':root', {
   }
 });
 
-globalStyle('body', {
-  margin: 0
+globalStyle('html, body', {
+  height: '100%',
+  margin: 0,
+  overflow: 'hidden'
+});
+
+globalStyle('#root', {
+  height: '100%',
+  overflow: 'hidden'
 });
 
 globalStyle('a', {

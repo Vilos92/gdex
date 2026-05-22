@@ -6,13 +6,10 @@ import {palette} from '@/styles/tokens';
  * Styles.
  */
 
-export const sidebar = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1rem',
-  minWidth: '14rem',
-  maxWidth: '18rem',
-  padding: '1.25rem',
+const sidebarSurface = {
+  alignSelf: 'stretch',
+  minHeight: 0,
+  overflow: 'hidden',
   borderRight: `1px solid ${palette.border}`,
   backgroundColor: palette.surface,
   '@media': {
@@ -21,12 +18,110 @@ export const sidebar = style({
       backgroundColor: palette.surfaceDark
     }
   }
+} as const;
+
+export const sidebar = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '1rem',
+  flex: '0 1 11rem',
+  minWidth: '8.5rem',
+  maxWidth: '13rem',
+  padding: '1rem',
+  ...sidebarSurface
+});
+
+export const sidebarBody = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '1rem',
+  flex: 1,
+  minHeight: 0,
+  overflowX: 'hidden',
+  overflowY: 'auto'
+});
+
+export const sidebarCollapsed = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  flex: '0 0 2.75rem',
+  width: '2.75rem',
+  minWidth: '2.75rem',
+  maxWidth: '2.75rem',
+  padding: '1rem 0.35rem',
+  ...sidebarSurface
+});
+
+export const sidebarHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  flexShrink: 0,
+  width: '100%',
+  height: '1.75rem',
+  gap: '0.5rem',
+  minWidth: 0
+});
+
+export const sidebarHeaderCollapsed = style({
+  justifyContent: 'center',
+  gap: 0
+});
+
+export const collapseToggle = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+  width: '1.75rem',
+  height: '1.75rem',
+  margin: 0,
+  padding: 0,
+  border: 'none',
+  borderRadius: '6px',
+  backgroundColor: 'transparent',
+  boxShadow: 'none',
+  color: palette.textMuted,
+  selectors: {
+    '&:hover': {
+      backgroundColor: palette.accentMuted,
+      borderColor: 'transparent',
+      boxShadow: 'none',
+      color: palette.text
+    },
+    '&:active': {
+      backgroundColor: palette.accentMuted,
+      borderColor: 'transparent',
+      boxShadow: 'none'
+    },
+    '&:focus-visible': {
+      outline: `2px solid ${palette.accent}`,
+      outlineOffset: '2px'
+    }
+  },
+  '@media': {
+    '(prefers-color-scheme: dark)': {
+      color: palette.textMutedDark,
+      selectors: {
+        '&:hover': {
+          backgroundColor: palette.accentMutedDark,
+          color: palette.textDark
+        },
+        '&:active': {
+          backgroundColor: palette.accentMutedDark
+        }
+      }
+    }
+  }
 });
 
 export const title = style({
   margin: 0,
+  flex: 1,
+  minWidth: 0,
   fontSize: '1.25rem',
   fontWeight: 600,
+  lineHeight: 1,
   letterSpacing: '-0.02em'
 });
 

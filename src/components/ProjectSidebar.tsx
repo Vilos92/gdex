@@ -4,15 +4,25 @@ import {useShallow} from 'zustand/shallow';
 import {AddProjectPanel} from '@/components/AddProjectPanel';
 import {ProjectList} from '@/components/ProjectList';
 import * as styles from '@/components/projectSidebar.css';
+import {SidebarPanelIcon} from '@/components/SidebarPanelIcon';
 import {invokeErrorMessage} from '@/lib/error';
 import {setActiveProject} from '@/lib/projectApi';
 import {useAppStore} from '@/stores/appStore';
+
+/*
+ * Styles.
+ */
+
+function sidebarHeaderClass(isCollapsed: boolean): string {
+  return [styles.sidebarHeader, isCollapsed ? styles.sidebarHeaderCollapsed : ''].filter(Boolean).join(' ');
+}
 
 /*
  * Component.
  */
 
 export function ProjectSidebar() {
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [selectError, setSelectError] = useState<string | undefined>(undefined);
   const {projects, activeProjectId, setActiveProjectId} = useProjectSidebarState();
 
@@ -30,16 +40,34 @@ export function ProjectSidebar() {
     }
   };
 
+  const toggleCollapsed = () => setIsCollapsed(collapsed => !collapsed);
+  const asideClass = isCollapsed ? styles.sidebarCollapsed : styles.sidebar;
+
   return (
-    <aside class={styles.sidebar}>
-      <h1 class={styles.title}>gdex</h1>
-      {selectError !== undefined ? (
-        <p class={styles.selectError} role="alert">
-          {selectError}
-        </p>
-      ) : undefined}
-      <ProjectList projects={projects} activeProjectId={activeProjectId} onSelect={selectProject} />
-      <AddProjectPanel />
+    <aside class={asideClass} aria-label="Projects">
+      <div class={sidebarHeaderClass(isCollapsed)}>
+        {isCollapsed ? undefined : <h1 class={styles.title}>gdex</h1>}
+        <button
+          type="button"
+          class={styles.collapseToggle}
+          aria-label={isCollapsed ? 'Expand projects sidebar' : 'Collapse projects sidebar'}
+          aria-expanded={!isCollapsed}
+          onClick={toggleCollapsed}
+        >
+          <SidebarPanelIcon pointsRight={isCollapsed} />
+        </button>
+      </div>
+      {isCollapsed ? undefined : (
+        <div class={styles.sidebarBody}>
+          {selectError !== undefined ? (
+            <p class={styles.selectError} role="alert">
+              {selectError}
+            </p>
+          ) : undefined}
+          <ProjectList projects={projects} activeProjectId={activeProjectId} onSelect={selectProject} />
+          <AddProjectPanel />
+        </div>
+      )}
     </aside>
   );
 }

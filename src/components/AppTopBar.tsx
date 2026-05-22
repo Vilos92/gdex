@@ -9,13 +9,20 @@ import {useAppStore} from '@/stores/appStore';
  */
 
 export function AppTopBar() {
-  const {projects, activeProjectId, tasks, zoomParentId, zoomTo} = useAppTopBarState();
+  const {projects, activeProjectId, tasks, zoomParentId, selectedTaskId, navigateToTask} =
+    useAppTopBarState();
 
   const projectName = projects.find(project => project.id === activeProjectId)?.name;
 
   return (
     <header class={styles.topBar}>
-      <TaskBreadcrumb projectName={projectName} tasks={tasks} zoomParentId={zoomParentId} onZoomTo={zoomTo} />
+      <TaskBreadcrumb
+        projectName={projectName}
+        tasks={tasks}
+        zoomParentId={zoomParentId}
+        selectedTaskId={selectedTaskId}
+        onNavigateTo={navigateToTask}
+      />
     </header>
   );
 }
@@ -31,7 +38,8 @@ function useAppTopBarState() {
       activeProjectId: state.activeProjectId,
       tasks: state.tasks,
       zoomParentId: state.zoomParentId,
-      zoomTo: state.zoomTo
+      selectedTaskId: state.selectedTaskId,
+      navigateToTask: state.navigateToTask
     }))
   );
 }

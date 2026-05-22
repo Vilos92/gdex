@@ -1,6 +1,7 @@
 import {useShallow} from 'zustand/shallow';
 
 import {TaskBoard} from '@/components/TaskBoard';
+import {TaskDetail} from '@/components/TaskDetail';
 import * as taskStyles from '@/components/taskList.css';
 import {useAppStore} from '@/stores/appStore';
 import * as styles from '@/views/views.css';
@@ -18,8 +19,7 @@ export function ProjectMain() {
     loadErrorMessage,
     zoomParentId,
     selectedTaskId,
-    selectTask,
-    zoomTo
+    selectTask
   } = useProjectMainState();
 
   const activeProject = projects.find(project => project.id === activeProjectId);
@@ -41,13 +41,15 @@ export function ProjectMain() {
   }
 
   return (
-    <TaskBoard
-      tasks={tasks}
-      zoomParentId={zoomParentId}
-      selectedTaskId={selectedTaskId}
-      onSelectTask={selectTask}
-      onZoomTask={zoomTo}
-    />
+    <div class={styles.projectWorkspace}>
+      <TaskBoard
+        tasks={tasks}
+        zoomParentId={zoomParentId}
+        selectedTaskId={selectedTaskId}
+        onSelectTask={selectTask}
+      />
+      <TaskDetail />
+    </div>
   );
 }
 
@@ -65,8 +67,7 @@ function useProjectMainState() {
       loadErrorMessage: state.tasksLoadError,
       zoomParentId: state.zoomParentId,
       selectedTaskId: state.selectedTaskId,
-      selectTask: state.selectTask,
-      zoomTo: state.zoomTo
+      selectTask: state.selectTask
     }))
   );
 }

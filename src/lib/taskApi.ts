@@ -32,3 +32,11 @@ export function taskStatus(task: Task): TaskStatus {
   }
   return 'pending';
 }
+
+/** Sort tasks by priority (desc), then name. */
+export function compareTasks(left: Task, right: Task): number {
+  if (right.priority !== left.priority) {
+    return right.priority - left.priority;
+  }
+  return left.name.localeCompare(right.name);
+}
