@@ -33,8 +33,7 @@ type TaskWire = {
   started_at?: string | null;
   completed_at?: string | null;
   children: readonly string[];
-  blocked_by?: readonly string[];
-  blockedBy: readonly string[];
+  blocked_by: readonly string[];
 };
 
 type WireOptionalField = {
@@ -63,11 +62,6 @@ export async function getTasks(projectId: string): Promise<Tasks> {
   return rows.map(normalizeTask);
 }
 
-export async function getTask(projectId: string, taskId: string): Promise<Task> {
-  const row = await invoke<TaskWire>('get_task', {projectId, taskId});
-  return normalizeTask(row);
-}
-
 /*
  * Helpers.
  */
@@ -89,7 +83,7 @@ function normalizeTask(row: TaskWire): Task {
     priority: row.priority,
     completed: row.completed,
     children: row.children,
-    blockedBy: row.blocked_by ?? row.blockedBy,
+    blockedBy: row.blocked_by,
     ...taskWireOptionalFields(row)
   };
 }

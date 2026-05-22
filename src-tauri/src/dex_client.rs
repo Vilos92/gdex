@@ -23,9 +23,10 @@ pub struct DexClient {
     binary_path: PathBuf,
 }
 
-/// Task record from `dex list --json` / `dex show <id> --json` (extra show-only keys are ignored).
+/// Dex CLI JSON (`dex list --json` / `dex show <id> --json`; extra keys are ignored).
+/// Serialized to the webview in snake_case (`blocked_by`; Dex JSON uses `blockedBy`).
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Task {
+pub struct DexTask {
     pub id: String,
     pub parent_id: Option<String>,
     pub name: String,
@@ -36,7 +37,7 @@ pub struct Task {
     pub started_at: Option<String>,
     pub completed_at: Option<String>,
     pub children: Vec<String>,
-    #[serde(rename = "blockedBy")]
+    #[serde(rename(serialize = "blocked_by", deserialize = "blockedBy"))]
     pub blocked_by: Vec<String>,
 }
 
@@ -81,12 +82,12 @@ impl DexClient {
         Self { binary_path }
     }
 
-    pub fn list_tasks(&self, project: &DexProject) -> Result<Vec<Task>, DexError> {
+    pub fn list_tasks(&self, project: &DexProject) -> Result<Vec<DexTask>, DexError> {
         let stdout = self.run_dex(project, &["list", "--json"])?;
         serde_json::from_str(&stdout).map_err(DexError::from)
     }
 
-    pub fn show_task(&self, project: &DexProject, id: &str) -> Result<Task, DexError> {
+    pub fn show_task(&self, project: &DexProject, id: &str) -> Result<DexTask, DexError> {
         let stdout = self.run_dex(project, &["show", id, "--json"])?;
         serde_json::from_str(&stdout).map_err(DexError::from)
     }
@@ -203,11 +204,30 @@ mod tests {
 
     #[test]
     fn deserializes_task_from_dex_json() {
-        let task: Task = serde_json::from_str(LIST_ROW_JSON).expect("task JSON");
+        let task: DexTask = serde_json::from_str(LIST_ROW_JSON).expect("task JSON");
         assert_eq!(task.id, "xrc0mxfb");
         assert_eq!(task.parent_id, Some("ia40wzb6".to_owned()));
         assert_eq!(task.blocked_by, vec!["blocker-a".to_owned()]);
         assert_eq!(task.children, vec!["child-a".to_owned()]);
+    }
+
+    #[test]
+    fn serializes_task_for_webview_in_snake_case() {
+        let task: DexTask = serde_json::from_str(LIST_ROW_JSON).expect("task JSON");
+        let json = serde_json::to_value(&task).expect("task JSON");
+
+        assert_eq!(
+            json.get("parent_id").and_then(|v| v.as_str()),
+            Some("ia40wzb6")
+        );
+        assert_eq!(
+            json.get("blocked_by")
+                .and_then(|v| v.as_array())
+                .map(|v| v.len()),
+            Some(1)
+        );
+        assert!(json.get("parentId").is_none());
+        assert!(json.get("blockedBy").is_none());
     }
 
     #[test]

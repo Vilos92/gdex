@@ -1,7 +1,7 @@
 import {Fragment} from 'preact';
 
 import * as styles from '@/components/appTopBar.css';
-import type {Tasks} from '@/lib/taskApi';
+import type {Task, Tasks} from '@/lib/taskApi';
 
 /*
  * Types.
@@ -22,6 +22,13 @@ export type TaskBreadcrumbProps = {
 type BreadcrumbLinkProps = {
   label: string;
   onNavigate: () => void;
+};
+
+type AncestorWalkState = {
+  chain: readonly string[];
+  visited: ReadonlySet<string>;
+  currentId: string | undefined;
+  stopped: boolean;
 };
 
 /*
@@ -82,15 +89,58 @@ export function TaskBreadcrumb({projectName, tasks, zoomParentId, onZoomTo}: Tas
  * Helpers.
  */
 
-/** Walk `parentId` from `startId` to the root. Returns ids root-first. */
+function taskByIdMap(tasks: Tasks): Map<string, Task> {
+  return new Map(tasks.map(task => [task.id, task]));
+}
+
+/** Walk `parentId` from `startId` to the root. Returns ids root-first; stops on cycles or missing links. */
 function collectAncestorIds(tasks: Tasks, startId: string): readonly string[] {
-  const parentId = tasks.find(entry => entry.id === startId)?.parentId;
-  return parentId === undefined ? [startId] : [...collectAncestorIds(tasks, parentId), startId];
+  return collectAncestorIdsFromMap(taskByIdMap(tasks), startId);
+}
+
+function collectAncestorIdsFromMap(byId: Map<string, Task>, startId: string): readonly string[] {
+  const initial: AncestorWalkState = {
+    chain: [],
+    visited: new Set(),
+    currentId: startId,
+    stopped: false
+  };
+
+  const maxSteps = byId.size + 1;
+  const {chain} = Array.from({length: maxSteps}).reduce<AncestorWalkState>(
+    state => stepAncestorWalk(byId, state),
+    initial
+  );
+
+  return chain;
+}
+
+function checkIsAncestorWalkFinished(state: AncestorWalkState): boolean {
+  if (state.stopped) {
+    return true;
+  }
+  const {currentId} = state;
+  return currentId === undefined || state.visited.has(currentId);
+}
+
+function stepAncestorWalk(byId: Map<string, Task>, state: AncestorWalkState): AncestorWalkState {
+  if (checkIsAncestorWalkFinished(state)) {
+    return {...state, stopped: true};
+  }
+
+  const currentId = state.currentId as string;
+
+  return {
+    chain: [currentId, ...state.chain],
+    visited: new Set([...state.visited, currentId]),
+    currentId: byId.get(currentId)?.parentId,
+    stopped: false
+  };
 }
 
 /** Resolve a task id to a breadcrumb segment (falls back to the raw id when the task is missing). */
-function toBreadcrumbSegment(tasks: Tasks, id: string): BreadcrumbSegment {
-  const task = tasks.find(entry => entry.id === id);
+function toBreadcrumbSegment(byId: Map<string, Task>, id: string): BreadcrumbSegment {
+  const task = byId.get(id);
   if (task === undefined) {
     return {id, name: id};
   }
@@ -99,5 +149,6 @@ function toBreadcrumbSegment(tasks: Tasks, id: string): BreadcrumbSegment {
 
 /** Breadcrumb segments for the zoomed task level: ancestors as links, current zoom parent as the label. */
 function zoomBreadcrumbTrail(tasks: Tasks, zoomParentId: string): readonly BreadcrumbSegment[] {
-  return collectAncestorIds(tasks, zoomParentId).map(id => toBreadcrumbSegment(tasks, id));
+  const byId = taskByIdMap(tasks);
+  return collectAncestorIds(tasks, zoomParentId).map(id => toBreadcrumbSegment(byId, id));
 }

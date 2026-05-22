@@ -1,8 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
   "entry": ["src/main.{ts,tsx,js,jsx}"],
-  // getTask: task detail panel (next milestone).
-  "ignoreExports": [{"file": "src/lib/taskApi.ts", "exports": ["getTask"]}],
   // TODO(Vilos92, 2026-05-20): remove ignoreDependencies when UI imports @tauri-apps/plugin-store (dex ls72agpk). Approved: peapfe6m / Plugins+Rust deps PR (Vilos92/gdex).
   "ignoreDependencies": ["@tauri-apps/plugin-store"],
   "audit": {
