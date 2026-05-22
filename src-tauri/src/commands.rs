@@ -16,10 +16,16 @@ pub fn add_workspace(
 ) -> Result<Workspace, String> {
     let workspace = workspace_store::add_workspace(&app, name, config_path, storage_path)?;
     if let Err(error) = watcher.register_workspace(&workspace) {
-        eprintln!(
-            "task watcher: could not watch workspace {} ({}): {error}",
-            workspace.id, workspace.storage_path
-        );
+        if let Err(remove_error) = workspace_store::remove_workspace(&app, &workspace.id) {
+            eprintln!(
+                "add_workspace: watcher failed for workspace {}; rollback remove failed: {remove_error}",
+                workspace.id
+            );
+        }
+        return Err(format!(
+            "could not watch workspace storage ({}): {error}",
+            workspace.storage_path
+        ));
     }
     Ok(workspace)
 }
