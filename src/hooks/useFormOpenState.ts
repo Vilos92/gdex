@@ -6,7 +6,18 @@ import {useState} from 'preact/hooks';
 
 export function useFormOpenState(isOpenProp?: boolean, onOpenChange?: (open: boolean) => void) {
   const [isOpenInternal, setIsOpenInternal] = useState(false);
-  const isOpen = isOpenProp ?? isOpenInternal;
-  const setIsOpen = onOpenChange ?? setIsOpenInternal;
-  return {isOpen, setIsOpen};
+  const hasOpenProp = isOpenProp !== undefined;
+  const hasChangeHandler = onOpenChange !== undefined;
+
+  if (hasOpenProp !== hasChangeHandler) {
+    throw new Error(
+      'useFormOpenState: pass both isOpen and onOpenChange for controlled mode, or neither for uncontrolled mode.'
+    );
+  }
+
+  if (hasOpenProp && hasChangeHandler) {
+    return {isOpen: isOpenProp, setIsOpen: onOpenChange};
+  }
+
+  return {isOpen: isOpenInternal, setIsOpen: setIsOpenInternal};
 }

@@ -85,6 +85,7 @@ export function AddProjectPanel({isFormOpen: isFormOpenProp, onFormOpenChange}: 
  */
 async function appendRegisteredProject(deps: ProjectRegisterHandlerDeps, project: Project) {
   const nextProjects = [...deps.projects, project];
+  deps.setActivationError(undefined);
   if (deps.activeProjectId !== undefined) {
     deps.setProjects(nextProjects);
     deps.closeForm();
@@ -92,7 +93,6 @@ async function appendRegisteredProject(deps: ProjectRegisterHandlerDeps, project
   }
 
   deps.setProjects(nextProjects);
-  deps.setActivationError(undefined);
   try {
     await setActiveProject(project.id);
   } catch (error) {

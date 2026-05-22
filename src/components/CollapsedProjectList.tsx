@@ -30,14 +30,15 @@ export function CollapsedProjectList({projects, activeProjectId, onSelect}: Coll
     <ul class={styles.collapsedProjectList}>
       {projects.map(project => {
         const isActive = project.id === activeProjectId;
+        const label = projectDisplayLabel(project.name);
         return (
           <li key={project.id}>
             <button
               type="button"
               class={projectSquareClass(isActive)}
               aria-current={isActive ? 'true' : undefined}
-              aria-label={project.name}
-              title={project.name}
+              aria-label={label}
+              title={label}
               onClick={() => onSelect(project.id)}
             >
               {projectInitial(project.name)}
@@ -52,6 +53,11 @@ export function CollapsedProjectList({projects, activeProjectId, onSelect}: Coll
 /*
  * Helpers.
  */
+
+function projectDisplayLabel(name: string): string {
+  const trimmed = name.trim();
+  return trimmed.length > 0 ? trimmed : projectInitial(name);
+}
 
 function projectInitial(name: string): string {
   const trimmed = name.trim();
