@@ -22,32 +22,23 @@ export function useProjectTaskNav(activeProjectId: string | undefined) {
   const selectedTaskId = activeTaskNav?.selectedTaskId;
   const zoomParentId = activeTaskNav?.zoomParentId;
 
+  if (activeProjectId === undefined) {
+    return {
+      selectedTaskId: undefined,
+      zoomParentId: undefined,
+      selectTask: () => {},
+      zoomTo: () => {}
+    };
+  }
+
+  const projectId = activeProjectId;
+
   const selectTask = (taskId: string) => {
-    if (activeProjectId === undefined) {
-      return;
-    }
-    setTaskNav(previous => {
-      const prior = priorTaskNav(previous, activeProjectId);
-      return {
-        projectId: activeProjectId,
-        selectedTaskId: taskId,
-        zoomParentId: prior?.zoomParentId
-      };
-    });
+    setTaskNav(previous => buildSelectTaskNav(previous, projectId, taskId));
   };
 
   const zoomTo = (parentId: string | undefined) => {
-    if (activeProjectId === undefined) {
-      return;
-    }
-    setTaskNav(previous => {
-      const prior = priorTaskNav(previous, activeProjectId);
-      return {
-        projectId: activeProjectId,
-        selectedTaskId: prior?.selectedTaskId,
-        zoomParentId: parentId
-      };
-    });
+    setTaskNav(previous => buildZoomTaskNav(previous, projectId, parentId));
   };
 
   return {selectedTaskId, zoomParentId, selectTask, zoomTo};
@@ -72,4 +63,32 @@ function priorTaskNav(
   activeProjectId: string
 ): ProjectTaskNav | undefined {
   return previous?.projectId === activeProjectId ? previous : undefined;
+}
+
+function buildSelectTaskNav(
+  previous: ProjectTaskNav | undefined,
+  activeProjectId: string,
+  taskId: string
+): ProjectTaskNav {
+  const prior = priorTaskNav(previous, activeProjectId);
+
+  return {
+    projectId: activeProjectId,
+    selectedTaskId: taskId,
+    zoomParentId: prior?.zoomParentId
+  };
+}
+
+function buildZoomTaskNav(
+  previous: ProjectTaskNav | undefined,
+  activeProjectId: string,
+  parentId: string | undefined
+): ProjectTaskNav {
+  const prior = priorTaskNav(previous, activeProjectId);
+
+  return {
+    projectId: activeProjectId,
+    selectedTaskId: prior?.selectedTaskId,
+    zoomParentId: parentId
+  };
 }
