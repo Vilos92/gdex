@@ -1,8 +1,8 @@
 mod commands;
 mod dex;
 mod dex_client;
-mod project_store;
 mod watcher;
+mod workspace_store;
 
 use dex::resolve_dex_binary_path;
 use dex_client::DexClient;
@@ -24,20 +24,26 @@ pub fn run() {
             let dex_path = resolve_dex_binary_path()?;
             app.manage(DexClient::new(dex_path));
 
-            // v0: only projects registered at startup are watched; dynamic watch-on-add is future work.
-            let projects = project_store::list_projects(app.handle())?;
-            let task_watcher = watcher::TaskWatcher::new(app.handle().clone(), projects)?;
+            let task_watcher = watcher::TaskWatcher::new(app.handle().clone());
+            for workspace in workspace_store::list_workspaces(app.handle())? {
+                if let Err(error) = task_watcher.register_workspace(&workspace) {
+                    eprintln!(
+                        "task watcher: skipping workspace {} ({}): {error}",
+                        workspace.id, workspace.storage_path
+                    );
+                }
+            }
             app.manage(task_watcher);
 
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             greet,
-            commands::add_project,
-            commands::remove_project,
-            commands::list_projects,
-            commands::set_active_project,
-            commands::get_active_project,
+            commands::add_workspace,
+            commands::remove_workspace,
+            commands::list_workspaces,
+            commands::set_active_workspace,
+            commands::get_active_workspace,
             commands::get_tasks,
             commands::get_task,
         ])

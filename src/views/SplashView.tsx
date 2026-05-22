@@ -1,5 +1,5 @@
-import {ProjectRegisterForm} from '@/components/ProjectRegisterForm';
-import type {Project} from '@/lib/projectApi';
+import {WorkspaceRegisterForm} from '@/components/WorkspaceRegisterForm';
+import type {Workspace} from '@/lib/workspaceApi';
 import * as styles from '@/views/views.css';
 
 /*
@@ -7,7 +7,7 @@ import * as styles from '@/views/views.css';
  */
 
 export type SplashViewProps = {
-  onRegistered: (project: Project) => void | Promise<void>;
+  onRegistered: (workspace: Workspace) => void | Promise<void>;
 };
 
 /*
@@ -19,9 +19,9 @@ export function SplashView({onRegistered}: SplashViewProps) {
     <div class={styles.splash}>
       <h1 class={styles.splashTitle}>gdex</h1>
       <p class={styles.splashSubtitle}>
-        Register a dex project to browse tasks from your config and storage paths.
+        Register a dex workspace to browse tasks from your config and storage paths.
       </p>
-      <ProjectRegisterForm onRegistered={onRegistered} />
+      <WorkspaceRegisterForm onRegistered={onRegistered} />
     </div>
   );
 }

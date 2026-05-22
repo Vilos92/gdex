@@ -2,11 +2,11 @@ import type {JSX} from 'preact';
 import {useEffect} from 'preact/hooks';
 import {useShallow} from 'zustand/shallow';
 
-import {setActiveProject} from '@/lib/projectApi';
+import {setActiveWorkspace} from '@/lib/workspaceApi';
 import {type AppView, useAppStore} from '@/stores/appStore';
-import {ProjectsLayout} from '@/views/ProjectsLayout';
 import {SplashView} from '@/views/SplashView';
 import * as styles from '@/views/views.css';
+import {WorkspacesLayout} from '@/views/WorkspacesLayout';
 
 /*
  * Component.
@@ -17,24 +17,24 @@ function App() {
 
   const {
     view,
-    projectsLoadError,
+    workspacesLoadError,
     setView,
-    setProjects,
-    setActiveProjectId,
-    reloadProjects,
-    handleProjectsLoadError
+    setWorkspaces,
+    setActiveWorkspaceId,
+    reloadWorkspaces,
+    handleWorkspacesLoadError
   } = useAppShellState();
 
   const viewRenderers: Record<AppView, () => JSX.Element> = {
-    loading: () => <p class={styles.loading}>Loading projects…</p>,
+    loading: () => <p class={styles.loading}>Loading workspaces…</p>,
     error: () => (
       <div class={styles.loadError}>
-        <p role="alert">{projectsLoadError ?? 'Could not load projects.'}</p>
+        <p role="alert">{workspacesLoadError ?? 'Could not load workspaces.'}</p>
         <button
           type="button"
           onClick={() => {
             setView('loading');
-            reloadProjects().catch(handleProjectsLoadError);
+            reloadWorkspaces().catch(handleWorkspacesLoadError);
           }}
         >
           Retry
@@ -43,20 +43,20 @@ function App() {
     ),
     splash: () => (
       <SplashView
-        onRegistered={async project => {
+        onRegistered={async workspace => {
           try {
-            await setActiveProject(project.id);
+            await setActiveWorkspace(workspace.id);
           } catch (error) {
-            handleProjectsLoadError(error);
+            handleWorkspacesLoadError(error);
             return;
           }
-          setProjects([project]);
-          setActiveProjectId(project.id);
-          setView('projects');
+          setWorkspaces([workspace]);
+          setActiveWorkspaceId(workspace.id);
+          setView('workspaces');
         }}
       />
     ),
-    projects: () => <ProjectsLayout />
+    workspaces: () => <WorkspacesLayout />
   };
 
   return viewRenderers[view]();
@@ -69,24 +69,24 @@ export default App;
  */
 
 function useAppBootstrap() {
-  const reloadProjects = useAppStore(state => state.reloadProjects);
-  const handleProjectsLoadError = useAppStore(state => state.handleProjectsLoadError);
+  const reloadWorkspaces = useAppStore(state => state.reloadWorkspaces);
+  const handleWorkspacesLoadError = useAppStore(state => state.handleWorkspacesLoadError);
 
   useEffect(() => {
-    reloadProjects().catch(handleProjectsLoadError);
-  }, [reloadProjects, handleProjectsLoadError]);
+    reloadWorkspaces().catch(handleWorkspacesLoadError);
+  }, [reloadWorkspaces, handleWorkspacesLoadError]);
 }
 
 function useAppShellState() {
   return useAppStore(
     useShallow(state => ({
       view: state.view,
-      projectsLoadError: state.projectsLoadError,
+      workspacesLoadError: state.workspacesLoadError,
       setView: state.setView,
-      setProjects: state.setProjects,
-      setActiveProjectId: state.setActiveProjectId,
-      reloadProjects: state.reloadProjects,
-      handleProjectsLoadError: state.handleProjectsLoadError
+      setWorkspaces: state.setWorkspaces,
+      setActiveWorkspaceId: state.setActiveWorkspaceId,
+      reloadWorkspaces: state.reloadWorkspaces,
+      handleWorkspacesLoadError: state.handleWorkspacesLoadError
     }))
   );
 }

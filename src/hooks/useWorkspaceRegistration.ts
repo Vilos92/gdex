@@ -1,21 +1,21 @@
 import {useRef, useState} from 'preact/hooks';
 
 import {pickConfigFile, pickStorageDirectory} from '@/lib/paths';
-import type {Project} from '@/lib/projectApi';
-import {applyRegistrationResult, submitProjectRegistration} from '@/lib/registerProject';
+import {applyRegistrationResult, submitWorkspaceRegistration} from '@/lib/registerWorkspace';
+import type {Workspace} from '@/lib/workspaceApi';
 
 /*
  * Hooks.
  */
 
 /**
- * Form state and handlers for registering a dex project (name, config file, storage directory).
- * Submit invokes the Tauri `add_project` command (Rust project store).
+ * Form state and handlers for registering a dex workspace (name, config file, storage directory).
+ * Submit invokes the Tauri `add_workspace` command (Rust workspace store).
  * On success the form resets and `onRegistered` runs.
  *
- * @param onRegistered — invoked with the persisted project after a successful registration
+ * @param onRegistered — invoked with the persisted workspace after a successful registration
  */
-export function useProjectRegistration(onRegistered: (project: Project) => void | Promise<void>) {
+export function useWorkspaceRegistration(onRegistered: (workspace: Workspace) => void | Promise<void>) {
   const [name, setName] = useState('');
   const [configPath, setConfigPath] = useState<string | undefined>(undefined);
   const [storagePath, setStoragePath] = useState<string | undefined>(undefined);
@@ -72,7 +72,7 @@ export function useProjectRegistration(onRegistered: (project: Project) => void 
     setIsRegistering(true);
     setErrorMessage(undefined);
     try {
-      await applyRegistrationResult(await submitProjectRegistration(input), {
+      await applyRegistrationResult(await submitWorkspaceRegistration(input), {
         setName,
         setConfigPath,
         setStoragePath,

@@ -1,11 +1,11 @@
-import * as styles from '@/components/projectSidebar.css';
 import {SidebarPanelIcon} from '@/components/SidebarPanelIcon';
+import * as styles from '@/components/workspaceSidebar.css';
 
 /*
  * Types.
  */
 
-export type ProjectSidebarHeaderProps = {
+export type WorkspaceSidebarHeaderProps = {
   isCollapsed: boolean;
   onToggleCollapsed: () => void;
 };
@@ -22,14 +22,14 @@ function sidebarHeaderClass(isCollapsed: boolean): string {
  * Component.
  */
 
-export function ProjectSidebarHeader({isCollapsed, onToggleCollapsed}: ProjectSidebarHeaderProps) {
+export function WorkspaceSidebarHeader({isCollapsed, onToggleCollapsed}: WorkspaceSidebarHeaderProps) {
   return (
     <div class={sidebarHeaderClass(isCollapsed)}>
       {isCollapsed ? undefined : <h1 class={styles.title}>gdex</h1>}
       <button
         type="button"
         class={styles.collapseToggle}
-        aria-label={isCollapsed ? 'Expand projects sidebar' : 'Collapse projects sidebar'}
+        aria-label={isCollapsed ? 'Expand workspaces sidebar' : 'Collapse workspaces sidebar'}
         aria-expanded={!isCollapsed}
         onClick={onToggleCollapsed}
       >

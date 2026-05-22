@@ -2,22 +2,22 @@ import {listen} from '@tauri-apps/api/event';
 import {create} from 'zustand';
 
 import {invokeErrorMessage} from '@/lib/error';
-import {listProjects} from '@/lib/projectApi';
-import {loadProjectSelection} from '@/lib/projectSelection';
 import {getTasks, type Tasks} from '@/lib/taskApi';
-import type {Projects} from '@/schemas/project';
+import {listWorkspaces} from '@/lib/workspaceApi';
+import {loadWorkspaceSelection} from '@/lib/workspaceSelection';
+import type {Workspaces} from '@/schemas/workspace';
 
 /*
  * Types.
  */
 
-export type AppView = 'loading' | 'splash' | 'projects' | 'error';
+export type AppView = 'loading' | 'splash' | 'workspaces' | 'error';
 
 type AppData = {
   view: AppView;
-  projectsLoadError: string | undefined;
-  projects: Projects;
-  activeProjectId: string | undefined;
+  workspacesLoadError: string | undefined;
+  workspaces: Workspaces;
+  activeWorkspaceId: string | undefined;
   tasks: Tasks;
   isTasksLoading: boolean;
   tasksLoadError: string | undefined;
@@ -25,16 +25,18 @@ type AppData = {
   zoomParentId: string | undefined;
 };
 
+type WorkspacesUpdater = Workspaces | ((workspaces: Workspaces) => Workspaces);
+
 type AppActions = {
   setView: (view: AppView) => void;
-  setProjects: (projects: Projects) => void;
-  setActiveProjectId: (activeProjectId: string | undefined) => void;
+  setWorkspaces: (workspaces: WorkspacesUpdater) => void;
+  setActiveWorkspaceId: (activeWorkspaceId: string | undefined) => void;
   selectTask: (taskId: string) => void;
   zoomTo: (parentId: string | undefined) => void;
   /** Set list zoom and detail selection together (breadcrumb navigation). */
   navigateToTask: (taskId: string | undefined) => void;
-  reloadProjects: () => Promise<void>;
-  handleProjectsLoadError: (error: unknown) => void;
+  reloadWorkspaces: () => Promise<void>;
+  handleWorkspacesLoadError: (error: unknown) => void;
   reloadTasks: () => Promise<void>;
   /** Subscribe to `tasks-changed`; returns cleanup that unlistens. */
   initTasksListener: () => () => void;
@@ -56,9 +58,9 @@ let tasksLoadRequestId = 0;
 
 export const useAppStore = create<AppState>((set, get) => ({
   view: 'loading',
-  projectsLoadError: undefined,
-  projects: [],
-  activeProjectId: undefined,
+  workspacesLoadError: undefined,
+  workspaces: [],
+  activeWorkspaceId: undefined,
   tasks: [],
   isTasksLoading: false,
   tasksLoadError: undefined,
@@ -67,12 +69,15 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setView: view => set({view}),
 
-  setProjects: projects => set({projects}),
+  setWorkspaces: workspaces =>
+    set(state => ({
+      workspaces: typeof workspaces === 'function' ? workspaces(state.workspaces) : workspaces
+    })),
 
-  setActiveProjectId: activeProjectId => {
+  setActiveWorkspaceId: activeWorkspaceId => {
     tasksLoadRequestId += 1;
     set({
-      activeProjectId,
+      activeWorkspaceId,
       tasks: [],
       isTasksLoading: false,
       tasksLoadError: undefined,
@@ -95,41 +100,52 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({zoomParentId: task?.parentId, selectedTaskId: taskId});
   },
 
-  reloadProjects: async () => {
-    const loadedProjects = await listProjects();
-    if (loadedProjects.length === 0) {
-      set({projects: [], activeProjectId: undefined, projectsLoadError: undefined, view: 'splash'});
+  reloadWorkspaces: async () => {
+    const loadedWorkspaces = await listWorkspaces();
+    if (loadedWorkspaces.length === 0) {
+      tasksLoadRequestId += 1;
+      set({
+        workspaces: [],
+        activeWorkspaceId: undefined,
+        workspacesLoadError: undefined,
+        view: 'splash',
+        tasks: [],
+        isTasksLoading: false,
+        tasksLoadError: undefined,
+        selectedTaskId: undefined,
+        zoomParentId: undefined
+      });
       return;
     }
 
-    const activeId = await loadProjectSelection(loadedProjects);
+    const activeId = await loadWorkspaceSelection(loadedWorkspaces);
     set({
-      projects: loadedProjects,
-      activeProjectId: activeId,
-      projectsLoadError: undefined,
-      view: 'projects'
+      workspaces: loadedWorkspaces,
+      activeWorkspaceId: activeId,
+      workspacesLoadError: undefined,
+      view: 'workspaces'
     });
   },
 
-  handleProjectsLoadError: error => {
-    console.error('project load failed', error);
+  handleWorkspacesLoadError: error => {
+    console.error('workspace load failed', error);
     set({
-      projectsLoadError: invokeErrorMessage(error, 'Could not load projects.'),
+      workspacesLoadError: invokeErrorMessage(error, 'Could not load workspaces.'),
       view: 'error'
     });
   },
 
   reloadTasks: async () => {
-    const {activeProjectId} = get();
+    const {activeWorkspaceId} = get();
     const setTaskLoad: SetTaskLoadState = partial => set(partial);
 
-    if (activeProjectId === undefined) {
-      clearTasksForNoProject(setTaskLoad);
+    if (activeWorkspaceId === undefined) {
+      clearTasksForNoWorkspace(setTaskLoad);
       return;
     }
 
     const requestId = beginTaskLoad(setTaskLoad);
-    const loadResult = await loadTasksForProject(activeProjectId);
+    const loadResult = await loadTasksForWorkspace(activeWorkspaceId);
     applyTaskLoadResult(setTaskLoad, requestId, loadResult);
   },
 
@@ -139,7 +155,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     const subscribe = async () => {
       const stop = await listen<string>('tasks-changed', event => {
-        if (event.payload === get().activeProjectId) {
+        if (event.payload === get().activeWorkspaceId) {
           get().reloadTasks();
         }
       });
@@ -165,7 +181,7 @@ export const useAppStore = create<AppState>((set, get) => ({
  * Helpers.
  */
 
-function clearTasksForNoProject(setTaskLoad: SetTaskLoadState): void {
+function clearTasksForNoWorkspace(setTaskLoad: SetTaskLoadState): void {
   tasksLoadRequestId += 1;
   setTaskLoad({tasks: [], tasksLoadError: undefined, isTasksLoading: false});
 }
@@ -176,9 +192,9 @@ function beginTaskLoad(setTaskLoad: SetTaskLoadState): number {
   return requestId;
 }
 
-async function loadTasksForProject(projectId: string): Promise<TaskLoadResult> {
+async function loadTasksForWorkspace(workspaceId: string): Promise<TaskLoadResult> {
   try {
-    const tasks = await getTasks(projectId);
+    const tasks = await getTasks(workspaceId);
     return {ok: true, tasks};
   } catch (error) {
     return {ok: false, error};

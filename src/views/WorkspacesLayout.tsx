@@ -1,25 +1,25 @@
 import {useEffect} from 'preact/hooks';
 
 import {AppTopBar} from '@/components/AppTopBar';
-import {ProjectSidebar} from '@/components/ProjectSidebar';
+import {WorkspaceSidebar} from '@/components/WorkspaceSidebar';
 import {useAppStore} from '@/stores/appStore';
-import {ProjectMain} from '@/views/ProjectMain';
 import * as styles from '@/views/views.css';
+import {WorkspaceMain} from '@/views/WorkspaceMain';
 
 /*
  * Component.
  */
 
-export function ProjectsLayout() {
-  useProjectTasksSync();
+export function WorkspacesLayout() {
+  useWorkspaceTasksSync();
 
   return (
     <div class={styles.appFrame}>
       <AppTopBar />
       <div class={styles.shell}>
-        <ProjectSidebar />
+        <WorkspaceSidebar />
         <main class={styles.main}>
-          <ProjectMain />
+          <WorkspaceMain />
         </main>
       </div>
     </div>
@@ -30,15 +30,15 @@ export function ProjectsLayout() {
  * Hooks.
  */
 
-/** Keeps task list and `tasks-changed` listener in sync while the projects shell is mounted. */
-function useProjectTasksSync() {
-  const activeProjectId = useAppStore(state => state.activeProjectId);
+/** Keeps task list and `tasks-changed` listener in sync while the workspaces shell is mounted. */
+function useWorkspaceTasksSync() {
+  const activeWorkspaceId = useAppStore(state => state.activeWorkspaceId);
   const reloadTasks = useAppStore(state => state.reloadTasks);
   const initTasksListener = useAppStore(state => state.initTasksListener);
 
   useEffect(() => {
     reloadTasks();
-  }, [activeProjectId, reloadTasks]);
+  }, [activeWorkspaceId, reloadTasks]);
 
   useEffect(() => {
     const unsubscribe = initTasksListener();

@@ -9,15 +9,15 @@ import {useAppStore} from '@/stores/appStore';
  */
 
 export function AppTopBar() {
-  const {projects, activeProjectId, tasks, zoomParentId, selectedTaskId, navigateToTask} =
+  const {workspaces, activeWorkspaceId, tasks, zoomParentId, selectedTaskId, navigateToTask} =
     useAppTopBarState();
 
-  const projectName = projects.find(project => project.id === activeProjectId)?.name;
+  const workspaceName = workspaces.find(workspace => workspace.id === activeWorkspaceId)?.name;
 
   return (
     <header class={styles.topBar}>
       <TaskBreadcrumb
-        projectName={projectName}
+        workspaceName={workspaceName}
         tasks={tasks}
         zoomParentId={zoomParentId}
         selectedTaskId={selectedTaskId}
@@ -34,8 +34,8 @@ export function AppTopBar() {
 function useAppTopBarState() {
   return useAppStore(
     useShallow(state => ({
-      projects: state.projects,
-      activeProjectId: state.activeProjectId,
+      workspaces: state.workspaces,
+      activeWorkspaceId: state.activeWorkspaceId,
       tasks: state.tasks,
       zoomParentId: state.zoomParentId,
       selectedTaskId: state.selectedTaskId,

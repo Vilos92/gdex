@@ -1,53 +1,66 @@
-//! Watch project storage paths and emit `tasks-changed` when task data updates.
+//! Watch workspace storage paths and emit `tasks-changed` when task data updates.
 
+use std::collections::HashMap;
 use std::path::Path;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use notify_debouncer_mini::notify::RecursiveMode;
 use notify_debouncer_mini::{new_debouncer, DebounceEventResult, Debouncer};
 use tauri::{AppHandle, Emitter};
 
-use crate::project_store::Project;
+use crate::workspace_store::Workspace;
 
 const DEBOUNCE_MS: u64 = 30;
 const EVENT_TASKS_CHANGED: &str = "tasks-changed";
 
+type WatcherDebouncer = Debouncer<notify_debouncer_mini::notify::RecommendedWatcher>;
+
 /* Types. */
 
-/// Keeps filesystem debouncers alive for the app lifetime; dropping stops watches.
+/// Keeps filesystem debouncers alive per workspace; register/unregister as the store changes.
 pub struct TaskWatcher {
-    _debouncers: Vec<Debouncer<notify_debouncer_mini::notify::RecommendedWatcher>>,
+    app: AppHandle,
+    debouncers: Arc<Mutex<HashMap<String, WatcherDebouncer>>>,
 }
 
 /* Task watcher. */
 
 impl TaskWatcher {
-    pub fn new(app: AppHandle, projects: Vec<Project>) -> Result<Self, String> {
-        let mut debouncers = Vec::with_capacity(projects.len());
-
-        for project in projects {
-            match watch_project_storage(&app, &project) {
-                Ok(debouncer) => debouncers.push(debouncer),
-                Err(error) => eprintln!(
-                    "task watcher: skipping project {} ({}): {error}",
-                    project.id, project.storage_path
-                ),
-            }
+    pub fn new(app: AppHandle) -> Self {
+        Self {
+            app,
+            debouncers: Arc::new(Mutex::new(HashMap::new())),
         }
+    }
 
-        Ok(Self {
-            _debouncers: debouncers,
-        })
+    pub fn register_workspace(&self, workspace: &Workspace) -> Result<(), String> {
+        let mut debouncers = self
+            .debouncers
+            .lock()
+            .map_err(|_| "task watcher lock poisoned".to_owned())?;
+        if debouncers.contains_key(&workspace.id) {
+            return Ok(());
+        }
+        let debouncer = watch_workspace_storage(&self.app, workspace)?;
+        debouncers.insert(workspace.id.clone(), debouncer);
+        Ok(())
+    }
+
+    pub fn unregister_workspace(&self, workspace_id: &str) {
+        if let Ok(mut debouncers) = self.debouncers.lock() {
+            debouncers.remove(workspace_id);
+        }
     }
 }
 
 /* Helpers. */
 
-fn watch_project_storage(
+fn watch_workspace_storage(
     app: &AppHandle,
-    project: &Project,
-) -> Result<Debouncer<notify_debouncer_mini::notify::RecommendedWatcher>, String> {
-    let storage_path = project.storage_path.as_str();
+    workspace: &Workspace,
+) -> Result<WatcherDebouncer, String> {
+    let storage_path = workspace.storage_path.as_str();
     let path = Path::new(storage_path);
     if !path.exists() {
         return Err(format!(
@@ -55,7 +68,7 @@ fn watch_project_storage(
         ));
     }
 
-    let project_id = project.id.clone();
+    let workspace_id = workspace.id.clone();
     let app = app.clone();
     let mut debouncer = new_debouncer(
         Duration::from_millis(DEBOUNCE_MS),
@@ -63,15 +76,15 @@ fn watch_project_storage(
             match result {
                 Ok(events) => {
                     if !events.is_empty() {
-                        if let Err(error) = app.emit(EVENT_TASKS_CHANGED, project_id.clone()) {
+                        if let Err(error) = app.emit(EVENT_TASKS_CHANGED, workspace_id.clone()) {
                             eprintln!(
-                                "task watcher: emit {EVENT_TASKS_CHANGED} for project {project_id}: {error}"
+                                "task watcher: emit {EVENT_TASKS_CHANGED} for workspace {workspace_id}: {error}"
                             );
                         }
                     }
                 }
                 Err(error) => eprintln!(
-                    "task watcher: debounce error for project {project_id}: {error}"
+                    "task watcher: debounce error for workspace {workspace_id}: {error}"
                 ),
             }
         },

@@ -10,22 +10,22 @@ import * as styles from '@/views/views.css';
  * Component.
  */
 
-export function ProjectMain() {
+export function WorkspaceMain() {
   const {
-    projects,
-    activeProjectId,
+    workspaces,
+    activeWorkspaceId,
     tasks,
     isLoading,
     loadErrorMessage,
     zoomParentId,
     selectedTaskId,
     selectTask
-  } = useProjectMainState();
+  } = useWorkspaceMainState();
 
-  const activeProject = projects.find(project => project.id === activeProjectId);
+  const activeWorkspace = workspaces.find(workspace => workspace.id === activeWorkspaceId);
 
-  if (activeProject === undefined) {
-    return <p class={styles.placeholder}>Select a project</p>;
+  if (activeWorkspace === undefined) {
+    return <p class={styles.placeholder}>Select a workspace</p>;
   }
 
   if (isLoading) {
@@ -41,7 +41,7 @@ export function ProjectMain() {
   }
 
   return (
-    <div class={styles.projectWorkspace}>
+    <div class={styles.workspaceMain}>
       <TaskBoard
         tasks={tasks}
         zoomParentId={zoomParentId}
@@ -57,11 +57,11 @@ export function ProjectMain() {
  * Hooks.
  */
 
-function useProjectMainState() {
+function useWorkspaceMainState() {
   return useAppStore(
     useShallow(state => ({
-      projects: state.projects,
-      activeProjectId: state.activeProjectId,
+      workspaces: state.workspaces,
+      activeWorkspaceId: state.activeWorkspaceId,
       tasks: state.tasks,
       isLoading: state.isTasksLoading,
       loadErrorMessage: state.tasksLoadError,

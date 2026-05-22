@@ -138,14 +138,14 @@ export const blockedList = style({
   lineHeight: 1.5
 });
 
-export const subtasksSection = style({
+export const childTasksSection = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '0.5rem',
   marginTop: '0.25rem'
 });
 
-export const subtaskButton = style({
+export const childTaskButton = style({
   display: 'flex',
   alignItems: 'flex-start',
   gap: '0.65rem',
@@ -159,14 +159,14 @@ export const subtaskButton = style({
   fontWeight: 500
 });
 
-export const subtaskName = style({
+export const childTaskName = style({
   flex: 1,
   minWidth: 0,
   lineHeight: 1.4,
   wordBreak: 'break-word'
 });
 
-export const subtaskNameDone = style({
+export const childTaskNameDone = style({
   color: palette.textMuted,
   textDecoration: 'line-through',
   '@media': {
@@ -176,7 +176,7 @@ export const subtaskNameDone = style({
   }
 });
 
-export const subtasksList = style({
+export const childTasksList = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '0.35rem',

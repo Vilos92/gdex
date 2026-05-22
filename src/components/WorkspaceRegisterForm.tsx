@@ -1,15 +1,15 @@
 import {PathPickerField} from '@/components/PathPickerField';
-import * as styles from '@/components/projectRegisterForm.css';
-import {useProjectRegistration} from '@/hooks/useProjectRegistration';
-import type {Project} from '@/lib/projectApi';
+import * as styles from '@/components/workspaceRegisterForm.css';
+import {useWorkspaceRegistration} from '@/hooks/useWorkspaceRegistration';
+import type {Workspace} from '@/lib/workspaceApi';
 
 /*
  * Types.
  */
 
-export type ProjectRegisterFormProps = {
+export type WorkspaceRegisterFormProps = {
   class?: string;
-  onRegistered: (project: Project) => void | Promise<void>;
+  onRegistered: (workspace: Workspace) => void | Promise<void>;
 };
 
 /*
@@ -24,8 +24,8 @@ function registerFormClass(extraClass: string | undefined): string {
  * Component.
  */
 
-export function ProjectRegisterForm({class: className, onRegistered}: ProjectRegisterFormProps) {
-  const registration = useProjectRegistration(onRegistered);
+export function WorkspaceRegisterForm({class: className, onRegistered}: WorkspaceRegisterFormProps) {
+  const registration = useWorkspaceRegistration(onRegistered);
 
   return (
     <form
@@ -36,11 +36,11 @@ export function ProjectRegisterForm({class: className, onRegistered}: ProjectReg
       }}
     >
       <div class={styles.field}>
-        <label class={styles.label} for="project-name">
-          Project name
+        <label class={styles.label} for="workspace-name">
+          Workspace name
         </label>
         <input
-          id="project-name"
+          id="workspace-name"
           value={registration.name}
           onInput={event => registration.setName(event.currentTarget.value)}
           placeholder="greg"
@@ -74,7 +74,7 @@ export function ProjectRegisterForm({class: className, onRegistered}: ProjectReg
         disabled={!registration.canRegister}
         aria-disabled={!registration.canRegister}
       >
-        {registration.isRegistering ? 'Registering…' : 'Register project'}
+        {registration.isRegistering ? 'Registering…' : 'Register workspace'}
       </button>
     </form>
   );
