@@ -12,7 +12,7 @@ import {useAppStore} from '@/stores/appStore';
 type TaskDetailContentProps = {
   task: Task;
   tasks: Tasks;
-  onOpenSubtask: (taskId: string) => void;
+  onOpenChildTask: (taskId: string) => void;
 };
 
 type TaskDetailHeaderProps = {
@@ -25,14 +25,14 @@ type TaskDetailFieldsProps = {
   blockers: BlockerEntry[];
 };
 
-type TaskDetailSubtasksProps = {
+type TaskDetailChildTasksProps = {
   childTasks: Task[];
-  onOpenSubtask: (taskId: string) => void;
+  onOpenChildTask: (taskId: string) => void;
 };
 
-type SubtaskItemProps = {
+type ChildTaskItemProps = {
   task: Task;
-  onOpenSubtask: (taskId: string) => void;
+  onOpenChildTask: (taskId: string) => void;
 };
 
 type BlockerEntry = {id: string; name: string};
@@ -75,8 +75,8 @@ function taskStatusDotClass(status: TaskStatus): string {
   return [listStyles.statusDot, statusDotVariantClass(status)].join(' ');
 }
 
-function subtaskNameClass(status: TaskStatus): string {
-  return [styles.subtaskName, status === 'done' ? styles.subtaskNameDone : ''].filter(Boolean).join(' ');
+function childTaskNameClass(status: TaskStatus): string {
+  return [styles.childTaskName, status === 'done' ? styles.childTaskNameDone : ''].filter(Boolean).join(' ');
 }
 
 /*
@@ -103,15 +103,15 @@ export function TaskDetail() {
     );
   }
 
-  const openSubtask = (childId: string) => {
+  const openChildTask = (childId: string) => {
     selectTask(childId);
     zoomTo(task.id);
   };
 
-  return <TaskDetailContent task={task} tasks={tasks} onOpenSubtask={openSubtask} />;
+  return <TaskDetailContent task={task} tasks={tasks} onOpenChildTask={openChildTask} />;
 }
 
-function TaskDetailContent({task, tasks, onOpenSubtask}: TaskDetailContentProps) {
+function TaskDetailContent({task, tasks, onOpenChildTask}: TaskDetailContentProps) {
   const status = taskStatus(task);
   const childTasks = resolveChildTasks(tasks, task.children);
   const blockers = resolveBlockers(tasks, task.blockedBy);
@@ -120,7 +120,7 @@ function TaskDetailContent({task, tasks, onOpenSubtask}: TaskDetailContentProps)
     <aside class={styles.panel} aria-label="Task details">
       <TaskDetailHeader name={task.name} status={status} />
       <TaskDetailFields task={task} blockers={blockers} />
-      <TaskDetailSubtasks childTasks={childTasks} onOpenSubtask={onOpenSubtask} />
+      <TaskDetailChildTasks childTasks={childTasks} onOpenChildTask={onOpenChildTask} />
     </aside>
   );
 }
@@ -170,31 +170,31 @@ function TaskDetailFields({task, blockers}: TaskDetailFieldsProps) {
   );
 }
 
-function TaskDetailSubtasks({childTasks, onOpenSubtask}: TaskDetailSubtasksProps) {
+function TaskDetailChildTasks({childTasks, onOpenChildTask}: TaskDetailChildTasksProps) {
   if (childTasks.length === 0) {
     return undefined;
   }
 
   return (
-    <section class={styles.subtasksSection}>
-      <h3 class={styles.sectionLabel}>Subtasks</h3>
-      <ul class={styles.subtasksList}>
+    <section class={styles.childTasksSection} aria-label="Tasks">
+      <h3 class={styles.sectionLabel}>Tasks</h3>
+      <ul class={styles.childTasksList}>
         {childTasks.map(child => (
-          <SubtaskItem key={child.id} task={child} onOpenSubtask={onOpenSubtask} />
+          <ChildTaskItem key={child.id} task={child} onOpenChildTask={onOpenChildTask} />
         ))}
       </ul>
     </section>
   );
 }
 
-function SubtaskItem({task, onOpenSubtask}: SubtaskItemProps) {
+function ChildTaskItem({task, onOpenChildTask}: ChildTaskItemProps) {
   const status = taskStatus(task);
 
   return (
     <li>
-      <button type="button" class={styles.subtaskButton} onClick={() => onOpenSubtask(task.id)}>
+      <button type="button" class={styles.childTaskButton} onClick={() => onOpenChildTask(task.id)}>
         <span class={taskStatusDotClass(status)} title={statusLabel(status)} />
-        <span class={subtaskNameClass(status)}>{task.name}</span>
+        <span class={childTaskNameClass(status)}>{task.name}</span>
       </button>
     </li>
   );

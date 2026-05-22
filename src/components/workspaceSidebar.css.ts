@@ -74,7 +74,7 @@ const scrollbarHidden = style({
   }
 });
 
-export const collapsedProjectStrip = style([
+export const collapsedWorkspaceStrip = style([
   scrollbarHidden,
   {
     display: 'flex',
@@ -89,7 +89,7 @@ export const collapsedProjectStrip = style([
   }
 ]);
 
-export const collapsedProjectList = style({
+export const collapsedWorkspaceList = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -100,7 +100,7 @@ export const collapsedProjectList = style({
   width: '100%'
 });
 
-export const collapsedProjectSquare = style({
+export const collapsedWorkspaceSquare = style({
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -138,7 +138,7 @@ export const collapsedProjectSquare = style({
   }
 });
 
-export const collapsedProjectSquareActive = style({
+export const collapsedWorkspaceSquareActive = style({
   backgroundColor: palette.accentMuted,
   borderColor: palette.accent,
   '@media': {
@@ -230,7 +230,7 @@ export const title = style({
   letterSpacing: '-0.02em'
 });
 
-export const projectList = style({
+export const workspaceList = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '0.35rem',
@@ -239,7 +239,7 @@ export const projectList = style({
   listStyle: 'none'
 });
 
-export const projectButton = style({
+export const workspaceButton = style({
   width: '100%',
   textAlign: 'left',
   padding: '0.55em 0.75em',
@@ -250,7 +250,7 @@ export const projectButton = style({
   fontWeight: 500
 });
 
-export const projectButtonActive = style({
+export const workspaceButtonActive = style({
   backgroundColor: palette.accentMuted,
   borderColor: palette.accent,
   '@media': {

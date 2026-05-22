@@ -13,7 +13,7 @@ type BreadcrumbSegment = {
 };
 
 export type TaskBreadcrumbProps = {
-  projectName: string | undefined;
+  workspaceName: string | undefined;
   tasks: Tasks;
   zoomParentId: string | undefined;
   selectedTaskId: string | undefined;
@@ -45,13 +45,13 @@ function BreadcrumbLink({label, onNavigate}: BreadcrumbLinkProps) {
 }
 
 export function TaskBreadcrumb({
-  projectName,
+  workspaceName,
   tasks,
   zoomParentId,
   selectedTaskId,
   onNavigateTo
 }: TaskBreadcrumbProps) {
-  if (projectName === undefined) {
+  if (workspaceName === undefined) {
     return (
       <nav class={styles.breadcrumb} aria-label="Location">
         <span class={styles.appTitle}>gdex</span>
@@ -64,14 +64,14 @@ export function TaskBreadcrumb({
   if (segments.length === 0) {
     return (
       <nav class={styles.breadcrumb} aria-label="Task level">
-        <span class={styles.breadcrumbCurrent}>{projectName}</span>
+        <span class={styles.breadcrumbCurrent}>{workspaceName}</span>
       </nav>
     );
   }
 
   return (
     <nav class={styles.breadcrumb} aria-label="Task level">
-      <BreadcrumbLink label={projectName} onNavigate={() => onNavigateTo(undefined)} />
+      <BreadcrumbLink label={workspaceName} onNavigate={() => onNavigateTo(undefined)} />
       {segments.map((segment, index) => {
         const isCurrent = index === segments.length - 1;
 

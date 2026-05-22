@@ -1,51 +1,51 @@
 import {invokeErrorMessage} from '@/lib/error';
-import {addProject, type Project} from '@/lib/projectApi';
+import {addWorkspace, type Workspace} from '@/lib/workspaceApi';
 
 /*
  * Types.
  */
 
-export type RegisterProjectInput = {
+export type RegisterWorkspaceInput = {
   name: string;
   configPath: string;
   storagePath: string;
 };
 
-export type RegisterProjectResult = {ok: true; project: Project} | {ok: false; message: string};
+export type RegisterWorkspaceResult = {ok: true; workspace: Workspace} | {ok: false; message: string};
 
 export type RegistrationCallbacks = {
   setName: (name: string) => void;
   setConfigPath: (path: string | undefined) => void;
   setStoragePath: (path: string | undefined) => void;
   setErrorMessage: (message: string | undefined) => void;
-  onRegistered: (project: Project) => void | Promise<void>;
+  onRegistered: (workspace: Workspace) => void | Promise<void>;
 };
 
 /*
  * Helpers.
  */
 
-export async function submitProjectRegistration(
-  input: RegisterProjectInput | undefined
-): Promise<RegisterProjectResult> {
+export async function submitWorkspaceRegistration(
+  input: RegisterWorkspaceInput | undefined
+): Promise<RegisterWorkspaceResult> {
   if (input === undefined) {
     return {ok: false, message: 'Select config and storage paths before registering.'};
   }
 
   try {
-    const project = await addProject(input.name, input.configPath, input.storagePath);
-    return {ok: true, project};
+    const workspace = await addWorkspace(input.name, input.configPath, input.storagePath);
+    return {ok: true, workspace};
   } catch (registerError) {
-    console.error('add_project failed', registerError);
+    console.error('add_workspace failed', registerError);
     return {
       ok: false,
-      message: invokeErrorMessage(registerError, 'Could not register project.')
+      message: invokeErrorMessage(registerError, 'Could not register workspace.')
     };
   }
 }
 
 export async function applyRegistrationResult(
-  result: RegisterProjectResult,
+  result: RegisterWorkspaceResult,
   callbacks: RegistrationCallbacks
 ): Promise<void> {
   if (!result.ok) {
@@ -56,5 +56,5 @@ export async function applyRegistrationResult(
   callbacks.setName('');
   callbacks.setConfigPath(undefined);
   callbacks.setStoragePath(undefined);
-  await callbacks.onRegistered(result.project);
+  await callbacks.onRegistered(result.workspace);
 }

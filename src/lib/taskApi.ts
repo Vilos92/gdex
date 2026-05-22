@@ -14,8 +14,8 @@ export type TaskStatus = 'pending' | 'in_progress' | 'done';
  * API.
  */
 
-export async function getTasks(projectId: string): Promise<Tasks> {
-  const rows = await invoke<unknown>('get_tasks', {projectId});
+export async function getTasks(workspaceId: string): Promise<Tasks> {
+  const rows = await invoke<unknown>('get_tasks', {workspaceId});
   return tasksSchema.parse(rows);
 }
 

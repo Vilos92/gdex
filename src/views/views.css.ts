@@ -59,7 +59,7 @@ export const main = style({
   padding: '1rem 1.25rem'
 });
 
-export const projectWorkspace = style({
+export const workspaceMain = style({
   display: 'flex',
   flex: 1,
   gap: '1rem',

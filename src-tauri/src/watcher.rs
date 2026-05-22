@@ -1,4 +1,4 @@
-//! Watch project storage paths and emit `tasks-changed` when task data updates.
+//! Watch workspace storage paths and emit `tasks-changed` when task data updates.
 
 use std::path::Path;
 use std::time::Duration;
@@ -7,7 +7,7 @@ use notify_debouncer_mini::notify::RecursiveMode;
 use notify_debouncer_mini::{new_debouncer, DebounceEventResult, Debouncer};
 use tauri::{AppHandle, Emitter};
 
-use crate::project_store::Project;
+use crate::workspace_store::Workspace;
 
 const DEBOUNCE_MS: u64 = 30;
 const EVENT_TASKS_CHANGED: &str = "tasks-changed";
@@ -22,15 +22,15 @@ pub struct TaskWatcher {
 /* Task watcher. */
 
 impl TaskWatcher {
-    pub fn new(app: AppHandle, projects: Vec<Project>) -> Result<Self, String> {
-        let mut debouncers = Vec::with_capacity(projects.len());
+    pub fn new(app: AppHandle, workspaces: Vec<Workspace>) -> Result<Self, String> {
+        let mut debouncers = Vec::with_capacity(workspaces.len());
 
-        for project in projects {
-            match watch_project_storage(&app, &project) {
+        for workspace in workspaces {
+            match watch_workspace_storage(&app, &workspace) {
                 Ok(debouncer) => debouncers.push(debouncer),
                 Err(error) => eprintln!(
-                    "task watcher: skipping project {} ({}): {error}",
-                    project.id, project.storage_path
+                    "task watcher: skipping workspace {} ({}): {error}",
+                    workspace.id, workspace.storage_path
                 ),
             }
         }
@@ -43,11 +43,11 @@ impl TaskWatcher {
 
 /* Helpers. */
 
-fn watch_project_storage(
+fn watch_workspace_storage(
     app: &AppHandle,
-    project: &Project,
+    workspace: &Workspace,
 ) -> Result<Debouncer<notify_debouncer_mini::notify::RecommendedWatcher>, String> {
-    let storage_path = project.storage_path.as_str();
+    let storage_path = workspace.storage_path.as_str();
     let path = Path::new(storage_path);
     if !path.exists() {
         return Err(format!(
@@ -55,7 +55,7 @@ fn watch_project_storage(
         ));
     }
 
-    let project_id = project.id.clone();
+    let workspace_id = workspace.id.clone();
     let app = app.clone();
     let mut debouncer = new_debouncer(
         Duration::from_millis(DEBOUNCE_MS),
@@ -63,15 +63,15 @@ fn watch_project_storage(
             match result {
                 Ok(events) => {
                     if !events.is_empty() {
-                        if let Err(error) = app.emit(EVENT_TASKS_CHANGED, project_id.clone()) {
+                        if let Err(error) = app.emit(EVENT_TASKS_CHANGED, workspace_id.clone()) {
                             eprintln!(
-                                "task watcher: emit {EVENT_TASKS_CHANGED} for project {project_id}: {error}"
+                                "task watcher: emit {EVENT_TASKS_CHANGED} for workspace {workspace_id}: {error}"
                             );
                         }
                     }
                 }
                 Err(error) => eprintln!(
-                    "task watcher: debounce error for project {project_id}: {error}"
+                    "task watcher: debounce error for workspace {workspace_id}: {error}"
                 ),
             }
         },
