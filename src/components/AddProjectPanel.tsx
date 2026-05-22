@@ -3,35 +3,32 @@ import {useState} from 'preact/hooks';
 
 import {ProjectRegisterForm} from '@/components/ProjectRegisterForm';
 import * as styles from '@/components/projectSidebar.css';
-import {type Project, type Projects, setActiveProject} from '@/lib/projectApi';
-
-/*
- * Types.
- */
-
-export type AddProjectPanelProps = {
-  projects: Projects;
-  activeProjectId: string | undefined;
-  onProjectsChange: (projects: Projects, activeProjectId: string | undefined) => void;
-};
+import type {Project} from '@/lib/projectApi';
+import {setActiveProject} from '@/lib/projectApi';
+import {useAppStore} from '@/stores/appStore';
 
 /*
  * Component.
  */
 
-export function AddProjectPanel({projects, activeProjectId, onProjectsChange}: AddProjectPanelProps) {
+export function AddProjectPanel() {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const projects = useAppStore(state => state.projects);
+  const activeProjectId = useAppStore(state => state.activeProjectId);
+  const setProjects = useAppStore(state => state.setProjects);
+  const setActiveProjectId = useAppStore(state => state.setActiveProjectId);
 
   async function handleRegistered(project: Project) {
     const nextProjects = [...projects, project];
     if (activeProjectId === undefined) {
       await setActiveProject(project.id);
-      onProjectsChange(nextProjects, project.id);
+      setProjects(nextProjects);
+      setActiveProjectId(project.id);
       setIsFormOpen(false);
       return;
     }
 
-    onProjectsChange(nextProjects, activeProjectId);
+    setProjects(nextProjects);
     setIsFormOpen(false);
   }
 

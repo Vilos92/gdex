@@ -1,27 +1,20 @@
 import {useState} from 'preact/hooks';
+import {useShallow} from 'zustand/shallow';
 
 import {AddProjectPanel} from '@/components/AddProjectPanel';
 import {ProjectList} from '@/components/ProjectList';
 import * as styles from '@/components/projectSidebar.css';
 import {invokeErrorMessage} from '@/lib/error';
-import {type Projects, setActiveProject} from '@/lib/projectApi';
-
-/*
- * Types.
- */
-
-export type ProjectSidebarProps = {
-  projects: Projects;
-  activeProjectId: string | undefined;
-  onProjectsChange: (projects: Projects, activeProjectId: string | undefined) => void;
-};
+import {setActiveProject} from '@/lib/projectApi';
+import {useAppStore} from '@/stores/appStore';
 
 /*
  * Component.
  */
 
-export function ProjectSidebar({projects, activeProjectId, onProjectsChange}: ProjectSidebarProps) {
+export function ProjectSidebar() {
   const [selectError, setSelectError] = useState<string | undefined>(undefined);
+  const {projects, activeProjectId, setActiveProjectId} = useProjectSidebarState();
 
   const selectProject = async (projectId: string) => {
     setSelectError(undefined);
@@ -30,7 +23,7 @@ export function ProjectSidebar({projects, activeProjectId, onProjectsChange}: Pr
     }
     try {
       await setActiveProject(projectId);
-      onProjectsChange(projects, projectId);
+      setActiveProjectId(projectId);
     } catch (error) {
       console.error('set_active_project failed', error);
       setSelectError(invokeErrorMessage(error, 'Could not set active project.'));
@@ -46,11 +39,21 @@ export function ProjectSidebar({projects, activeProjectId, onProjectsChange}: Pr
         </p>
       ) : undefined}
       <ProjectList projects={projects} activeProjectId={activeProjectId} onSelect={selectProject} />
-      <AddProjectPanel
-        projects={projects}
-        activeProjectId={activeProjectId}
-        onProjectsChange={onProjectsChange}
-      />
+      <AddProjectPanel />
     </aside>
+  );
+}
+
+/*
+ * Hooks.
+ */
+
+function useProjectSidebarState() {
+  return useAppStore(
+    useShallow(state => ({
+      projects: state.projects,
+      activeProjectId: state.activeProjectId,
+      setActiveProjectId: state.setActiveProjectId
+    }))
   );
 }

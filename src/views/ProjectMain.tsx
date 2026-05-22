@@ -1,38 +1,29 @@
+import {useShallow} from 'zustand/shallow';
+
 import {TaskBoard} from '@/components/TaskBoard';
 import * as taskStyles from '@/components/taskList.css';
-import type {Project} from '@/lib/projectApi';
-import type {Tasks} from '@/lib/taskApi';
+import {useAppStore} from '@/stores/appStore';
 import * as styles from '@/views/views.css';
-
-/*
- * Types.
- */
-
-export type ProjectMainProps = {
-  activeProject: Project | undefined;
-  tasks: Tasks;
-  isLoading: boolean;
-  loadErrorMessage: string | undefined;
-  zoomParentId: string | undefined;
-  selectedTaskId: string | undefined;
-  onSelectTask: (taskId: string) => void;
-  onZoomTask: (taskId: string) => void;
-};
 
 /*
  * Component.
  */
 
-export function ProjectMain({
-  activeProject,
-  tasks,
-  isLoading,
-  loadErrorMessage,
-  zoomParentId,
-  selectedTaskId,
-  onSelectTask,
-  onZoomTask
-}: ProjectMainProps) {
+export function ProjectMain() {
+  const {
+    projects,
+    activeProjectId,
+    tasks,
+    isLoading,
+    loadErrorMessage,
+    zoomParentId,
+    selectedTaskId,
+    selectTask,
+    zoomTo
+  } = useProjectMainState();
+
+  const activeProject = projects.find(project => project.id === activeProjectId);
+
   if (activeProject === undefined) {
     return <p class={styles.placeholder}>Select a project</p>;
   }
@@ -54,8 +45,28 @@ export function ProjectMain({
       tasks={tasks}
       zoomParentId={zoomParentId}
       selectedTaskId={selectedTaskId}
-      onSelectTask={onSelectTask}
-      onZoomTask={onZoomTask}
+      onSelectTask={selectTask}
+      onZoomTask={zoomTo}
     />
+  );
+}
+
+/*
+ * Hooks.
+ */
+
+function useProjectMainState() {
+  return useAppStore(
+    useShallow(state => ({
+      projects: state.projects,
+      activeProjectId: state.activeProjectId,
+      tasks: state.tasks,
+      isLoading: state.isTasksLoading,
+      loadErrorMessage: state.tasksLoadError,
+      zoomParentId: state.zoomParentId,
+      selectedTaskId: state.selectedTaskId,
+      selectTask: state.selectTask,
+      zoomTo: state.zoomTo
+    }))
   );
 }

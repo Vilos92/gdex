@@ -1,31 +1,37 @@
+import {useShallow} from 'zustand/shallow';
+
 import * as styles from '@/components/appTopBar.css';
 import {TaskBreadcrumb} from '@/components/TaskBreadcrumb';
-import type {Tasks} from '@/lib/taskApi';
-
-/*
- * Types.
- */
-
-export type AppTopBarProps = {
-  projectName: string | undefined;
-  tasks: Tasks;
-  zoomParentId: string | undefined;
-  onZoomTo: (taskId: string | undefined) => void;
-};
+import {useAppStore} from '@/stores/appStore';
 
 /*
  * Component.
  */
 
-export function AppTopBar({projectName, tasks, zoomParentId, onZoomTo}: AppTopBarProps) {
+export function AppTopBar() {
+  const {projects, activeProjectId, tasks, zoomParentId, zoomTo} = useAppTopBarState();
+
+  const projectName = projects.find(project => project.id === activeProjectId)?.name;
+
   return (
     <header class={styles.topBar}>
-      <TaskBreadcrumb
-        projectName={projectName}
-        tasks={tasks}
-        zoomParentId={zoomParentId}
-        onZoomTo={onZoomTo}
-      />
+      <TaskBreadcrumb projectName={projectName} tasks={tasks} zoomParentId={zoomParentId} onZoomTo={zoomTo} />
     </header>
+  );
+}
+
+/*
+ * Hooks.
+ */
+
+function useAppTopBarState() {
+  return useAppStore(
+    useShallow(state => ({
+      projects: state.projects,
+      activeProjectId: state.activeProjectId,
+      tasks: state.tasks,
+      zoomParentId: state.zoomParentId,
+      zoomTo: state.zoomTo
+    }))
   );
 }

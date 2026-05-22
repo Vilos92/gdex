@@ -1,58 +1,44 @@
+import {useEffect} from 'preact/hooks';
+
 import {AppTopBar} from '@/components/AppTopBar';
 import {ProjectSidebar} from '@/components/ProjectSidebar';
-import {useProjectTaskNav} from '@/hooks/useProjectTaskNav';
-import {useProjectTasks} from '@/hooks/useProjectTasks';
-import type {Projects} from '@/lib/projectApi';
+import {useAppStore} from '@/stores/appStore';
 import {ProjectMain} from '@/views/ProjectMain';
 import * as styles from '@/views/views.css';
-
-/*
- * Types.
- */
-
-export type ProjectsLayoutProps = {
-  projects: Projects;
-  activeProjectId: string | undefined;
-  onProjectsChange: (projects: Projects, activeProjectId: string | undefined) => void;
-};
 
 /*
  * Component.
  */
 
-export function ProjectsLayout({projects, activeProjectId, onProjectsChange}: ProjectsLayoutProps) {
-  const {tasks, isLoading, loadErrorMessage} = useProjectTasks(activeProjectId);
-  const {selectedTaskId, zoomParentId, selectTask, zoomTo} = useProjectTaskNav(activeProjectId);
-
-  const activeProject = projects.find(project => project.id === activeProjectId);
+export function ProjectsLayout() {
+  useProjectTasksSync();
 
   return (
     <div class={styles.appFrame}>
-      <AppTopBar
-        projectName={activeProject?.name}
-        tasks={tasks}
-        zoomParentId={zoomParentId}
-        onZoomTo={zoomTo}
-      />
+      <AppTopBar />
       <div class={styles.shell}>
-        <ProjectSidebar
-          projects={projects}
-          activeProjectId={activeProjectId}
-          onProjectsChange={onProjectsChange}
-        />
+        <ProjectSidebar />
         <main class={styles.main}>
-          <ProjectMain
-            activeProject={activeProject}
-            tasks={tasks}
-            isLoading={isLoading}
-            loadErrorMessage={loadErrorMessage}
-            zoomParentId={zoomParentId}
-            selectedTaskId={selectedTaskId}
-            onSelectTask={selectTask}
-            onZoomTask={zoomTo}
-          />
+          <ProjectMain />
         </main>
       </div>
     </div>
   );
+}
+
+/*
+ * Hooks.
+ */
+
+/** Keeps task list and `tasks-changed` listener in sync while the projects shell is mounted. */
+function useProjectTasksSync() {
+  const activeProjectId = useAppStore(state => state.activeProjectId);
+  const reloadTasks = useAppStore(state => state.reloadTasks);
+  const initTasksListener = useAppStore(state => state.initTasksListener);
+
+  useEffect(() => {
+    reloadTasks();
+  }, [activeProjectId, reloadTasks]);
+
+  useEffect(() => initTasksListener(), [activeProjectId, initTasksListener]);
 }
