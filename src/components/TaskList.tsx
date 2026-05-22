@@ -1,5 +1,5 @@
 import * as styles from '@/components/taskList.css';
-import {type Task, type Tasks, taskStatus} from '@/lib/taskApi';
+import {type Task, type TaskStatus, type Tasks, taskStatus} from '@/lib/taskApi';
 
 /*
  * Types.
@@ -20,6 +20,33 @@ type TaskListItemProps = {
 };
 
 /*
+ * Styles.
+ */
+
+function taskRowButtonClass(isSelected: boolean): string {
+  return [styles.taskButton, isSelected ? styles.taskButtonSelected : ''].filter(Boolean).join(' ');
+}
+
+function taskNameClass(status: TaskStatus): string {
+  return [styles.taskName, status === 'done' ? styles.taskNameDone : ''].filter(Boolean).join(' ');
+}
+
+function statusDotVariantClass(status: TaskStatus): string {
+  switch (status) {
+    case 'in_progress':
+      return styles.statusInProgress;
+    case 'done':
+      return styles.statusDone;
+    default:
+      return styles.statusPending;
+  }
+}
+
+function taskStatusDotClass(status: TaskStatus): string {
+  return [styles.statusDot, statusDotVariantClass(status)].join(' ');
+}
+
+/*
  * Component.
  */
 
@@ -31,22 +58,13 @@ function TaskListItem({task, isSelected, onSelectTask, onZoomTask}: TaskListItem
     <li>
       <button
         type="button"
-        class={[styles.taskButton, isSelected ? styles.taskButtonSelected : ''].filter(Boolean).join(' ')}
+        class={taskRowButtonClass(isSelected)}
         aria-current={isSelected ? 'true' : undefined}
         title={hasChildren ? 'Open subtasks' : undefined}
-        onClick={() => {
-          onSelectTask(task.id);
-          if (hasChildren) {
-            onZoomTask(task.id);
-          }
-        }}
+        onClick={() => activateTask(task.id, hasChildren, onSelectTask, onZoomTask)}
       >
-        <span class={[styles.statusDot, statusDotClass(status)].join(' ')} title={statusLabel(status)} />
-        <span
-          class={[styles.taskName, status === 'done' ? styles.taskNameDone : ''].filter(Boolean).join(' ')}
-        >
-          {task.name}
-        </span>
+        <span class={taskStatusDotClass(status)} title={statusLabel(status)} />
+        <span class={taskNameClass(status)}>{task.name}</span>
       </button>
     </li>
   );
@@ -78,6 +96,18 @@ export function TaskList({tasks, selectedTaskId, onSelectTask, onZoomTask}: Task
  * Helpers.
  */
 
+function activateTask(
+  taskId: string,
+  hasChildren: boolean,
+  onSelectTask: (taskId: string) => void,
+  onZoomTask: (taskId: string) => void
+): void {
+  onSelectTask(taskId);
+  if (hasChildren) {
+    onZoomTask(taskId);
+  }
+}
+
 function compareTasks(left: Task, right: Task): number {
   if (right.priority !== left.priority) {
     return right.priority - left.priority;
@@ -85,18 +115,7 @@ function compareTasks(left: Task, right: Task): number {
   return left.name.localeCompare(right.name);
 }
 
-function statusDotClass(status: ReturnType<typeof taskStatus>): string {
-  switch (status) {
-    case 'in_progress':
-      return styles.statusInProgress;
-    case 'done':
-      return styles.statusDone;
-    default:
-      return styles.statusPending;
-  }
-}
-
-function statusLabel(status: ReturnType<typeof taskStatus>): string {
+function statusLabel(status: TaskStatus): string {
   switch (status) {
     case 'in_progress':
       return 'In progress';

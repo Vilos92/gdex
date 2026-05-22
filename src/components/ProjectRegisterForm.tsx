@@ -13,6 +13,14 @@ export type ProjectRegisterFormProps = {
 };
 
 /*
+ * Styles.
+ */
+
+function registerFormClass(extraClass: string | undefined): string {
+  return [styles.form, extraClass].filter(Boolean).join(' ');
+}
+
+/*
  * Component.
  */
 
@@ -21,7 +29,7 @@ export function ProjectRegisterForm({class: className, onRegistered}: ProjectReg
 
   return (
     <form
-      class={[styles.form, className].filter(Boolean).join(' ')}
+      class={registerFormClass(className)}
       onSubmit={event => {
         event.preventDefault();
         registration.submitRegistration();

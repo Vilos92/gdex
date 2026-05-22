@@ -18,7 +18,7 @@ type ProjectTaskNav = {
 export function useProjectTaskNav(activeProjectId: string | undefined) {
   const [taskNav, setTaskNav] = useState<ProjectTaskNav | undefined>(undefined);
 
-  const activeTaskNav = taskNav?.projectId === activeProjectId ? taskNav : undefined;
+  const activeTaskNav = resolveActiveTaskNav(taskNav, activeProjectId);
   const selectedTaskId = activeTaskNav?.selectedTaskId;
   const zoomParentId = activeTaskNav?.zoomParentId;
 
@@ -26,23 +26,50 @@ export function useProjectTaskNav(activeProjectId: string | undefined) {
     if (activeProjectId === undefined) {
       return;
     }
-    setTaskNav(previous => ({
-      projectId: activeProjectId,
-      selectedTaskId: taskId,
-      zoomParentId: previous?.projectId === activeProjectId ? previous.zoomParentId : undefined
-    }));
+    setTaskNav(previous => {
+      const prior = priorTaskNav(previous, activeProjectId);
+      return {
+        projectId: activeProjectId,
+        selectedTaskId: taskId,
+        zoomParentId: prior?.zoomParentId
+      };
+    });
   };
 
   const zoomTo = (parentId: string | undefined) => {
     if (activeProjectId === undefined) {
       return;
     }
-    setTaskNav(previous => ({
-      projectId: activeProjectId,
-      selectedTaskId: previous?.projectId === activeProjectId ? previous.selectedTaskId : undefined,
-      zoomParentId: parentId
-    }));
+    setTaskNav(previous => {
+      const prior = priorTaskNav(previous, activeProjectId);
+      return {
+        projectId: activeProjectId,
+        selectedTaskId: prior?.selectedTaskId,
+        zoomParentId: parentId
+      };
+    });
   };
 
   return {selectedTaskId, zoomParentId, selectTask, zoomTo};
+}
+
+/*
+ * Helpers.
+ */
+
+function resolveActiveTaskNav(
+  taskNav: ProjectTaskNav | undefined,
+  activeProjectId: string | undefined
+): ProjectTaskNav | undefined {
+  if (activeProjectId === undefined) {
+    return undefined;
+  }
+  return priorTaskNav(taskNav, activeProjectId);
+}
+
+function priorTaskNav(
+  previous: ProjectTaskNav | undefined,
+  activeProjectId: string
+): ProjectTaskNav | undefined {
+  return previous?.projectId === activeProjectId ? previous : undefined;
 }

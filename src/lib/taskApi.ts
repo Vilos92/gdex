@@ -37,6 +37,23 @@ type TaskWire = {
   blockedBy: readonly string[];
 };
 
+type WireOptionalField = {
+  wireKey: 'parent_id' | 'description' | 'result' | 'started_at' | 'completed_at';
+  appKey: 'parentId' | 'description' | 'result' | 'startedAt' | 'completedAt';
+};
+
+/*
+ * Constants.
+ */
+
+const WIRE_OPTIONAL_FIELDS: readonly WireOptionalField[] = [
+  {wireKey: 'parent_id', appKey: 'parentId'},
+  {wireKey: 'description', appKey: 'description'},
+  {wireKey: 'result', appKey: 'result'},
+  {wireKey: 'started_at', appKey: 'startedAt'},
+  {wireKey: 'completed_at', appKey: 'completedAt'}
+];
+
 /*
  * API.
  */
@@ -68,15 +85,23 @@ export function taskStatus(task: Task): TaskStatus {
 function normalizeTask(row: TaskWire): Task {
   return {
     id: row.id,
-    parentId: row.parent_id ?? undefined,
     name: row.name,
-    description: row.description ?? undefined,
     priority: row.priority,
     completed: row.completed,
-    result: row.result ?? undefined,
-    startedAt: row.started_at ?? undefined,
-    completedAt: row.completed_at ?? undefined,
     children: row.children,
-    blockedBy: row.blocked_by ?? row.blockedBy
+    blockedBy: row.blocked_by ?? row.blockedBy,
+    ...taskWireOptionalFields(row)
   };
+}
+
+function taskWireOptionalFields(
+  row: TaskWire
+): Pick<Task, 'parentId' | 'description' | 'result' | 'startedAt' | 'completedAt'> {
+  const fields: Partial<Pick<Task, 'parentId' | 'description' | 'result' | 'startedAt' | 'completedAt'>> = {};
+
+  for (const {wireKey, appKey} of WIRE_OPTIONAL_FIELDS) {
+    fields[appKey] = row[wireKey] ?? undefined;
+  }
+
+  return fields as Pick<Task, 'parentId' | 'description' | 'result' | 'startedAt' | 'completedAt'>;
 }
