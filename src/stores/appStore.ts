@@ -67,7 +67,8 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setProjects: projects => set({projects}),
 
-  setActiveProjectId: activeProjectId =>
+  setActiveProjectId: activeProjectId => {
+    tasksLoadRequestId += 1;
     set({
       activeProjectId,
       tasks: [],
@@ -75,7 +76,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       tasksLoadError: undefined,
       selectedTaskId: undefined,
       zoomParentId: undefined
-    }),
+    });
+  },
 
   selectTask: taskId => set({selectedTaskId: taskId}),
 

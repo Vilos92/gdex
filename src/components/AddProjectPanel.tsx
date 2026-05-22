@@ -21,8 +21,8 @@ export function AddProjectPanel() {
   async function handleRegistered(project: Project) {
     const nextProjects = [...projects, project];
     if (activeProjectId === undefined) {
-      await setActiveProject(project.id);
       setProjects(nextProjects);
+      await setActiveProject(project.id);
       setActiveProjectId(project.id);
       setIsFormOpen(false);
       return;

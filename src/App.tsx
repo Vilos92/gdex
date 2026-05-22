@@ -44,7 +44,12 @@ function App() {
     splash: () => (
       <SplashView
         onRegistered={async project => {
-          await setActiveProject(project.id);
+          try {
+            await setActiveProject(project.id);
+          } catch (error) {
+            handleProjectsLoadError(error);
+            return;
+          }
           setProjects([project]);
           setActiveProjectId(project.id);
           setView('projects');

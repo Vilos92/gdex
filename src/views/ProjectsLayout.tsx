@@ -40,5 +40,8 @@ function useProjectTasksSync() {
     reloadTasks();
   }, [activeProjectId, reloadTasks]);
 
-  useEffect(() => initTasksListener(), [activeProjectId, initTasksListener]);
+  useEffect(() => {
+    const unsubscribe = initTasksListener();
+    return unsubscribe;
+  }, [initTasksListener]);
 }
