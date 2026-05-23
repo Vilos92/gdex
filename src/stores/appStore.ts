@@ -203,6 +203,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     // Switch to a remaining workspace. Prefer the next workspace after the deleted one, fall
     // back to the first in the list.
+    tasksLoadRequestId += 1;
     const nextWorkspace = remaining[0];
     set({workspaces: remaining});
     try {

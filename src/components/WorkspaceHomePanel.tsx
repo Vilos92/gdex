@@ -1,10 +1,10 @@
-import {useState} from 'preact/hooks';
-import {useShallow} from 'zustand/shallow';
+import { useState } from "preact/hooks";
+import { useShallow } from "zustand/shallow";
 
-import * as styles from '@/components/workspaceHomePanel.css';
-import {invokeErrorMessage} from '@/lib/error';
-import type {Workspace} from '@/lib/workspaceApi';
-import {useAppStore} from '@/stores/appStore';
+import * as styles from "@/components/workspaceHomePanel.css";
+import { invokeErrorMessage } from "@/lib/error";
+import type { Workspace } from "@/lib/workspaceApi";
+import { useAppStore } from "@/stores/appStore";
 
 /*
  * Types.
@@ -26,8 +26,8 @@ type DeleteConfirmProps = {
  * Component.
  */
 
-export function WorkspaceHomePanel({workspace}: WorkspaceHomePanelProps) {
-  const {deleteWorkspace} = useWorkspaceHomePanelState();
+export function WorkspaceHomePanel({ workspace }: WorkspaceHomePanelProps) {
+  const { deleteWorkspace } = useWorkspaceHomePanelState();
   const [isConfirming, setIsConfirming] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | undefined>(undefined);
@@ -37,10 +37,12 @@ export function WorkspaceHomePanel({workspace}: WorkspaceHomePanelProps) {
     setDeleteError(undefined);
     try {
       await deleteWorkspace(workspace.id);
-    } catch (error) {
-      setDeleteError(invokeErrorMessage(error, 'Could not delete workspace.'));
       setIsDeleting(false);
       setIsConfirming(false);
+      setDeleteError(undefined);
+    } catch (error) {
+      setDeleteError(invokeErrorMessage(error, "Could not delete workspace."));
+      setIsDeleting(false);
     }
   };
 
@@ -68,7 +70,11 @@ export function WorkspaceHomePanel({workspace}: WorkspaceHomePanelProps) {
             onCancel={() => setIsConfirming(false)}
           />
         ) : (
-          <button type="button" class={styles.deleteButton} onClick={() => setIsConfirming(true)}>
+          <button
+            type="button"
+            class={styles.deleteButton}
+            onClick={() => setIsConfirming(true)}
+          >
             Delete workspace
           </button>
         )}
@@ -77,12 +83,18 @@ export function WorkspaceHomePanel({workspace}: WorkspaceHomePanelProps) {
   );
 }
 
-function DeleteConfirm({workspaceName, isDeleting, deleteError, onConfirm, onCancel}: DeleteConfirmProps) {
+function DeleteConfirm({
+  workspaceName,
+  isDeleting,
+  deleteError,
+  onConfirm,
+  onCancel,
+}: DeleteConfirmProps) {
   return (
     <div class={styles.confirmRow}>
       <p class={styles.confirmText}>
-        Delete <strong>{workspaceName}</strong>? This removes it from gdex only — your dex data files are not
-        affected.
+        Delete <strong>{workspaceName}</strong>? This removes it from gdex only
+        — your dex data files are not affected.
       </p>
       <div class={styles.confirmActions}>
         <button
@@ -92,9 +104,14 @@ function DeleteConfirm({workspaceName, isDeleting, deleteError, onConfirm, onCan
           aria-disabled={isDeleting}
           onClick={onConfirm}
         >
-          {isDeleting ? 'Deleting…' : 'Delete'}
+          {isDeleting ? "Deleting…" : "Delete"}
         </button>
-        <button type="button" class={styles.cancelButton} disabled={isDeleting} onClick={onCancel}>
+        <button
+          type="button"
+          class={styles.cancelButton}
+          disabled={isDeleting}
+          onClick={onCancel}
+        >
           Cancel
         </button>
       </div>
@@ -112,5 +129,7 @@ function DeleteConfirm({workspaceName, isDeleting, deleteError, onConfirm, onCan
  */
 
 function useWorkspaceHomePanelState() {
-  return useAppStore(useShallow(state => ({deleteWorkspace: state.deleteWorkspace})));
+  return useAppStore(
+    useShallow((state) => ({ deleteWorkspace: state.deleteWorkspace }))
+  );
 }
