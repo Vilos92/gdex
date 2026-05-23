@@ -22,6 +22,10 @@ export async function setActiveWorkspace(id: string): Promise<void> {
   await invoke('set_active_workspace', {id});
 }
 
+export async function validateWorkspace(configPath: string, storagePath: string): Promise<void> {
+  await invoke('validate_workspace', {configPath, storagePath});
+}
+
 export async function addWorkspace(
   name: string,
   configPath: string,

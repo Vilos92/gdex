@@ -12,7 +12,7 @@ const DEX_COMMAND_TIMEOUT: Duration = Duration::from_secs(30);
 
 /* Types. */
 
-/// Registered dex workspace: config file and task storage directory passed to every CLI invocation.
+/// Dex invocation paths: config file and `--storage-path` (directory containing `tasks.jsonl`).
 pub struct DexProject {
     pub config_path: PathBuf,
     pub storage_path: PathBuf,

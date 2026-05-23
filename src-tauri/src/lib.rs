@@ -39,6 +39,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             greet,
+            commands::validate_workspace,
             commands::add_workspace,
             commands::remove_workspace,
             commands::list_workspaces,
