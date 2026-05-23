@@ -230,17 +230,23 @@ function useTaskIdCopy(taskId: string) {
     };
   }, []);
 
-  const copyId = useCallback(() => {
-    navigator.clipboard.writeText(taskId).then(() => {
+  const copyId = useCallback(async () => {
+    if (timeoutRef.current !== undefined) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = undefined;
+    }
+
+    const didCopy = await copyTextToClipboard(taskId);
+    if (didCopy) {
       setIsCopied(true);
-      if (timeoutRef.current !== undefined) {
-        clearTimeout(timeoutRef.current);
-      }
       timeoutRef.current = setTimeout(() => {
         setIsCopied(false);
         timeoutRef.current = undefined;
       }, 1200);
-    });
+      return;
+    }
+
+    setIsCopied(false);
   }, [taskId]);
 
   return {isCopied, copyId};
@@ -285,6 +291,37 @@ function resolveBlockers(tasks: Tasks, blockerIds: readonly string[]): BlockerEn
     blockers.push({id: blockerId, name: blocker?.name ?? blockerId});
   }
   return blockers;
+}
+
+/** Copy text via Clipboard API, falling back to `execCommand` when the API is unavailable. */
+async function copyTextToClipboard(text: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard?.writeText !== undefined) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+
+    return copyTextViaExecCommand(text);
+  } catch {
+    return false;
+  }
+}
+
+/** Synchronous clipboard fallback when `navigator.clipboard` is unavailable (e.g. non-secure context). */
+function copyTextViaExecCommand(text: string): boolean {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'fixed';
+  textarea.style.left = '-9999px';
+  document.body.appendChild(textarea);
+  textarea.select();
+
+  try {
+    return document.execCommand('copy');
+  } finally {
+    document.body.removeChild(textarea);
+  }
 }
 
 function statusLabel(status: TaskStatus): string {
