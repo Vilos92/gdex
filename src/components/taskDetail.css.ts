@@ -2,6 +2,8 @@ import {style} from '@vanilla-extract/css';
 
 import {palette} from '@/styles/tokens';
 
+export {section, sectionLabel} from '@/components/panelSection.css';
+
 /*
  * Styles.
  */
@@ -102,27 +104,6 @@ export const statusBadgeDone = style({
   }
 });
 
-export const section = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.4rem',
-  minWidth: 0
-});
-
-export const sectionLabel = style({
-  margin: 0,
-  fontSize: '0.75rem',
-  fontWeight: 600,
-  letterSpacing: '0.04em',
-  textTransform: 'uppercase',
-  color: palette.textMuted,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textMutedDark
-    }
-  }
-});
-
 export const sectionBody = style({
   margin: 0,
   fontSize: '0.9375rem',
@@ -183,4 +164,45 @@ export const childTasksList = style({
   margin: 0,
   padding: 0,
   listStyle: 'none'
+});
+
+export const taskIdButton = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '0.3em',
+  padding: '0.15em 0.4em',
+  marginTop: '0.1rem',
+  background: 'none',
+  border: '1px solid transparent',
+  borderRadius: '4px',
+  fontFamily: 'monospace',
+  fontSize: '0.6875rem',
+  letterSpacing: '0.02em',
+  color: palette.textMuted,
+  cursor: 'pointer',
+  transition: 'color 120ms, border-color 120ms, background-color 120ms',
+  ':hover': {
+    color: palette.text,
+    borderColor: palette.border,
+    backgroundColor: palette.pageBg
+  },
+  '@media': {
+    '(prefers-color-scheme: dark)': {
+      color: palette.textMutedDark,
+      ':hover': {
+        color: palette.textDark,
+        borderColor: palette.borderDark,
+        backgroundColor: palette.pageBgDark
+      }
+    }
+  }
+});
+
+export const taskIdCopied = style({
+  color: palette.accent,
+  '@media': {
+    '(prefers-color-scheme: dark)': {
+      color: palette.accent
+    }
+  }
 });

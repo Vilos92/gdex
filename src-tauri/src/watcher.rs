@@ -1,4 +1,4 @@
-//! Watch workspace storage paths and emit `tasks-changed` when task data updates.
+//! Watch workspace storage directories and emit `tasks-changed` when task data updates.
 
 use std::collections::HashMap;
 use std::path::Path;

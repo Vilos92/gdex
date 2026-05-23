@@ -3,7 +3,7 @@ import {create} from 'zustand';
 
 import {invokeErrorMessage} from '@/lib/error';
 import {getTasks, type Tasks} from '@/lib/taskApi';
-import {listWorkspaces} from '@/lib/workspaceApi';
+import {listWorkspaces, removeWorkspace, setActiveWorkspace} from '@/lib/workspaceApi';
 import {loadWorkspaceSelection} from '@/lib/workspaceSelection';
 import type {Workspaces} from '@/schemas/workspace';
 
@@ -40,6 +40,11 @@ type AppActions = {
   reloadTasks: () => Promise<void>;
   /** Subscribe to `tasks-changed`; returns cleanup that unlistens. */
   initTasksListener: () => () => void;
+  /**
+   * Remove a workspace from the registry. If no workspaces remain, switches to the splash view.
+   * If at least one workspace remains, the first one is activated.
+   */
+  deleteWorkspace: (workspaceId: string) => Promise<void>;
 };
 
 type AppState = AppData & AppActions;
@@ -174,6 +179,46 @@ export const useAppStore = create<AppState>((set, get) => ({
       disposed = true;
       unlisten?.();
     };
+  },
+
+  deleteWorkspace: async workspaceId => {
+    await removeWorkspace(workspaceId);
+    const remaining = get().workspaces.filter(workspace => workspace.id !== workspaceId);
+
+    if (remaining.length === 0) {
+      tasksLoadRequestId += 1;
+      set({
+        workspaces: [],
+        activeWorkspaceId: undefined,
+        workspacesLoadError: undefined,
+        view: 'splash',
+        tasks: [],
+        isTasksLoading: false,
+        tasksLoadError: undefined,
+        selectedTaskId: undefined,
+        zoomParentId: undefined
+      });
+      return;
+    }
+
+    // Switch to a remaining workspace. Prefer the next workspace after the deleted one, fall
+    // back to the first in the list.
+    tasksLoadRequestId += 1;
+    const nextWorkspace = remaining[0];
+    set({workspaces: remaining});
+    try {
+      await setActiveWorkspace(nextWorkspace.id);
+    } catch (error) {
+      console.error('set_active_workspace failed after delete', error);
+    }
+    set({
+      activeWorkspaceId: nextWorkspace.id,
+      tasks: [],
+      isTasksLoading: false,
+      tasksLoadError: undefined,
+      selectedTaskId: undefined,
+      zoomParentId: undefined
+    });
   }
 }));
 

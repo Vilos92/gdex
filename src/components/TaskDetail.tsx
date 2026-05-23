@@ -1,7 +1,9 @@
+import {useCallback, useEffect, useRef, useState} from 'preact/hooks';
 import {useShallow} from 'zustand/shallow';
 
 import * as styles from '@/components/taskDetail.css';
 import * as listStyles from '@/components/taskList.css';
+import {WorkspaceHomePanel} from '@/components/WorkspaceHomePanel';
 import {compareTasks, type Task, type TaskStatus, type Tasks, taskStatus} from '@/lib/taskApi';
 import {useAppStore} from '@/stores/appStore';
 
@@ -16,6 +18,7 @@ type TaskDetailContentProps = {
 };
 
 type TaskDetailHeaderProps = {
+  id: string;
   name: string;
   status: TaskStatus;
 };
@@ -84,9 +87,13 @@ function childTaskNameClass(status: TaskStatus): string {
  */
 
 export function TaskDetail() {
-  const {tasks, selectedTaskId, selectTask, zoomTo} = useTaskDetailState();
+  const {workspaces, activeWorkspaceId, tasks, selectedTaskId, selectTask, zoomTo} = useTaskDetailState();
 
   if (selectedTaskId === undefined) {
+    const activeWorkspace = workspaces.find(workspace => workspace.id === activeWorkspaceId);
+    if (activeWorkspace !== undefined) {
+      return <WorkspaceHomePanel workspace={activeWorkspace} />;
+    }
     return (
       <aside class={styles.panel} aria-label="Task details">
         <p class={styles.emptyMessage}>Select a task to view details.</p>
@@ -118,14 +125,16 @@ function TaskDetailContent({task, tasks, onOpenChildTask}: TaskDetailContentProp
 
   return (
     <aside class={styles.panel} aria-label="Task details">
-      <TaskDetailHeader name={task.name} status={status} />
+      <TaskDetailHeader id={task.id} name={task.name} status={status} />
       <TaskDetailFields task={task} blockers={blockers} />
       <TaskDetailChildTasks childTasks={childTasks} onOpenChildTask={onOpenChildTask} />
     </aside>
   );
 }
 
-function TaskDetailHeader({name, status}: TaskDetailHeaderProps) {
+function TaskDetailHeader({id, name, status}: TaskDetailHeaderProps) {
+  const {isCopied, copyId} = useTaskIdCopy(id);
+
   return (
     <>
       <h2 class={titleClass(status)}>{name}</h2>
@@ -134,6 +143,15 @@ function TaskDetailHeader({name, status}: TaskDetailHeaderProps) {
           <span class={taskStatusDotClass(status)} aria-hidden="true" />
           {statusLabel(status)}
         </span>
+        <button
+          type="button"
+          class={[styles.taskIdButton, isCopied ? styles.taskIdCopied : ''].filter(Boolean).join(' ')}
+          onClick={copyId}
+          title="Copy task ID"
+          aria-label={isCopied ? 'Copied!' : `Copy task ID: ${id}`}
+        >
+          {isCopied ? '✓ Copied!' : id}
+        </button>
       </div>
     </>
   );
@@ -204,9 +222,46 @@ function ChildTaskItem({task, onOpenChildTask}: ChildTaskItemProps) {
  * Hooks.
  */
 
+function useTaskIdCopy(taskId: string) {
+  const [isCopied, setIsCopied] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  // Clear the timeout on unmount to avoid state updates on an unmounted component.
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current !== undefined) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const copyId = useCallback(async () => {
+    if (timeoutRef.current !== undefined) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = undefined;
+    }
+
+    const didCopy = await copyTextToClipboard(taskId);
+    if (didCopy) {
+      setIsCopied(true);
+      timeoutRef.current = setTimeout(() => {
+        setIsCopied(false);
+        timeoutRef.current = undefined;
+      }, 1200);
+      return;
+    }
+
+    setIsCopied(false);
+  }, [taskId]);
+
+  return {isCopied, copyId};
+}
+
 function useTaskDetailState() {
   return useAppStore(
     useShallow(state => ({
+      workspaces: state.workspaces,
+      activeWorkspaceId: state.activeWorkspaceId,
       tasks: state.tasks,
       selectedTaskId: state.selectedTaskId,
       selectTask: state.selectTask,
@@ -243,6 +298,37 @@ function resolveBlockers(tasks: Tasks, blockerIds: readonly string[]): BlockerEn
     blockers.push({id: blockerId, name: blocker?.name ?? blockerId});
   }
   return blockers;
+}
+
+/** Copy text via Clipboard API, falling back to `execCommand` when the API is unavailable. */
+async function copyTextToClipboard(text: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard?.writeText !== undefined) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+
+    return copyTextViaExecCommand(text);
+  } catch {
+    return false;
+  }
+}
+
+/** Synchronous clipboard fallback when `navigator.clipboard` is unavailable (e.g. non-secure context). */
+function copyTextViaExecCommand(text: string): boolean {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'fixed';
+  textarea.style.left = '-9999px';
+  document.body.appendChild(textarea);
+  textarea.select();
+
+  try {
+    return document.execCommand('copy');
+  } finally {
+    document.body.removeChild(textarea);
+  }
 }
 
 function statusLabel(status: TaskStatus): string {

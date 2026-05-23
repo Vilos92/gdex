@@ -21,7 +21,8 @@ static STORE_WRITE_MUTEX: Mutex<()> = Mutex::new(());
 
 /* Types. */
 
-/// User-registered dex workspace (config + storage paths passed to every `dex` invocation).
+/// User-registered dex workspace. `storage_path` is dex's `--storage-path` (directory
+/// containing `tasks.jsonl`, e.g. `~/.dex/task-db/greg.jsonl`).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Workspace {
     pub id: String,
@@ -118,6 +119,25 @@ impl From<&Workspace> for DexProject {
 
 type SettingsStore = Arc<tauri_plugin_store::Store<tauri::Wry>>;
 
+pub(crate) const TASKS_FILE_NAME: &str = "tasks.jsonl";
+
+pub(crate) fn validate_dex_storage_path(storage_path: &str) -> Result<(), String> {
+    let path = Path::new(storage_path);
+    if !path.exists() {
+        return Err(format!("storage path not found: {storage_path}"));
+    }
+    if !path.is_dir() {
+        return Err(format!("storage path is not a directory: {storage_path}"));
+    }
+    let tasks_file = path.join(TASKS_FILE_NAME);
+    if !tasks_file.is_file() {
+        return Err(format!(
+            "storage directory does not contain a {TASKS_FILE_NAME} task file: {storage_path}"
+        ));
+    }
+    Ok(())
+}
+
 fn validate_workspace_paths(config_path: &str, storage_path: &str) -> Result<(), String> {
     let config = Path::new(config_path);
     if !config.exists() {
@@ -127,13 +147,7 @@ fn validate_workspace_paths(config_path: &str, storage_path: &str) -> Result<(),
         return Err(format!("config path is not a file: {config_path}"));
     }
 
-    let storage = Path::new(storage_path);
-    if !storage.exists() {
-        return Err(format!("storage path not found: {storage_path}"));
-    }
-    if !storage.is_dir() {
-        return Err(format!("storage path is not a directory: {storage_path}"));
-    }
+    validate_dex_storage_path(storage_path)?;
 
     Ok(())
 }

@@ -50,9 +50,9 @@ export function useWorkspaceRegistration(onRegistered: (workspace: Workspace) =>
   const selectStorage = async () => {
     setErrorMessage(undefined);
     try {
-      const pickedStoragePath = await pickStorageDirectory();
-      if (pickedStoragePath !== undefined) {
-        setStoragePath(pickedStoragePath);
+      const pickedStorageDirectory = await pickStorageDirectory();
+      if (pickedStorageDirectory !== undefined) {
+        setStoragePath(pickedStorageDirectory);
       }
     } catch (error) {
       console.error('pickStorageDirectory failed', error);
