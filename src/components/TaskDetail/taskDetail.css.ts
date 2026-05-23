@@ -20,7 +20,7 @@ export const panel = style({
   overflowWrap: 'anywhere'
 });
 
-export const emptyMessage = style({
+export const panelEmptyMessage = style({
   margin: 0,
   fontSize: '0.9375rem',
   color: palette.textMuted,

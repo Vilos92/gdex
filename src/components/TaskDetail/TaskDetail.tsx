@@ -106,7 +106,7 @@ export function TaskDetail() {
   if (task === undefined) {
     return (
       <aside class={styles.panel} aria-label="Task details">
-        <p class={styles.emptyMessage}>Task not found.</p>
+        <p class={styles.panelEmptyMessage}>Task not found.</p>
       </aside>
     );
   }
@@ -136,7 +136,7 @@ function TaskDetailNoSelection({workspaces, activeWorkspaceId}: TaskDetailNoSele
 
   return (
     <aside class={styles.panel} aria-label="Task details">
-      <p class={styles.emptyMessage}>Select a task to view details.</p>
+      <p class={styles.panelEmptyMessage}>Select a task to view details.</p>
     </aside>
   );
 }

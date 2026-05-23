@@ -42,7 +42,7 @@ const visibilityByPromptId: Record<AgentPromptId, (status: TaskStatus) => boolea
 };
 
 /*
- * Helpers.
+ * Script.
  */
 
 /** Agent instruction snippets in display order; unavailable prompts stay listed but marked disabled. */
@@ -60,6 +60,10 @@ export function buildAgentPrompts(input: {
     isAvailable: visibilityByPromptId[definition.id](status)
   }));
 }
+
+/*
+ * Helpers.
+ */
 
 function buildViewPrompt(workspaceName: string, taskId: string): string {
   return agentPromptText`

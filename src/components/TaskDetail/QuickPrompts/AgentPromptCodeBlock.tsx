@@ -11,6 +11,10 @@ export type AgentPromptCodeBlockProps = {
   text: string;
 };
 
+type QuickPromptCopyButtonProps = {
+  text: string;
+};
+
 /*
  * Component.
  */
@@ -26,7 +30,7 @@ export function AgentPromptCodeBlock({text}: AgentPromptCodeBlockProps) {
   );
 }
 
-function QuickPromptCopyButton({text}: {text: string}) {
+function QuickPromptCopyButton({text}: QuickPromptCopyButtonProps) {
   const {isCopied, copy} = useClipboardCopy();
   const {buttonClass, title, ariaLabel, Icon} = quickPromptCopyPresentation(isCopied);
 

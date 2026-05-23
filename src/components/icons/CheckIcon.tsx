@@ -1,9 +1,19 @@
 /*
+ * Types.
+ */
+
+export type CheckIconProps = {
+  class?: string;
+};
+
+/*
  * Component.
  */
 
 /** Simple checkmark for brief copy-success feedback. */
-export function CheckIcon({class: className}: {class?: string}) {
+export function CheckIcon(props: CheckIconProps) {
+  const {class: className} = props;
+
   return (
     <svg
       class={className}

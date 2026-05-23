@@ -166,20 +166,32 @@ function breadcrumbSegments(
       ? []
       : collectAncestorIds(tasks, zoomParentId).map(id => toBreadcrumbSegment(byId, id));
 
+  return appendSelectedBreadcrumb(zoomTrail, byId, selectedTaskId, zoomParentId);
+}
+
+function appendSelectedBreadcrumb(
+  zoomTrail: readonly BreadcrumbSegment[],
+  byId: Map<string, Task>,
+  selectedTaskId: string | undefined,
+  zoomParentId: string | undefined
+): readonly BreadcrumbSegment[] {
   if (selectedTaskId === undefined) {
     return zoomTrail;
   }
 
   const selected = byId.get(selectedTaskId);
-  if (selected === undefined || !isTaskInZoomList(selected, zoomParentId)) {
-    return zoomTrail;
-  }
-
-  if (selected.id === zoomParentId) {
+  if (!shouldAppendSelectedBreadcrumb(selected, zoomParentId)) {
     return zoomTrail;
   }
 
   return [...zoomTrail, toBreadcrumbSegment(byId, selected.id)];
+}
+
+function shouldAppendSelectedBreadcrumb(
+  selected: Task | undefined,
+  zoomParentId: string | undefined
+): selected is Task {
+  return selected !== undefined && isTaskInZoomList(selected, zoomParentId) && selected.id !== zoomParentId;
 }
 
 function isTaskInZoomList(task: Task, zoomParentId: string | undefined): boolean {
