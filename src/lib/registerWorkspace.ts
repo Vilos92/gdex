@@ -1,5 +1,5 @@
 import {invokeErrorMessage} from '@/lib/error';
-import {addWorkspace, type Workspace} from '@/lib/workspaceApi';
+import {addWorkspace, validateWorkspace, type Workspace} from '@/lib/workspaceApi';
 
 /*
  * Types.
@@ -30,6 +30,16 @@ export async function submitWorkspaceRegistration(
 ): Promise<RegisterWorkspaceResult> {
   if (input === undefined) {
     return {ok: false, message: 'Select config and storage paths before registering.'};
+  }
+
+  try {
+    await validateWorkspace(input.configPath, input.storagePath);
+  } catch (validateError) {
+    console.error('validate_workspace failed', validateError);
+    return {
+      ok: false,
+      message: invokeErrorMessage(validateError, 'Workspace validation failed.')
+    };
   }
 
   try {

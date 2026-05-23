@@ -2,9 +2,9 @@
 
 use tauri::{AppHandle, State};
 
-use crate::dex_client::{DexClient, DexTask};
+use crate::dex_client::{DexClient, DexProject, DexTask};
 use crate::watcher::TaskWatcher;
-use crate::workspace_store::{self, Workspace};
+use crate::workspace_store::{self, validate_dex_storage_path, Workspace};
 
 #[tauri::command]
 pub fn add_workspace(
@@ -76,5 +76,32 @@ pub fn get_task(
 ) -> Result<DexTask, String> {
     let workspace = workspace_store::dex_workspace_for_id(&app, &workspace_id)?;
     dex.show_task(&workspace, &task_id)
+        .map_err(|error| error.to_string())
+}
+
+/// Validates a proposed workspace before registration.
+///
+/// Two checks, in order:
+/// 1. `storage_path` is an existing dex storage directory containing a `tasks.jsonl` file.
+/// 2. A trial `dex list --json` using the provided config and `--storage-path`.
+///
+/// Returns `Ok(())` when both checks pass, or an `Err` with a user-readable description
+/// of the first failure.
+#[tauri::command]
+pub fn validate_workspace(
+    dex: State<'_, DexClient>,
+    config_path: String,
+    storage_path: String,
+) -> Result<(), String> {
+    // Check 1: dex storage directory must exist and contain `tasks.jsonl`.
+    validate_dex_storage_path(&storage_path)?;
+
+    // Check 2: trial `dex list --json` must succeed with these paths.
+    let project = DexProject {
+        config_path: config_path.into(),
+        storage_path: storage_path.into(),
+    };
+    dex.list_tasks(&project)
+        .map(|_| ())
         .map_err(|error| error.to_string())
 }

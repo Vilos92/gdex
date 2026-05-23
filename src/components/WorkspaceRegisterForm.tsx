@@ -56,7 +56,7 @@ export function WorkspaceRegisterForm({class: className, onRegistered}: Workspac
       />
 
       <PathPickerField
-        label="Task storage directory"
+        label="Dex storage directory"
         path={registration.storagePath}
         emptyLabel="No storage directory selected"
         onPick={registration.selectStorage}
