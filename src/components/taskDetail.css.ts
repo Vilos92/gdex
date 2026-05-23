@@ -2,6 +2,8 @@ import {style} from '@vanilla-extract/css';
 
 import {palette} from '@/styles/tokens';
 
+export {section, sectionLabel} from '@/components/panelSection.css';
+
 /*
  * Styles.
  */
@@ -98,27 +100,6 @@ export const statusBadgeDone = style({
       color: palette.textMutedDark,
       backgroundColor: palette.pageBgDark,
       borderColor: palette.borderDark
-    }
-  }
-});
-
-export const section = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.4rem',
-  minWidth: 0
-});
-
-export const sectionLabel = style({
-  margin: 0,
-  fontSize: '0.75rem',
-  fontWeight: 600,
-  letterSpacing: '0.04em',
-  textTransform: 'uppercase',
-  color: palette.textMuted,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textMutedDark
     }
   }
 });
