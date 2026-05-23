@@ -65,36 +65,53 @@ export function buildAgentPrompts(input: {
  * Helpers.
  */
 
+/** Single-quote a value for safe paste into shell commands. */
+function quoteCliArg(value: string): string {
+  return `'${value.replace(/'/g, "'\\''")}'`;
+}
+
 function buildViewPrompt(workspaceName: string, taskId: string): string {
+  const ws = quoteCliArg(workspaceName);
+  const id = quoteCliArg(taskId);
+
   return agentPromptText`
     View and understand dex task \`${taskId}\` (workspace \`${workspaceName}\`) — read only for now; do not start implementation.
-    Run \`gdex ${workspaceName} show ${taskId} --full\`, summarize what the task is asking, and discuss scope or questions with the user.
-    Wait for explicit direction before changing code or running \`gdex ${workspaceName} start ${taskId}\`.
+    Run \`gdex ${ws} show ${id} --full\`, summarize what the task is asking, and discuss scope or questions with the user.
+    Wait for explicit direction before changing code or running \`gdex ${ws} start ${id}\`.
   `;
 }
 
 function buildStartPrompt(workspaceName: string, taskId: string): string {
+  const ws = quoteCliArg(workspaceName);
+  const id = quoteCliArg(taskId);
+
   return agentPromptText`
     Kick off dex task \`${taskId}\` (workspace \`${workspaceName}\`).
-    Run \`gdex ${workspaceName} start ${taskId}\`, then work through the task with the user.
+    Run \`gdex ${ws} start ${id}\`, then work through the task with the user.
     When implementation is done, run any self-feedback or validation the project expects (lint, typecheck, etc.).
     Pause for the human to review and commit your changes — do not mark the dex task complete until after that commit.
-    Then run \`gdex ${workspaceName} complete ${taskId} --result "..."\` with a concise result summary.
+    Then run \`gdex ${ws} complete ${id} --result "..."\` with a concise result summary.
   `;
 }
 
 function buildCompletePrompt(workspaceName: string, taskId: string): string {
+  const ws = quoteCliArg(workspaceName);
+  const id = quoteCliArg(taskId);
+
   return agentPromptText`
     Mark dex task \`${taskId}\` complete (workspace \`${workspaceName}\`).
-    When done, run \`gdex ${workspaceName} complete ${taskId} --result "..."\` with a concise result summary.
+    When done, run \`gdex ${ws} complete ${id} --result "..."\` with a concise result summary.
   `;
 }
 
 function buildDeletePrompt(workspaceName: string, taskId: string): string {
+  const ws = quoteCliArg(workspaceName);
+  const id = quoteCliArg(taskId);
+
   return agentPromptText`
     Delete dex task \`${taskId}\` safely (workspace \`${workspaceName}\`).
-    Run \`gdex ${workspaceName} show ${taskId} --full\` first, warn about subtasks if any,
-    get user confirmation, then \`gdex ${workspaceName} delete ${taskId}\` (or \`-f\` if appropriate).
+    Run \`gdex ${ws} show ${id} --full\` first, warn about subtasks if any,
+    get user confirmation, then \`gdex ${ws} delete ${id}\` (or \`-f\` if appropriate).
   `;
 }
 

@@ -1,4 +1,4 @@
-import * as styles from '@/components/WorkspaceRegisterForm/workspaceRegisterForm.css';
+import * as styles from '@/styles/formFields.css';
 
 /*
  * Types.
