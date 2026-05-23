@@ -33,10 +33,25 @@ export function taskStatus(task: Task): TaskStatus {
   return 'pending';
 }
 
-/** Sort tasks by priority (desc), then name. */
+/** Sort by status group (in progress → pending → done), then priority (desc), then name. */
 export function compareTasks(left: Task, right: Task): number {
+  const statusOrder = taskStatusSortRank(taskStatus(left)) - taskStatusSortRank(taskStatus(right));
+  if (statusOrder !== 0) {
+    return statusOrder;
+  }
   if (right.priority !== left.priority) {
     return right.priority - left.priority;
   }
   return left.name.localeCompare(right.name);
+}
+
+function taskStatusSortRank(status: TaskStatus): number {
+  switch (status) {
+    case 'in_progress':
+      return 0;
+    case 'pending':
+      return 1;
+    case 'done':
+      return 2;
+  }
 }
