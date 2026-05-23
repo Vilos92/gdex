@@ -72,7 +72,7 @@ Blank line before and after each section block, and between the comment and the 
 
 ## Naming
 
-- **Booleans:** prefix with **`is`**, **`has`**, **`should`**, etc. (`isLoading`, `hasSelection`).
+- **Booleans:** name as **predicates**—a short auxiliary/state prefix plus a noun or participle so the name reads like a yes/no question. Common prefixes include **`is`**, **`has`**, **`did`**, **`should`**, **`can`**, **`was`**, **`needs`** (`isLoading`, `hasSelection`, `didCopy`, `shouldRetry`). The list is illustrative, not exhaustive; pick the prefix that matches the question (“is it …?”, “did it …?”, “should we …?”).
 - **Locals:** context-readable names (`greetMessage`, `taskId`)—not `e`, `res`, `n`, `x` unless in a tiny scope where the meaning is obvious.
 
 ## Fail fast
