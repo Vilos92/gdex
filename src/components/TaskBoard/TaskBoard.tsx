@@ -1,5 +1,5 @@
-import {TaskList} from '@/components/TaskList';
-import * as styles from '@/components/taskList.css';
+import {TaskList} from '@/components/TaskList/TaskList';
+import * as styles from '@/components/TaskList/taskList.css';
 import type {Tasks} from '@/lib/taskApi';
 
 /*

@@ -1,7 +1,7 @@
 import {useState} from 'preact/hooks';
 import {useShallow} from 'zustand/shallow';
 
-import * as styles from '@/components/workspaceHomePanel.css';
+import * as styles from '@/components/WorkspaceHomePanel/workspaceHomePanel.css';
 import {invokeErrorMessage} from '@/lib/error';
 import type {Workspace} from '@/lib/workspaceApi';
 import {useAppStore} from '@/stores/appStore';

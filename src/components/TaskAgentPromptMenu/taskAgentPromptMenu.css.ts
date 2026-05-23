@@ -1,6 +1,6 @@
 import {globalStyle, style} from '@vanilla-extract/css';
 
-import {sectionLabel} from '@/components/panelSection.css';
+import {sectionLabel} from '@/styles/panelSection.css';
 import {palette} from '@/styles/tokens';
 
 /*

@@ -2,7 +2,7 @@ import {createPortal} from 'preact/compat';
 import {useState} from 'preact/hooks';
 
 import {TaskAgentPromptMenu} from '@/components/TaskAgentPromptMenu/TaskAgentPromptMenu';
-import * as styles from '@/components/taskList.css';
+import * as styles from '@/components/TaskList/taskList.css';
 import {compareTasks, type Task, type TaskStatus, type Tasks, taskStatus} from '@/lib/taskApi';
 
 /*

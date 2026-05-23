@@ -1,7 +1,7 @@
 import type {JSX} from 'preact';
 import {useState} from 'preact/hooks';
 
-import {WorkspaceRegisterForm} from '@/components/WorkspaceRegisterForm';
+import {WorkspaceRegisterForm} from '@/components/WorkspaceRegisterForm/WorkspaceRegisterForm';
 import * as styles from '@/components/WorkspaceSidebar/workspaceSidebar.css';
 import {useFormOpenState} from '@/hooks/useFormOpenState';
 import {invokeErrorMessage} from '@/lib/error';

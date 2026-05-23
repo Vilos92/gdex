@@ -3,7 +3,7 @@ import {style} from '@vanilla-extract/css';
 import {panelIconButton} from '@/styles/iconButton.css';
 import {fonts, palette} from '@/styles/tokens';
 
-export {section, sectionLabel} from '@/components/panelSection.css';
+export {section, sectionLabel} from '@/styles/panelSection.css';
 
 /*
  * Styles.

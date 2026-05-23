@@ -1,6 +1,6 @@
 import {useEffect} from 'preact/hooks';
 
-import {AppTopBar} from '@/components/AppTopBar';
+import {AppTopBar} from '@/components/AppTopBar/AppTopBar';
 import {WorkspaceSidebar} from '@/components/WorkspaceSidebar/WorkspaceSidebar';
 import {useAppStore} from '@/stores/appStore';
 import * as styles from '@/views/views.css';

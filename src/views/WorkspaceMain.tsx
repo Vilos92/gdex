@@ -1,8 +1,8 @@
 import {useShallow} from 'zustand/shallow';
 
-import {TaskBoard} from '@/components/TaskBoard';
+import {TaskBoard} from '@/components/TaskBoard/TaskBoard';
 import {TaskDetail} from '@/components/TaskDetail/TaskDetail';
-import * as taskStyles from '@/components/taskList.css';
+import * as taskStyles from '@/components/TaskList/taskList.css';
 import {useAppStore} from '@/stores/appStore';
 import * as styles from '@/views/views.css';
 

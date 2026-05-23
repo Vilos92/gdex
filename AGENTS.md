@@ -22,7 +22,7 @@ Living conventions for this repo. Order and wording can evolve—ask whether new
 
 - **`@/*` → `./src/*`** in `tsconfig` `paths`. Import every `src/` module via `@/` (`@/App`, `@/styles/tokens`); no relative paths between `src/` files.
 - **UI under `src/`:** `App.tsx` at the root; **`views/`**, **`components/`**, **`hooks/`**, **`schemas/`** next to **`lib/`** and **`styles/`** (not `src/app/`).
-- **Component folders:** when a **`components/`** slice outgrows one file, colocate its Preact modules and co-located **`*.css.ts`** in a subfolder; import the public entry via a full **`@/`** path to that file (not the folder alone). Cross-cutting leaf UI (icons, etc.) lives in shared subtrees such as **`components/icons/`**.
+- **`components/` layout:** one subfolder per UI slice—no bare **`*.tsx`** at **`components/`** root. Colocate the entry module and its component-scoped **`*.css.ts`** in that folder; import via a full **`@/`** path to the file (not the folder alone). Shared leaf UI (icons) lives under **`components/icons/`**; shared style modules not tied to one component live under **`src/styles/`** (with **`tokens`** and **`global`**).
 - No **`.ts` / `.tsx`** suffixes on import paths (`allowImportingTsExtensions: false`).
 
 ## Preact components
@@ -33,8 +33,8 @@ Living conventions for this repo. Order and wording can evolve—ask whether new
 ## Vanilla Extract
 
 - Styling uses **Vanilla Extract** (`@vanilla-extract/css`, `@vanilla-extract/vite-plugin`)—same stack as **vilos92.com**, not Tailwind.
-- Co-locate styles in **`*.css.ts`** next to the UI or under **`src/styles/`** for shared tokens and globals.
-- **`tokens.ts`** holds palette and shared constants; **`global.css.ts`** holds `globalStyle` resets; component files export `style()` class names consumed as `class={styles.foo}` in Preact.
+- Co-locate styles in **`*.css.ts`** next to the UI; put cross-cutting **`*.css.ts`** (tokens, globals, reusable class groups like panel sections) under **`src/styles/`**.
+- **`tokens.ts`** holds palette and shared constants; **`global.css.ts`** holds `globalStyle` resets; other **`src/styles/*.css.ts`** modules export shared `style()` names; component files export slice-local classes consumed as `class={styles.foo}` in Preact.
 - Import global styles once from **`main.tsx`** (side-effect import of `@/styles/global.css`).
 
 ## File layout (section comments)

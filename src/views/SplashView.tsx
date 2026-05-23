@@ -1,4 +1,4 @@
-import {WorkspaceRegisterForm} from '@/components/WorkspaceRegisterForm';
+import {WorkspaceRegisterForm} from '@/components/WorkspaceRegisterForm/WorkspaceRegisterForm';
 import type {Workspace} from '@/lib/workspaceApi';
 import * as styles from '@/views/views.css';
 

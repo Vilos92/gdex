@@ -1,6 +1,6 @@
 import {Fragment} from 'preact';
 
-import * as styles from '@/components/appTopBar.css';
+import * as styles from '@/components/AppTopBar/appTopBar.css';
 import type {Task, Tasks} from '@/lib/taskApi';
 
 /*
