@@ -1,3 +1,4 @@
+import {useCallback, useEffect, useRef, useState} from 'preact/hooks';
 import {useShallow} from 'zustand/shallow';
 
 import * as styles from '@/components/taskDetail.css';
@@ -16,6 +17,7 @@ type TaskDetailContentProps = {
 };
 
 type TaskDetailHeaderProps = {
+  id: string;
   name: string;
   status: TaskStatus;
 };
@@ -118,14 +120,16 @@ function TaskDetailContent({task, tasks, onOpenChildTask}: TaskDetailContentProp
 
   return (
     <aside class={styles.panel} aria-label="Task details">
-      <TaskDetailHeader name={task.name} status={status} />
+      <TaskDetailHeader id={task.id} name={task.name} status={status} />
       <TaskDetailFields task={task} blockers={blockers} />
       <TaskDetailChildTasks childTasks={childTasks} onOpenChildTask={onOpenChildTask} />
     </aside>
   );
 }
 
-function TaskDetailHeader({name, status}: TaskDetailHeaderProps) {
+function TaskDetailHeader({id, name, status}: TaskDetailHeaderProps) {
+  const {isCopied, copyId} = useTaskIdCopy(id);
+
   return (
     <>
       <h2 class={titleClass(status)}>{name}</h2>
@@ -134,6 +138,15 @@ function TaskDetailHeader({name, status}: TaskDetailHeaderProps) {
           <span class={taskStatusDotClass(status)} aria-hidden="true" />
           {statusLabel(status)}
         </span>
+        <button
+          type="button"
+          class={[styles.taskIdButton, isCopied ? styles.taskIdCopied : ''].filter(Boolean).join(' ')}
+          onClick={copyId}
+          title="Copy task ID"
+          aria-label={isCopied ? 'Copied!' : `Copy task ID: ${id}`}
+        >
+          {isCopied ? '✓ Copied!' : id}
+        </button>
       </div>
     </>
   );
@@ -203,6 +216,35 @@ function ChildTaskItem({task, onOpenChildTask}: ChildTaskItemProps) {
 /*
  * Hooks.
  */
+
+function useTaskIdCopy(taskId: string) {
+  const [isCopied, setIsCopied] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  // Clear the timeout on unmount to avoid state updates on an unmounted component.
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current !== undefined) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const copyId = useCallback(() => {
+    navigator.clipboard.writeText(taskId).then(() => {
+      setIsCopied(true);
+      if (timeoutRef.current !== undefined) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        setIsCopied(false);
+        timeoutRef.current = undefined;
+      }, 1200);
+    });
+  }, [taskId]);
+
+  return {isCopied, copyId};
+}
 
 function useTaskDetailState() {
   return useAppStore(
