@@ -83,7 +83,7 @@ pub fn get_task(
 ///
 /// Two checks, in order:
 /// 1. `storage_path` is an existing dex storage directory containing a `tasks.jsonl` file.
-/// 2. A trial `dex list --json` using the provided config and `--storage-path`.
+/// 2. A trial `dex list --all --json` using the provided config and `--storage-path`.
 ///
 /// Returns `Ok(())` when both checks pass, or an `Err` with a user-readable description
 /// of the first failure.

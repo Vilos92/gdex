@@ -83,7 +83,8 @@ impl DexClient {
     }
 
     pub fn list_tasks(&self, project: &DexProject) -> Result<Vec<DexTask>, DexError> {
-        let stdout = self.run_dex(project, &["list", "--json"])?;
+        // `--all` includes completed (non-archived) tasks; archived tasks stay hidden.
+        let stdout = self.run_dex(project, &["list", "--all", "--json"])?;
         serde_json::from_str(&stdout).map_err(DexError::from)
     }
 
