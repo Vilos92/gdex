@@ -128,7 +128,7 @@ export const childTasksSection = style({
 
 export const childTaskButton = style({
   display: 'flex',
-  alignItems: 'flex-start',
+  alignItems: 'center',
   gap: '0.65rem',
   width: '100%',
   textAlign: 'left',
