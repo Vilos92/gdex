@@ -2,6 +2,7 @@ import {useShallow} from 'zustand/shallow';
 
 import * as styles from '@/components/taskDetail.css';
 import * as listStyles from '@/components/taskList.css';
+import {WorkspaceHomePanel} from '@/components/WorkspaceHomePanel';
 import {compareTasks, type Task, type TaskStatus, type Tasks, taskStatus} from '@/lib/taskApi';
 import {useAppStore} from '@/stores/appStore';
 
@@ -84,9 +85,13 @@ function childTaskNameClass(status: TaskStatus): string {
  */
 
 export function TaskDetail() {
-  const {tasks, selectedTaskId, selectTask, zoomTo} = useTaskDetailState();
+  const {workspaces, activeWorkspaceId, tasks, selectedTaskId, selectTask, zoomTo} = useTaskDetailState();
 
   if (selectedTaskId === undefined) {
+    const activeWorkspace = workspaces.find(workspace => workspace.id === activeWorkspaceId);
+    if (activeWorkspace !== undefined) {
+      return <WorkspaceHomePanel workspace={activeWorkspace} />;
+    }
     return (
       <aside class={styles.panel} aria-label="Task details">
         <p class={styles.emptyMessage}>Select a task to view details.</p>
@@ -207,6 +212,8 @@ function ChildTaskItem({task, onOpenChildTask}: ChildTaskItemProps) {
 function useTaskDetailState() {
   return useAppStore(
     useShallow(state => ({
+      workspaces: state.workspaces,
+      activeWorkspaceId: state.activeWorkspaceId,
       tasks: state.tasks,
       selectedTaskId: state.selectedTaskId,
       selectTask: state.selectTask,

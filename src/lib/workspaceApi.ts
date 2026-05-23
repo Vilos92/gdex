@@ -30,3 +30,7 @@ export async function addWorkspace(
   const row = await invoke<unknown>('add_workspace', {name, configPath, storagePath});
   return workspaceSchema.parse(row);
 }
+
+export async function removeWorkspace(id: string): Promise<void> {
+  await invoke('remove_workspace', {id});
+}
