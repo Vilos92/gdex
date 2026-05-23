@@ -1,5 +1,6 @@
 import {style} from '@vanilla-extract/css';
 
+import {panelIconButton} from '@/styles/iconButton.css';
 import {palette} from '@/styles/tokens';
 
 /*
@@ -149,52 +150,7 @@ export const collapsedWorkspaceSquareActive = style({
   }
 });
 
-export const collapseToggle = style({
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flexShrink: 0,
-  width: '1.75rem',
-  height: '1.75rem',
-  margin: 0,
-  padding: 0,
-  border: 'none',
-  borderRadius: '6px',
-  backgroundColor: 'transparent',
-  boxShadow: 'none',
-  color: palette.textMuted,
-  selectors: {
-    '&:hover': {
-      backgroundColor: palette.accentMuted,
-      borderColor: 'transparent',
-      boxShadow: 'none',
-      color: palette.text
-    },
-    '&:active': {
-      backgroundColor: palette.accentMuted,
-      borderColor: 'transparent',
-      boxShadow: 'none'
-    },
-    '&:focus-visible': {
-      outline: `2px solid ${palette.accent}`,
-      outlineOffset: '2px'
-    }
-  },
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textMutedDark,
-      selectors: {
-        '&:hover': {
-          backgroundColor: palette.accentMutedDark,
-          color: palette.textDark
-        },
-        '&:active': {
-          backgroundColor: palette.accentMutedDark
-        }
-      }
-    }
-  }
-});
+export const collapseToggle = panelIconButton;
 
 export const collapsedAddButton = style([
   collapseToggle,

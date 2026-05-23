@@ -1,8 +1,8 @@
 import {useShallow} from 'zustand/shallow';
 
-import {TaskBoard} from '@/components/TaskBoard';
-import {TaskDetail} from '@/components/TaskDetail';
-import * as taskStyles from '@/components/taskList.css';
+import {TaskBoard} from '@/components/TaskBoard/TaskBoard';
+import {TaskDetail} from '@/components/TaskDetail/TaskDetail';
+import * as taskStyles from '@/components/TaskList/taskList.css';
 import {useAppStore} from '@/stores/appStore';
 import * as styles from '@/views/views.css';
 
@@ -44,6 +44,7 @@ export function WorkspaceMain() {
     <div class={styles.workspaceMain}>
       <TaskBoard
         tasks={tasks}
+        workspaceName={activeWorkspace.name}
         zoomParentId={zoomParentId}
         selectedTaskId={selectedTaskId}
         onSelectTask={selectTask}

@@ -1,7 +1,7 @@
 import {useShallow} from 'zustand/shallow';
 
-import * as styles from '@/components/appTopBar.css';
-import {TaskBreadcrumb} from '@/components/TaskBreadcrumb';
+import * as styles from '@/components/AppTopBar/appTopBar.css';
+import {TaskBreadcrumb} from '@/components/TaskBreadcrumb/TaskBreadcrumb';
 import {useAppStore} from '@/stores/appStore';
 
 /*

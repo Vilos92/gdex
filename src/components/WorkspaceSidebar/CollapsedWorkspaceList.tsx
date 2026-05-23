@@ -1,4 +1,4 @@
-import * as styles from '@/components/workspaceSidebar.css';
+import * as styles from '@/components/WorkspaceSidebar/workspaceSidebar.css';
 import type {Workspaces} from '@/lib/workspaceApi';
 
 /*

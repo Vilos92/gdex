@@ -1,13 +1,13 @@
 import {globalStyle} from '@vanilla-extract/css';
 
-import {palette} from '@/styles/tokens';
+import {fonts, palette} from '@/styles/tokens';
 
 /*
  * Styles.
  */
 
 globalStyle(':root', {
-  fontFamily: 'Inter, Avenir, Helvetica, Arial, sans-serif',
+  fontFamily: fonts.sans,
   fontSize: '16px',
   lineHeight: '24px',
   fontWeight: 400,

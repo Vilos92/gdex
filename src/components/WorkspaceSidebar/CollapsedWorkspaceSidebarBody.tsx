@@ -1,5 +1,5 @@
-import {CollapsedWorkspaceList} from '@/components/CollapsedWorkspaceList';
-import * as styles from '@/components/workspaceSidebar.css';
+import {CollapsedWorkspaceList} from '@/components/WorkspaceSidebar/CollapsedWorkspaceList';
+import * as styles from '@/components/WorkspaceSidebar/workspaceSidebar.css';
 import type {Workspaces} from '@/lib/workspaceApi';
 
 /*

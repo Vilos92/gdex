@@ -2,7 +2,7 @@ import {style} from '@vanilla-extract/css';
 
 import {palette} from '@/styles/tokens';
 
-export {section, sectionLabel} from '@/components/panelSection.css';
+export {section, sectionLabel} from '@/styles/panelSection.css';
 
 /*
  * Styles.
@@ -20,7 +20,7 @@ export const panel = style({
   overflowWrap: 'anywhere'
 });
 
-export const emptyMessage = style({
+export const panelEmptyMessage = style({
   margin: 0,
   fontSize: '0.9375rem',
   color: palette.textMuted,

@@ -1,5 +1,5 @@
-import {TaskList} from '@/components/TaskList';
-import * as styles from '@/components/taskList.css';
+import {TaskList} from '@/components/TaskList/TaskList';
+import * as styles from '@/components/TaskList/taskList.css';
 import type {Tasks} from '@/lib/taskApi';
 
 /*
@@ -8,6 +8,7 @@ import type {Tasks} from '@/lib/taskApi';
 
 export type TaskBoardProps = {
   tasks: Tasks;
+  workspaceName: string;
   zoomParentId: string | undefined;
   selectedTaskId: string | undefined;
   onSelectTask: (taskId: string) => void;
@@ -17,12 +18,23 @@ export type TaskBoardProps = {
  * Component.
  */
 
-export function TaskBoard({tasks, zoomParentId, selectedTaskId, onSelectTask}: TaskBoardProps) {
+export function TaskBoard({
+  tasks,
+  workspaceName,
+  zoomParentId,
+  selectedTaskId,
+  onSelectTask
+}: TaskBoardProps) {
   const levelTasks = tasksAtLevel(tasks, zoomParentId);
 
   return (
     <div class={styles.board}>
-      <TaskList tasks={levelTasks} selectedTaskId={selectedTaskId} onSelectTask={onSelectTask} />
+      <TaskList
+        tasks={levelTasks}
+        workspaceName={workspaceName}
+        selectedTaskId={selectedTaskId}
+        onSelectTask={onSelectTask}
+      />
     </div>
   );
 }

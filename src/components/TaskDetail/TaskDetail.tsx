@@ -1,10 +1,13 @@
-import {useCallback, useEffect, useRef, useState} from 'preact/hooks';
+import {useCallback} from 'preact/hooks';
 import {useShallow} from 'zustand/shallow';
 
-import * as styles from '@/components/taskDetail.css';
-import * as listStyles from '@/components/taskList.css';
-import {WorkspaceHomePanel} from '@/components/WorkspaceHomePanel';
+import {TaskDetailQuickPrompts} from '@/components/TaskDetail/QuickPrompts/TaskDetailQuickPrompts';
+import * as styles from '@/components/TaskDetail/taskDetail.css';
+import * as listStyles from '@/components/TaskList/taskList.css';
+import {WorkspaceHomePanel} from '@/components/WorkspaceHomePanel/WorkspaceHomePanel';
+import {useClipboardCopy} from '@/hooks/useClipboardCopy';
 import {compareTasks, type Task, type TaskStatus, type Tasks, taskStatus} from '@/lib/taskApi';
+import type {Workspaces} from '@/lib/workspaceApi';
 import {useAppStore} from '@/stores/appStore';
 
 /*
@@ -14,6 +17,7 @@ import {useAppStore} from '@/stores/appStore';
 type TaskDetailContentProps = {
   task: Task;
   tasks: Tasks;
+  workspaceName: string | undefined;
   onOpenChildTask: (taskId: string) => void;
 };
 
@@ -39,6 +43,11 @@ type ChildTaskItemProps = {
 };
 
 type BlockerEntry = {id: string; name: string};
+
+type TaskDetailNoSelectionProps = {
+  workspaces: Workspaces;
+  activeWorkspaceId: string | undefined;
+};
 
 /*
  * Styles.
@@ -90,22 +99,14 @@ export function TaskDetail() {
   const {workspaces, activeWorkspaceId, tasks, selectedTaskId, selectTask, zoomTo} = useTaskDetailState();
 
   if (selectedTaskId === undefined) {
-    const activeWorkspace = workspaces.find(workspace => workspace.id === activeWorkspaceId);
-    if (activeWorkspace !== undefined) {
-      return <WorkspaceHomePanel workspace={activeWorkspace} />;
-    }
-    return (
-      <aside class={styles.panel} aria-label="Task details">
-        <p class={styles.emptyMessage}>Select a task to view details.</p>
-      </aside>
-    );
+    return <TaskDetailNoSelection workspaces={workspaces} activeWorkspaceId={activeWorkspaceId} />;
   }
 
   const task = findTaskById(tasks, selectedTaskId);
   if (task === undefined) {
     return (
       <aside class={styles.panel} aria-label="Task details">
-        <p class={styles.emptyMessage}>Task not found.</p>
+        <p class={styles.panelEmptyMessage}>Task not found.</p>
       </aside>
     );
   }
@@ -115,10 +116,32 @@ export function TaskDetail() {
     zoomTo(task.id);
   };
 
-  return <TaskDetailContent task={task} tasks={tasks} onOpenChildTask={openChildTask} />;
+  const activeWorkspace = workspaces.find(workspace => workspace.id === activeWorkspaceId);
+
+  return (
+    <TaskDetailContent
+      task={task}
+      tasks={tasks}
+      workspaceName={activeWorkspace?.name}
+      onOpenChildTask={openChildTask}
+    />
+  );
 }
 
-function TaskDetailContent({task, tasks, onOpenChildTask}: TaskDetailContentProps) {
+function TaskDetailNoSelection({workspaces, activeWorkspaceId}: TaskDetailNoSelectionProps) {
+  const activeWorkspace = workspaces.find(workspace => workspace.id === activeWorkspaceId);
+  if (activeWorkspace !== undefined) {
+    return <WorkspaceHomePanel workspace={activeWorkspace} />;
+  }
+
+  return (
+    <aside class={styles.panel} aria-label="Task details">
+      <p class={styles.panelEmptyMessage}>Select a task to view details.</p>
+    </aside>
+  );
+}
+
+function TaskDetailContent({task, tasks, workspaceName, onOpenChildTask}: TaskDetailContentProps) {
   const status = taskStatus(task);
   const childTasks = resolveChildTasks(tasks, task.children);
   const blockers = resolveBlockers(tasks, task.blockedBy);
@@ -127,13 +150,20 @@ function TaskDetailContent({task, tasks, onOpenChildTask}: TaskDetailContentProp
     <aside class={styles.panel} aria-label="Task details">
       <TaskDetailHeader id={task.id} name={task.name} status={status} />
       <TaskDetailFields task={task} blockers={blockers} />
+      {workspaceName !== undefined ? (
+        <TaskDetailQuickPrompts workspaceName={workspaceName} taskId={task.id} status={status} />
+      ) : undefined}
       <TaskDetailChildTasks childTasks={childTasks} onOpenChildTask={onOpenChildTask} />
     </aside>
   );
 }
 
 function TaskDetailHeader({id, name, status}: TaskDetailHeaderProps) {
-  const {isCopied, copyId} = useTaskIdCopy(id);
+  const {isCopied, copy} = useClipboardCopy();
+
+  const copyId = useCallback(() => {
+    void copy(id);
+  }, [copy, id]);
 
   return (
     <>
@@ -218,45 +248,6 @@ function ChildTaskItem({task, onOpenChildTask}: ChildTaskItemProps) {
   );
 }
 
-/*
- * Hooks.
- */
-
-function useTaskIdCopy(taskId: string) {
-  const [isCopied, setIsCopied] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-
-  // Clear the timeout on unmount to avoid state updates on an unmounted component.
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current !== undefined) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
-  const copyId = useCallback(async () => {
-    if (timeoutRef.current !== undefined) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = undefined;
-    }
-
-    const didCopy = await copyTextToClipboard(taskId);
-    if (didCopy) {
-      setIsCopied(true);
-      timeoutRef.current = setTimeout(() => {
-        setIsCopied(false);
-        timeoutRef.current = undefined;
-      }, 1200);
-      return;
-    }
-
-    setIsCopied(false);
-  }, [taskId]);
-
-  return {isCopied, copyId};
-}
-
 function useTaskDetailState() {
   return useAppStore(
     useShallow(state => ({
@@ -298,37 +289,6 @@ function resolveBlockers(tasks: Tasks, blockerIds: readonly string[]): BlockerEn
     blockers.push({id: blockerId, name: blocker?.name ?? blockerId});
   }
   return blockers;
-}
-
-/** Copy text via Clipboard API, falling back to `execCommand` when the API is unavailable. */
-async function copyTextToClipboard(text: string): Promise<boolean> {
-  try {
-    if (navigator.clipboard?.writeText !== undefined) {
-      await navigator.clipboard.writeText(text);
-      return true;
-    }
-
-    return copyTextViaExecCommand(text);
-  } catch {
-    return false;
-  }
-}
-
-/** Synchronous clipboard fallback when `navigator.clipboard` is unavailable (e.g. non-secure context). */
-function copyTextViaExecCommand(text: string): boolean {
-  const textarea = document.createElement('textarea');
-  textarea.value = text;
-  textarea.setAttribute('readonly', '');
-  textarea.style.position = 'fixed';
-  textarea.style.left = '-9999px';
-  document.body.appendChild(textarea);
-  textarea.select();
-
-  try {
-    return document.execCommand('copy');
-  } finally {
-    document.body.removeChild(textarea);
-  }
 }
 
 function statusLabel(status: TaskStatus): string {

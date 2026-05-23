@@ -1,5 +1,5 @@
-import {PathPickerField} from '@/components/PathPickerField';
-import * as styles from '@/components/workspaceRegisterForm.css';
+import {PathPickerField} from '@/components/PathPickerField/PathPickerField';
+import * as styles from '@/components/WorkspaceRegisterForm/workspaceRegisterForm.css';
 import {useWorkspaceRegistration} from '@/hooks/useWorkspaceRegistration';
 import type {Workspace} from '@/lib/workspaceApi';
 
