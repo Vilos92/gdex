@@ -1,6 +1,6 @@
-import {AddWorkspacePanel} from '@/components/AddWorkspacePanel';
-import {WorkspaceList} from '@/components/WorkspaceList';
-import * as styles from '@/components/workspaceSidebar.css';
+import {AddWorkspacePanel} from '@/components/WorkspaceSidebar/AddWorkspacePanel';
+import {WorkspaceList} from '@/components/WorkspaceSidebar/WorkspaceList';
+import * as styles from '@/components/WorkspaceSidebar/workspaceSidebar.css';
 import type {Workspaces} from '@/lib/workspaceApi';
 
 /*

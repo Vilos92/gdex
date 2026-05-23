@@ -1,5 +1,5 @@
-import {SidebarPanelIcon} from '@/components/SidebarPanelIcon';
-import * as styles from '@/components/workspaceSidebar.css';
+import {SidebarPanelIcon} from '@/components/icons/SidebarPanelIcon';
+import * as styles from '@/components/WorkspaceSidebar/workspaceSidebar.css';
 
 /*
  * Types.

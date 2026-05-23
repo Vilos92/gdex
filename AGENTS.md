@@ -22,6 +22,7 @@ Living conventions for this repo. Order and wording can evolve—ask whether new
 
 - **`@/*` → `./src/*`** in `tsconfig` `paths`. Import every `src/` module via `@/` (`@/App`, `@/styles/tokens`); no relative paths between `src/` files.
 - **UI under `src/`:** `App.tsx` at the root; **`views/`**, **`components/`**, **`hooks/`**, **`schemas/`** next to **`lib/`** and **`styles/`** (not `src/app/`).
+- **Component folders:** when a **`components/`** slice outgrows one file, colocate its Preact modules and co-located **`*.css.ts`** in a subfolder; import the public entry via a full **`@/`** path to that file (not the folder alone). Cross-cutting leaf UI (icons, etc.) lives in shared subtrees such as **`components/icons/`**.
 - No **`.ts` / `.tsx`** suffixes on import paths (`allowImportingTsExtensions: false`).
 
 ## Preact components

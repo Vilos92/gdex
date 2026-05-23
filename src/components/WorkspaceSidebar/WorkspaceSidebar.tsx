@@ -1,9 +1,9 @@
 import {useState} from 'preact/hooks';
 
-import {CollapsedWorkspaceSidebarBody} from '@/components/CollapsedWorkspaceSidebarBody';
-import {ExpandedWorkspaceSidebarBody} from '@/components/ExpandedWorkspaceSidebarBody';
-import {WorkspaceSidebarHeader} from '@/components/WorkspaceSidebarHeader';
-import * as styles from '@/components/workspaceSidebar.css';
+import {CollapsedWorkspaceSidebarBody} from '@/components/WorkspaceSidebar/CollapsedWorkspaceSidebarBody';
+import {ExpandedWorkspaceSidebarBody} from '@/components/WorkspaceSidebar/ExpandedWorkspaceSidebarBody';
+import {WorkspaceSidebarHeader} from '@/components/WorkspaceSidebar/WorkspaceSidebarHeader';
+import * as styles from '@/components/WorkspaceSidebar/workspaceSidebar.css';
 import {useWorkspaceSelection} from '@/hooks/useWorkspaceSelection';
 
 /*

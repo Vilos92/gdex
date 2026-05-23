@@ -1,12 +1,11 @@
-import {useCallback, useEffect, useState} from 'preact/hooks';
+import {useCallback} from 'preact/hooks';
 import {useShallow} from 'zustand/shallow';
-import {CheckIcon} from '@/components/CheckIcon';
-import {ClipboardIcon} from '@/components/ClipboardIcon';
-import * as styles from '@/components/taskDetail.css';
+
+import {TaskDetailQuickPrompts} from '@/components/TaskDetail/QuickPrompts/TaskDetailQuickPrompts';
+import * as styles from '@/components/TaskDetail/taskDetail.css';
 import * as listStyles from '@/components/taskList.css';
 import {WorkspaceHomePanel} from '@/components/WorkspaceHomePanel';
 import {useClipboardCopy} from '@/hooks/useClipboardCopy';
-import {type AgentPrompt, buildAgentPrompts, DEFAULT_AGENT_PROMPT_ID} from '@/lib/agentPrompts';
 import {compareTasks, type Task, type TaskStatus, type Tasks, taskStatus} from '@/lib/taskApi';
 import type {Workspaces} from '@/lib/workspaceApi';
 import {useAppStore} from '@/stores/appStore';
@@ -44,16 +43,6 @@ type ChildTaskItemProps = {
 };
 
 type BlockerEntry = {id: string; name: string};
-
-type TaskDetailQuickPromptsProps = {
-  workspaceName: string;
-  taskId: string;
-  status: TaskStatus;
-};
-
-type AgentPromptCodeBlockProps = {
-  text: string;
-};
 
 type TaskDetailNoSelectionProps = {
   workspaces: Workspaces;
@@ -198,79 +187,6 @@ function TaskDetailHeader({id, name, status}: TaskDetailHeaderProps) {
   );
 }
 
-function TaskDetailQuickPrompts({workspaceName, taskId, status}: TaskDetailQuickPromptsProps) {
-  const prompts = buildAgentPrompts({workspaceName, taskId, status});
-  const [selectedId, setSelectedId] = useState<AgentPrompt['id']>(DEFAULT_AGENT_PROMPT_ID);
-
-  useEffect(() => {
-    setSelectedId(DEFAULT_AGENT_PROMPT_ID);
-  }, [taskId, workspaceName]);
-
-  useEffect(() => {
-    setSelectedId(current =>
-      buildAgentPrompts({workspaceName, taskId, status}).some(prompt => prompt.id === current)
-        ? current
-        : DEFAULT_AGENT_PROMPT_ID
-    );
-  }, [status, workspaceName, taskId]);
-
-  const activePrompt = prompts.find(prompt => prompt.id === selectedId) ?? prompts[0];
-  if (activePrompt === undefined) {
-    return undefined;
-  }
-
-  return (
-    <section class={styles.section} aria-label="Quick prompts">
-      <h3 class={styles.sectionLabel}>Quick prompts</h3>
-      <div class={styles.quickPromptStack}>
-        <select
-          class={styles.quickPromptSelect}
-          value={selectedId}
-          onChange={event =>
-            setSelectedId((event.currentTarget as HTMLSelectElement).value as AgentPrompt['id'])
-          }
-          aria-label="Agent prompt"
-        >
-          {prompts.map(prompt => (
-            <option key={prompt.id} value={prompt.id}>
-              {prompt.label}
-            </option>
-          ))}
-        </select>
-        <AgentPromptCodeBlock text={activePrompt.text} />
-      </div>
-    </section>
-  );
-}
-
-function AgentPromptCodeBlock({text}: AgentPromptCodeBlockProps) {
-  return (
-    <div class={styles.quickPromptCode}>
-      <pre class={styles.quickPromptCodeText}>{text}</pre>
-      <div class={styles.quickPromptCodeToolbar}>
-        <QuickPromptCopyButton text={text} />
-      </div>
-    </div>
-  );
-}
-
-function QuickPromptCopyButton({text}: {text: string}) {
-  const {isCopied, copy} = useClipboardCopy();
-  const {buttonClass, title, ariaLabel, Icon} = quickPromptCopyPresentation(isCopied);
-
-  return (
-    <button
-      type="button"
-      class={buttonClass}
-      onClick={() => void copy(text)}
-      title={title}
-      aria-label={ariaLabel}
-    >
-      <Icon />
-    </button>
-  );
-}
-
 function TaskDetailFields({task, blockers}: TaskDetailFieldsProps) {
   return (
     <>
@@ -373,24 +289,6 @@ function resolveBlockers(tasks: Tasks, blockerIds: readonly string[]): BlockerEn
     blockers.push({id: blockerId, name: blocker?.name ?? blockerId});
   }
   return blockers;
-}
-
-function quickPromptCopyPresentation(isCopied: boolean) {
-  if (isCopied) {
-    return {
-      buttonClass: `${styles.quickPromptCopyButton} ${styles.quickPromptCopyButtonCopied}`,
-      title: 'Copied!',
-      ariaLabel: 'Copied!',
-      Icon: CheckIcon
-    };
-  }
-
-  return {
-    buttonClass: styles.quickPromptCopyButton,
-    title: 'Copy prompt',
-    ariaLabel: 'Copy prompt to clipboard',
-    Icon: ClipboardIcon
-  };
 }
 
 function statusLabel(status: TaskStatus): string {

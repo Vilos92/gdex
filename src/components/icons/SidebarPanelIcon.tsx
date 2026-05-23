@@ -2,7 +2,7 @@
  * Types.
  */
 
-type SidebarPanelIconProps = {
+export type SidebarPanelIconProps = {
   class?: string;
   /** When true, arrow points right (expand collapsed sidebar). */
   pointsRight?: boolean;
