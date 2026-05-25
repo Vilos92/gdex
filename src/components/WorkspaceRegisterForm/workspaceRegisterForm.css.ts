@@ -2,9 +2,9 @@ import {style} from '@vanilla-extract/css';
 
 import {palette} from '@/styles/tokens';
 
-/* Styles. */
-
-export {field, label} from '@/styles/formFields.css';
+/*
+ * Styles.
+ */
 
 export const form = style({
   display: 'flex',
