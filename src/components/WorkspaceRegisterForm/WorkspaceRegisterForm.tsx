@@ -1,4 +1,5 @@
 import {PathPickerField} from '@/components/PathPickerField/PathPickerField';
+import * as formStyles from '@/styles/formFields.css';
 import * as styles from '@/components/WorkspaceRegisterForm/workspaceRegisterForm.css';
 import {useWorkspaceRegistration} from '@/hooks/useWorkspaceRegistration';
 import type {Workspace} from '@/lib/workspaceApi';
@@ -35,8 +36,8 @@ export function WorkspaceRegisterForm({class: className, onRegistered}: Workspac
         registration.submitRegistration();
       }}
     >
-      <div class={styles.field}>
-        <label class={styles.label} for="workspace-name">
+      <div class={formStyles.field}>
+        <label class={formStyles.label} for="workspace-name">
           Workspace name
         </label>
         <input
