@@ -1,5 +1,5 @@
 /*
- * Styles.
+ * Constants.
  */
 
 /** App-wide font stacks (`:root` sans + monospace surfaces like code blocks). */

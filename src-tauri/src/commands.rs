@@ -89,16 +89,6 @@ pub fn get_task(
 /// Returns `Ok(())` when both checks pass, or an `Err` with a user-readable description
 /// of the first failure.
 #[tauri::command]
-pub fn get_theme_mode(app: AppHandle) -> Result<ThemeMode, String> {
-    theme_store::get_theme_mode(&app)
-}
-
-#[tauri::command]
-pub fn set_theme_mode(app: AppHandle, mode: ThemeMode) -> Result<(), String> {
-    theme_store::set_theme_mode(&app, mode)
-}
-
-#[tauri::command]
 pub fn validate_workspace(
     dex: State<'_, DexClient>,
     config_path: String,
@@ -115,4 +105,16 @@ pub fn validate_workspace(
     dex.list_tasks(&project)
         .map(|_| ())
         .map_err(|error| error.to_string())
+}
+
+/// Returns the persisted theme mode for the app.
+#[tauri::command]
+pub fn get_theme_mode(app: AppHandle) -> Result<ThemeMode, String> {
+    theme_store::get_theme_mode(&app)
+}
+
+/// Persists the user's selected theme mode.
+#[tauri::command]
+pub fn set_theme_mode(app: AppHandle, mode: ThemeMode) -> Result<(), String> {
+    theme_store::set_theme_mode(&app, mode)
 }

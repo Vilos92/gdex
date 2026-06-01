@@ -44,10 +44,10 @@ export const taskButton = style({
   backgroundColor: palette.surface,
   boxShadow: 'none',
   fontWeight: 500,
-  ...inDarkScheme({
-    backgroundColor: palette.surfaceDark
-  }),
   selectors: {
+    [darkSelector()]: {
+      backgroundColor: palette.surfaceDark
+    },
     '&:hover': {
       backgroundColor: palette.accentMuted,
       borderColor: 'transparent',

@@ -8,7 +8,7 @@ import * as formStyles from '@/styles/formFields.css';
  * Types.
  */
 
-export type WorkspaceRegisterFormLayout = 'default' | 'sidebar';
+type WorkspaceRegisterFormLayout = 'default' | 'sidebar';
 
 export type WorkspaceRegisterFormProps = {
   class?: string;

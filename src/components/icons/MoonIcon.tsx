@@ -20,7 +20,7 @@ export function MoonIcon(props: MoonIconProps) {
       width="16"
       height="16"
       viewBox="0 0 16 16"
-      display="block"
+      style={{display: 'block'}}
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
