@@ -37,8 +37,8 @@ export function TaskDetailQuickPrompts({workspace, taskId, status}: TaskDetailQu
   }
 
   return (
-    <section class={styles.section} aria-label="Quick prompts">
-      <h3 class={styles.sectionLabel}>Quick prompts</h3>
+    <details class={styles.quickPromptsDetails}>
+      <summary class={styles.quickPromptsSummary}>Quick prompts</summary>
       <div class={styles.quickPromptStack}>
         <select
           class={styles.quickPromptSelect}
@@ -56,6 +56,6 @@ export function TaskDetailQuickPrompts({workspace, taskId, status}: TaskDetailQu
         </select>
         <AgentPromptCodeBlock text={activePrompt.text} />
       </div>
-    </section>
+    </details>
   );
 }
