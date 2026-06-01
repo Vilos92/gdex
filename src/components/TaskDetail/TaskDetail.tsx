@@ -9,6 +9,7 @@ import {useClipboardCopy} from '@/hooks/useClipboardCopy';
 import {compareTasks, type Task, type TaskStatus, type Tasks, taskStatus} from '@/lib/taskApi';
 import type {Workspace, Workspaces} from '@/lib/workspaceApi';
 import {useAppStore} from '@/stores/appStore';
+import * as disclosureStyles from '@/styles/panelDisclosure.css';
 
 /*
  * Types.
@@ -48,6 +49,14 @@ type TaskDetailNoSelectionProps = {
   workspaces: Workspaces;
   activeWorkspaceId: string | undefined;
 };
+
+/*
+ * Constants.
+ */
+
+/** Description stays expanded at or below these limits; longer copy starts collapsed. */
+const LONG_DESCRIPTION_LINE_COUNT = 10;
+const LONG_DESCRIPTION_CHAR_COUNT = 500;
 
 /*
  * Styles.
@@ -149,7 +158,6 @@ function TaskDetailContent({task, tasks, workspace, onOpenChildTask}: TaskDetail
   return (
     <aside class={styles.panel} aria-label="Task details">
       <TaskDetailHeader id={task.id} name={task.name} status={status} />
-      <TaskDetailFields task={task} blockers={blockers} />
       {workspace !== undefined ? (
         <TaskDetailQuickPrompts
           key={`${workspace.id}:${task.id}`}
@@ -158,6 +166,7 @@ function TaskDetailContent({task, tasks, workspace, onOpenChildTask}: TaskDetail
           status={status}
         />
       ) : undefined}
+      <TaskDetailFields task={task} blockers={blockers} />
       <TaskDetailChildTasks childTasks={childTasks} onOpenChildTask={onOpenChildTask} />
     </aside>
   );
@@ -196,10 +205,10 @@ function TaskDetailFields({task, blockers}: TaskDetailFieldsProps) {
   return (
     <>
       {task.description !== undefined ? (
-        <section class={styles.section}>
-          <h3 class={styles.sectionLabel}>Description</h3>
+        <details class={disclosureStyles.panelDisclosureDetails} open={!isLongDescription(task.description)}>
+          <summary class={disclosureStyles.panelDisclosureSummary}>Description</summary>
           <p class={styles.sectionBody}>{task.description}</p>
-        </section>
+        </details>
       ) : undefined}
 
       {task.result !== undefined ? (
@@ -305,4 +314,14 @@ function statusLabel(status: TaskStatus): string {
     default:
       return 'Pending';
   }
+}
+
+function isLongDescription(description: string): boolean {
+  const trimmed = description.trim();
+  if (trimmed.length === 0) {
+    return false;
+  }
+
+  const lineCount = trimmed.split('\n').length;
+  return lineCount > LONG_DESCRIPTION_LINE_COUNT || trimmed.length > LONG_DESCRIPTION_CHAR_COUNT;
 }

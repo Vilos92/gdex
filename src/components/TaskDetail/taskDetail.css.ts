@@ -1,5 +1,6 @@
 import {style} from '@vanilla-extract/css';
 
+import {darkSelector, inDarkScheme} from '@/styles/darkScheme';
 import {palette} from '@/styles/tokens';
 
 export {section, sectionLabel} from '@/styles/panelSection.css';
@@ -24,11 +25,9 @@ export const panelEmptyMessage = style({
   margin: 0,
   fontSize: '0.9375rem',
   color: palette.textMuted,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textMutedDark
-    }
-  }
+  ...inDarkScheme({
+    color: palette.textMutedDark
+  })
 });
 
 export const title = style({
@@ -42,11 +41,9 @@ export const title = style({
 export const titleDone = style({
   color: palette.textMuted,
   textDecoration: 'line-through',
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textMutedDark
-    }
-  }
+  ...inDarkScheme({
+    color: palette.textMutedDark
+  })
 });
 
 export const statusRow = style({
@@ -70,38 +67,32 @@ export const statusBadgePending = style({
   color: palette.textMuted,
   backgroundColor: palette.pageBg,
   borderColor: palette.border,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textMutedDark,
-      backgroundColor: palette.pageBgDark,
-      borderColor: palette.borderDark
-    }
-  }
+  ...inDarkScheme({
+    color: palette.textMutedDark,
+    backgroundColor: palette.pageBgDark,
+    borderColor: palette.borderDark
+  })
 });
 
 export const statusBadgeInProgress = style({
   color: palette.accent,
   backgroundColor: palette.accentMuted,
   borderColor: palette.accent,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      backgroundColor: palette.accentMutedDark,
-      borderColor: palette.accent
-    }
-  }
+  ...inDarkScheme({
+    backgroundColor: palette.accentMutedDark,
+    borderColor: palette.accent
+  })
 });
 
 export const statusBadgeDone = style({
   color: palette.textMuted,
   backgroundColor: palette.pageBg,
   borderColor: palette.border,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textMutedDark,
-      backgroundColor: palette.pageBgDark,
-      borderColor: palette.borderDark
-    }
-  }
+  ...inDarkScheme({
+    color: palette.textMutedDark,
+    backgroundColor: palette.pageBgDark,
+    borderColor: palette.borderDark
+  })
 });
 
 export const sectionBody = style({
@@ -150,11 +141,9 @@ export const childTaskName = style({
 export const childTaskNameDone = style({
   color: palette.textMuted,
   textDecoration: 'line-through',
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textMutedDark
-    }
-  }
+  ...inDarkScheme({
+    color: palette.textMutedDark
+  })
 });
 
 export const childTasksList = style({
@@ -179,30 +168,24 @@ export const taskIdButton = style({
   fontSize: '0.6875rem',
   letterSpacing: '0.02em',
   color: palette.textMuted,
-  cursor: 'pointer',
   transition: 'color 120ms, border-color 120ms, background-color 120ms',
-  ':hover': {
-    color: palette.text,
-    borderColor: palette.border,
-    backgroundColor: palette.pageBg
-  },
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textMutedDark,
-      ':hover': {
-        color: palette.textDark,
-        borderColor: palette.borderDark,
-        backgroundColor: palette.pageBgDark
-      }
+  selectors: {
+    '&:hover': {
+      color: palette.text,
+      borderColor: palette.border,
+      backgroundColor: palette.pageBg
+    },
+    [darkSelector(':hover')]: {
+      color: palette.textDark,
+      borderColor: palette.borderDark,
+      backgroundColor: palette.pageBgDark
+    },
+    [darkSelector()]: {
+      color: palette.textMutedDark
     }
   }
 });
 
 export const taskIdCopied = style({
-  color: palette.accent,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.accent
-    }
-  }
+  color: palette.accent
 });

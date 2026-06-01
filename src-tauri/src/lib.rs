@@ -1,6 +1,7 @@
 mod commands;
 mod dex;
 mod dex_client;
+mod theme_store;
 mod watcher;
 mod workspace_store;
 
@@ -47,6 +48,8 @@ pub fn run() {
             commands::get_active_workspace,
             commands::get_tasks,
             commands::get_task,
+            commands::get_theme_mode,
+            commands::set_theme_mode,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

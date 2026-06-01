@@ -5,6 +5,7 @@ import * as styles from '@/components/TaskDetail/QuickPrompts/taskDetailQuickPro
 import {type AgentPrompt, buildAgentPrompts, DEFAULT_AGENT_PROMPT_ID} from '@/lib/agentPrompts';
 import type {TaskStatus} from '@/lib/taskApi';
 import type {Workspace} from '@/lib/workspaceApi';
+import * as disclosureStyles from '@/styles/panelDisclosure.css';
 
 /*
  * Types.
@@ -37,8 +38,8 @@ export function TaskDetailQuickPrompts({workspace, taskId, status}: TaskDetailQu
   }
 
   return (
-    <section class={styles.section} aria-label="Quick prompts">
-      <h3 class={styles.sectionLabel}>Quick prompts</h3>
+    <details class={disclosureStyles.panelDisclosureDetails}>
+      <summary class={disclosureStyles.panelDisclosureSummary}>Quick prompts</summary>
       <div class={styles.quickPromptStack}>
         <select
           class={styles.quickPromptSelect}
@@ -56,6 +57,6 @@ export function TaskDetailQuickPrompts({workspace, taskId, status}: TaskDetailQu
         </select>
         <AgentPromptCodeBlock text={activePrompt.text} />
       </div>
-    </section>
+    </details>
   );
 }

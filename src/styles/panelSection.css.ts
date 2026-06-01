@@ -1,5 +1,6 @@
 import {style} from '@vanilla-extract/css';
 
+import {inDarkScheme} from '@/styles/darkScheme';
 import {palette} from '@/styles/tokens';
 
 /*
@@ -22,9 +23,7 @@ export const sectionLabel = style({
   letterSpacing: '0.04em',
   textTransform: 'uppercase',
   color: palette.textMuted,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textMutedDark
-    }
-  }
+  ...inDarkScheme({
+    color: palette.textMutedDark
+  })
 });

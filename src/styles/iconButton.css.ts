@@ -1,5 +1,6 @@
 import {style} from '@vanilla-extract/css';
 
+import {darkSelector} from '@/styles/darkScheme';
 import {palette} from '@/styles/tokens';
 
 /*
@@ -36,20 +37,20 @@ export const panelIconButton = style({
     '&:focus-visible': {
       outline: `2px solid ${palette.accent}`,
       outlineOffset: '2px'
-    }
-  },
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textMutedDark,
-      selectors: {
-        '&:hover': {
-          backgroundColor: palette.accentMutedDark,
-          color: palette.textDark
-        },
-        '&:active': {
-          backgroundColor: palette.accentMutedDark
-        }
-      }
+    },
+    [darkSelector(':hover')]: {
+      backgroundColor: palette.accentMutedDark,
+      borderColor: 'transparent',
+      boxShadow: 'none',
+      color: palette.textDark
+    },
+    [darkSelector(':active')]: {
+      backgroundColor: palette.accentMutedDark,
+      borderColor: 'transparent',
+      boxShadow: 'none'
+    },
+    [darkSelector()]: {
+      color: palette.textMutedDark
     }
   }
 });

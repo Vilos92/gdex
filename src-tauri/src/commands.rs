@@ -3,6 +3,7 @@
 use tauri::{AppHandle, State};
 
 use crate::dex_client::{DexClient, DexProject, DexTask};
+use crate::theme_store::{self, ThemeMode};
 use crate::watcher::TaskWatcher;
 use crate::workspace_store::{self, validate_dex_storage_path, Workspace};
 
@@ -104,4 +105,16 @@ pub fn validate_workspace(
     dex.list_tasks(&project)
         .map(|_| ())
         .map_err(|error| error.to_string())
+}
+
+/// Returns the persisted theme mode for the app.
+#[tauri::command]
+pub fn get_theme_mode(app: AppHandle) -> Result<ThemeMode, String> {
+    theme_store::get_theme_mode(&app)
+}
+
+/// Persists the user's selected theme mode.
+#[tauri::command]
+pub fn set_theme_mode(app: AppHandle, mode: ThemeMode) -> Result<(), String> {
+    theme_store::set_theme_mode(&app, mode)
 }

@@ -2,6 +2,7 @@ import type {JSX} from 'preact';
 import {useEffect} from 'preact/hooks';
 import {useShallow} from 'zustand/shallow';
 
+import {subscribeToSystemColorScheme} from '@/lib/theme';
 import {setActiveWorkspace} from '@/lib/workspaceApi';
 import {type AppView, useAppStore} from '@/stores/appStore';
 import {SplashView} from '@/views/SplashView';
@@ -71,10 +72,20 @@ export default App;
 function useAppBootstrap() {
   const reloadWorkspaces = useAppStore(state => state.reloadWorkspaces);
   const handleWorkspacesLoadError = useAppStore(state => state.handleWorkspacesLoadError);
+  const hydrateTheme = useAppStore(state => state.hydrateTheme);
+  const handleSystemColorSchemeChange = useAppStore(state => state.handleSystemColorSchemeChange);
 
   useEffect(() => {
+    hydrateTheme().catch(error => {
+      console.error('theme hydrate failed', error);
+    });
     reloadWorkspaces().catch(handleWorkspacesLoadError);
-  }, [reloadWorkspaces, handleWorkspacesLoadError]);
+  }, [hydrateTheme, reloadWorkspaces, handleWorkspacesLoadError]);
+
+  useEffect(
+    () => subscribeToSystemColorScheme(handleSystemColorSchemeChange),
+    [handleSystemColorSchemeChange]
+  );
 }
 
 function useAppShellState() {

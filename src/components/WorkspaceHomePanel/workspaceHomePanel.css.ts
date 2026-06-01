@@ -1,5 +1,6 @@
 import {style} from '@vanilla-extract/css';
 
+import {darkSelector, inDarkScheme} from '@/styles/darkScheme';
 import {palette} from '@/styles/tokens';
 
 export {section, sectionLabel} from '@/styles/panelSection.css';
@@ -35,11 +36,9 @@ export const sectionBody = style({
   fontFamily: 'monospace',
   wordBreak: 'break-all',
   color: palette.text,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textDark
-    }
-  }
+  ...inDarkScheme({
+    color: palette.textDark
+  })
 });
 
 export const actionsSection = style({
@@ -49,11 +48,9 @@ export const actionsSection = style({
   marginTop: 'auto',
   paddingTop: '1rem',
   borderTop: `1px solid ${palette.border}`,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      borderColor: palette.borderDark
-    }
-  }
+  ...inDarkScheme({
+    borderColor: palette.borderDark
+  })
 });
 
 export const deleteButton = style({
@@ -68,15 +65,11 @@ export const deleteButton = style({
       backgroundColor: palette.danger,
       color: palette.surface,
       borderColor: palette.danger
-    }
-  },
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      selectors: {
-        '&:hover': {
-          color: palette.surfaceDark
-        }
-      }
+    },
+    [darkSelector(':hover')]: {
+      backgroundColor: palette.danger,
+      color: palette.surfaceDark,
+      borderColor: palette.danger
     }
   }
 });
@@ -91,11 +84,9 @@ export const confirmText = style({
   margin: 0,
   fontSize: '0.875rem',
   color: palette.textMuted,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textMutedDark
-    }
-  }
+  ...inDarkScheme({
+    color: palette.textMutedDark
+  })
 });
 
 export const confirmActions = style({
@@ -115,7 +106,6 @@ export const confirmDeleteButton = style({
       opacity: 0.85
     },
     '&:disabled': {
-      cursor: 'not-allowed',
       opacity: 0.45
     }
   }
@@ -131,15 +121,10 @@ export const cancelButton = style({
     '&:hover': {
       backgroundColor: palette.accentMuted,
       borderColor: 'transparent'
-    }
-  },
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      selectors: {
-        '&:hover': {
-          backgroundColor: palette.accentMutedDark
-        }
-      }
+    },
+    [darkSelector(':hover')]: {
+      backgroundColor: palette.accentMutedDark,
+      borderColor: 'transparent'
     }
   }
 });

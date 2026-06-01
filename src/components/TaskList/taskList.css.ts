@@ -1,5 +1,6 @@
 import {style} from '@vanilla-extract/css';
 
+import {darkSelector, inDarkScheme} from '@/styles/darkScheme';
 import {palette} from '@/styles/tokens';
 
 /*
@@ -40,16 +41,41 @@ export const taskButton = style({
   padding: '0.6em 0.75em',
   borderRadius: '8px',
   border: `1px solid transparent`,
-  backgroundColor: 'transparent',
+  backgroundColor: palette.surface,
   boxShadow: 'none',
-  fontWeight: 500
+  fontWeight: 500,
+  selectors: {
+    [darkSelector()]: {
+      backgroundColor: palette.surfaceDark
+    },
+    '&:hover': {
+      backgroundColor: palette.accentMuted,
+      borderColor: 'transparent',
+      boxShadow: 'none'
+    },
+    [darkSelector(':hover')]: {
+      backgroundColor: palette.accentMutedDark,
+      borderColor: 'transparent',
+      boxShadow: 'none'
+    }
+  }
 });
 
 export const taskButtonSelected = style({
   backgroundColor: palette.accentMuted,
   borderColor: palette.accent,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
+  selectors: {
+    '&:hover': {
+      backgroundColor: palette.accentMuted,
+      borderColor: palette.accent,
+      boxShadow: 'none'
+    },
+    [darkSelector(':hover')]: {
+      backgroundColor: palette.accentMutedDark,
+      borderColor: palette.accent,
+      boxShadow: 'none'
+    },
+    [darkSelector()]: {
       backgroundColor: palette.accentMutedDark,
       borderColor: palette.accent
     }
@@ -65,11 +91,9 @@ export const statusDot = style({
 
 export const statusPending = style({
   backgroundColor: palette.border,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      backgroundColor: palette.borderDark
-    }
-  }
+  ...inDarkScheme({
+    backgroundColor: palette.borderDark
+  })
 });
 
 export const statusInProgress = style({
@@ -78,11 +102,9 @@ export const statusInProgress = style({
 
 export const statusDone = style({
   backgroundColor: palette.textMuted,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      backgroundColor: palette.textMutedDark
-    }
-  }
+  ...inDarkScheme({
+    backgroundColor: palette.textMutedDark
+  })
 });
 
 export const taskName = style({
@@ -96,22 +118,18 @@ export const taskName = style({
 export const taskNameDone = style({
   color: palette.textMuted,
   textDecoration: 'line-through',
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textMutedDark
-    }
-  }
+  ...inDarkScheme({
+    color: palette.textMutedDark
+  })
 });
 
 export const emptyMessage = style({
   margin: 0,
   fontSize: '0.9375rem',
   color: palette.textMuted,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textMutedDark
-    }
-  }
+  ...inDarkScheme({
+    color: palette.textMutedDark
+  })
 });
 
 export const taskLoadError = style({

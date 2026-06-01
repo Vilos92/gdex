@@ -1,5 +1,5 @@
 import {globalStyle, style} from '@vanilla-extract/css';
-
+import {darkSelector, inDarkScheme} from '@/styles/darkScheme';
 import {sectionLabel} from '@/styles/panelSection.css';
 import {palette} from '@/styles/tokens';
 
@@ -29,13 +29,11 @@ export const menu = style({
   border: `1px solid ${palette.border}`,
   backgroundColor: palette.surface,
   boxShadow: '0 8px 24px rgba(0, 0, 0, 0.18)',
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      borderColor: palette.borderDark,
-      backgroundColor: palette.surfaceDark,
-      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)'
-    }
-  }
+  ...inDarkScheme({
+    borderColor: palette.borderDark,
+    backgroundColor: palette.surfaceDark,
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)'
+  })
 });
 
 export const menuItem = style({
@@ -55,7 +53,6 @@ export const menuItem = style({
   fontWeight: 500,
   lineHeight: 1.35,
   textAlign: 'left',
-  cursor: 'pointer',
   transition: 'background-color 120ms',
   selectors: {
     '&:hover:enabled': {
@@ -64,21 +61,18 @@ export const menuItem = style({
       boxShadow: 'none'
     },
     '&:disabled': {
-      color: palette.textMuted,
-      cursor: 'default'
-    }
-  },
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textDark,
-      selectors: {
-        '&:hover:enabled': {
-          backgroundColor: palette.pageBgDark
-        },
-        '&:disabled': {
-          color: palette.textMutedDark
-        }
-      }
+      color: palette.textMuted
+    },
+    [darkSelector(':hover:enabled')]: {
+      backgroundColor: palette.pageBgDark,
+      borderColor: 'transparent',
+      boxShadow: 'none'
+    },
+    [darkSelector(':disabled')]: {
+      color: palette.textMutedDark
+    },
+    [darkSelector()]: {
+      color: palette.textDark
     }
   }
 });
@@ -107,18 +101,14 @@ export const menuItemIconWrap = style({
     },
     'button:disabled &': {
       opacity: 0.45
-    }
-  },
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textMutedDark,
-      selectors: {
-        'button:hover:enabled &': {
-          backgroundColor: palette.codeBlockBgDark,
-          boxShadow: `inset 0 0 0 1px ${palette.borderDark}`,
-          color: palette.textDark
-        }
-      }
+    },
+    [darkSelector('button:hover:enabled &')]: {
+      backgroundColor: palette.codeBlockBgDark,
+      boxShadow: `inset 0 0 0 1px ${palette.borderDark}`,
+      color: palette.textDark
+    },
+    [darkSelector()]: {
+      color: palette.textMutedDark
     }
   }
 });

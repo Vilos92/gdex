@@ -162,13 +162,13 @@ fn validate_workspace_paths(config_path: &str, storage_path: &str) -> Result<(),
     Ok(())
 }
 
-fn store_write_lock() -> Result<std::sync::MutexGuard<'static, ()>, String> {
+pub(crate) fn store_write_lock() -> Result<std::sync::MutexGuard<'static, ()>, String> {
     STORE_WRITE_MUTEX
         .lock()
         .map_err(|_| "workspace store lock poisoned".to_owned())
 }
 
-fn open_store(app: &AppHandle) -> Result<SettingsStore, String> {
+pub(crate) fn open_store(app: &AppHandle) -> Result<SettingsStore, String> {
     app.store(STORE_FILE).map_err(|error| error.to_string())
 }
 

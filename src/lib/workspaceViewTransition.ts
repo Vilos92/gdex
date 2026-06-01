@@ -1,3 +1,5 @@
+import {flushSync} from 'preact/compat';
+
 import {invokeErrorMessage} from '@/lib/error';
 import {getTasks, type Tasks} from '@/lib/taskApi';
 import {checkHasViewTransition, runViewTransition} from '@/lib/viewTransition';
@@ -183,11 +185,16 @@ export async function switchWorkspaceWithTransition(
   workspaceId: string,
   restoreOnPersistFailure: string | undefined
 ): Promise<void> {
-  if (workspaceId === get().activeWorkspaceId) {
+  const previousWorkspaceId = get().activeWorkspaceId;
+  if (workspaceId === previousWorkspaceId) {
     return;
   }
 
   const requestId = bumpTaskLoadRequest();
+  // Paint sidebar selection before the exit view transition runs.
+  flushSync(() => {
+    set({activeWorkspaceId: workspaceId});
+  });
   await exitWorkspaceMain(set, get, workspaceId);
 
   if (checkIsStaleTaskLoadRequest(requestId)) {

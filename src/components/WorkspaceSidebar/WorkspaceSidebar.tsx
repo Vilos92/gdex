@@ -13,7 +13,8 @@ import {useWorkspaceSelection} from '@/hooks/useWorkspaceSelection';
 export function WorkspaceSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
-  const {workspaces, activeWorkspaceId, selectError, selectWorkspace} = useWorkspaceSelection();
+  const {workspaces, activeWorkspaceId, isWorkspaceSwitching, selectError, selectWorkspace} =
+    useWorkspaceSelection();
 
   const toggleCollapsed = () => setIsCollapsed(collapsed => !collapsed);
 
@@ -31,6 +32,7 @@ export function WorkspaceSidebar() {
         <CollapsedWorkspaceSidebarBody
           workspaces={workspaces}
           activeWorkspaceId={activeWorkspaceId}
+          isWorkspaceSwitching={isWorkspaceSwitching}
           selectError={selectError}
           onSelect={selectWorkspace}
           onAddWorkspace={openAddWorkspace}
@@ -39,6 +41,7 @@ export function WorkspaceSidebar() {
         <ExpandedWorkspaceSidebarBody
           workspaces={workspaces}
           activeWorkspaceId={activeWorkspaceId}
+          isWorkspaceSwitching={isWorkspaceSwitching}
           selectError={selectError}
           isAddFormOpen={isAddFormOpen}
           onAddFormOpenChange={setIsAddFormOpen}

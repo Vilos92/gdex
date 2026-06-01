@@ -10,6 +10,7 @@ import type {Workspaces} from '@/lib/workspaceApi';
 export type ExpandedWorkspaceSidebarBodyProps = {
   workspaces: Workspaces;
   activeWorkspaceId: string | undefined;
+  isWorkspaceSwitching: boolean;
   selectError: string | undefined;
   isAddFormOpen: boolean;
   onAddFormOpenChange: (open: boolean) => void;
@@ -23,6 +24,7 @@ export type ExpandedWorkspaceSidebarBodyProps = {
 export function ExpandedWorkspaceSidebarBody({
   workspaces,
   activeWorkspaceId,
+  isWorkspaceSwitching,
   selectError,
   isAddFormOpen,
   onAddFormOpenChange,
@@ -35,7 +37,12 @@ export function ExpandedWorkspaceSidebarBody({
           {selectError}
         </p>
       ) : undefined}
-      <WorkspaceList workspaces={workspaces} activeWorkspaceId={activeWorkspaceId} onSelect={onSelect} />
+      <WorkspaceList
+        workspaces={workspaces}
+        activeWorkspaceId={activeWorkspaceId}
+        isWorkspaceSwitching={isWorkspaceSwitching}
+        onSelect={onSelect}
+      />
       <AddWorkspacePanel isFormOpen={isAddFormOpen} onFormOpenChange={onAddFormOpenChange} />
     </div>
   );

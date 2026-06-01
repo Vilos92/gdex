@@ -5,6 +5,26 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tauri + Preact + Typescript</title>
+    <script>
+      (() => {
+        const key = 'gdex-theme-mode';
+        const mode = localStorage.getItem(key);
+        const root = document.documentElement;
+
+        switch (mode) {
+          case 'light':
+            root.dataset.theme = 'light';
+            break;
+          case 'dark':
+            root.dataset.theme = 'dark';
+            break;
+          default:
+            root.dataset.theme = window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light';
+        }
+      })();
+    </script>
   </head>
 
   <body>
