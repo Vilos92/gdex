@@ -16,6 +16,8 @@
     "lint": "biome lint",
     "lint:ci": "biome ci --formatter-enabled=false",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "check": "biome check",
     "fallow": "fallow --summary",
     "fallow:audit": "fallow audit",
@@ -42,6 +44,7 @@
     "fallow": "2.66.1",
     "typescript": "~5.6.2",
     "vite": "^6.0.3",
-    "vite-tsconfig-paths": "^6.1.1"
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^4.1.7"
   }
 }

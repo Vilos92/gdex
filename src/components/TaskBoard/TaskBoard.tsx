@@ -12,6 +12,7 @@ export type TaskBoardProps = {
   workspace: Workspace;
   zoomParentId: string | undefined;
   selectedTaskId: string | undefined;
+  isLoading: boolean;
   onSelectTask: (taskId: string) => void;
 };
 
@@ -19,7 +20,14 @@ export type TaskBoardProps = {
  * Component.
  */
 
-export function TaskBoard({tasks, workspace, zoomParentId, selectedTaskId, onSelectTask}: TaskBoardProps) {
+export function TaskBoard({
+  tasks,
+  workspace,
+  zoomParentId,
+  selectedTaskId,
+  isLoading,
+  onSelectTask
+}: TaskBoardProps) {
   const levelTasks = tasksAtLevel(tasks, zoomParentId);
 
   return (
@@ -28,6 +36,7 @@ export function TaskBoard({tasks, workspace, zoomParentId, selectedTaskId, onSel
         tasks={levelTasks}
         workspace={workspace}
         selectedTaskId={selectedTaskId}
+        isLoading={isLoading}
         onSelectTask={onSelectTask}
       />
     </div>

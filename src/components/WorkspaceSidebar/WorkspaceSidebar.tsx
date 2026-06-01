@@ -11,7 +11,7 @@ import {useWorkspaceSelection} from '@/hooks/useWorkspaceSelection';
  */
 
 export function WorkspaceSidebar() {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const {workspaces, activeWorkspaceId, selectError, selectWorkspace} = useWorkspaceSelection();
 

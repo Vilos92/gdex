@@ -2,9 +2,18 @@ import {listen} from '@tauri-apps/api/event';
 import {create} from 'zustand';
 
 import {invokeErrorMessage} from '@/lib/error';
-import {getTasks, type Tasks} from '@/lib/taskApi';
-import {listWorkspaces, removeWorkspace, setActiveWorkspace} from '@/lib/workspaceApi';
+import type {Tasks} from '@/lib/taskApi';
+import {listWorkspaces, removeWorkspace} from '@/lib/workspaceApi';
 import {loadWorkspaceSelection} from '@/lib/workspaceSelection';
+import {
+  applySilentTaskLoad,
+  beginTaskLoad,
+  bumpTaskLoadRequest,
+  loadActiveWorkspaceWithTransition,
+  loadTasksForWorkspace,
+  switchWorkspaceWithTransition,
+  workspaceTaskUi
+} from '@/lib/workspaceViewTransition';
 import type {Workspaces} from '@/schemas/workspace';
 
 /*
@@ -21,6 +30,7 @@ type AppData = {
   tasks: Tasks;
   isTasksLoading: boolean;
   tasksLoadError: string | undefined;
+  isWorkspaceMainVisible: boolean;
   selectedTaskId: string | undefined;
   zoomParentId: string | undefined;
 };
@@ -31,6 +41,13 @@ type AppActions = {
   setView: (view: AppView) => void;
   setWorkspaces: (workspaces: WorkspacesUpdater) => void;
   setActiveWorkspaceId: (activeWorkspaceId: string | undefined) => void;
+  /** Sidebar selection: exit transition, load tasks, enter transition. */
+  switchWorkspace: (
+    workspaceId: string,
+    restoreActiveWorkspaceIdOnPersistFailure?: string | undefined
+  ) => Promise<void>;
+  /** Initial mount and programmatic activation (enter transition). */
+  loadActiveWorkspaceTasks: () => Promise<void>;
   selectTask: (taskId: string) => void;
   zoomTo: (parentId: string | undefined) => void;
   /** Set list zoom and detail selection together (breadcrumb navigation). */
@@ -49,17 +66,9 @@ type AppActions = {
 
 type AppState = AppData & AppActions;
 
-type TaskLoadSlice = Pick<AppData, 'tasks' | 'isTasksLoading' | 'tasksLoadError'>;
-
-type SetTaskLoadState = (partial: Partial<TaskLoadSlice>) => void;
-
-type TaskLoadResult = {ok: true; tasks: Tasks} | {ok: false; error: unknown};
-
 /*
  * Store.
  */
-
-let tasksLoadRequestId = 0;
 
 export const useAppStore = create<AppState>((set, get) => ({
   view: 'loading',
@@ -69,6 +78,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   tasks: [],
   isTasksLoading: false,
   tasksLoadError: undefined,
+  isWorkspaceMainVisible: true,
   selectedTaskId: undefined,
   zoomParentId: undefined,
 
@@ -80,15 +90,28 @@ export const useAppStore = create<AppState>((set, get) => ({
     })),
 
   setActiveWorkspaceId: activeWorkspaceId => {
-    tasksLoadRequestId += 1;
-    set({
-      activeWorkspaceId,
-      tasks: [],
-      isTasksLoading: false,
-      tasksLoadError: undefined,
-      selectedTaskId: undefined,
-      zoomParentId: undefined
-    });
+    bumpTaskLoadRequest();
+    set(workspaceTaskUi.activating(activeWorkspaceId));
+  },
+
+  switchWorkspace: (workspaceId, restoreActiveWorkspaceIdOnPersistFailure) =>
+    switchWorkspaceWithTransition(
+      set,
+      get,
+      workspaceId,
+      restoreActiveWorkspaceIdOnPersistFailure ?? get().activeWorkspaceId
+    ),
+
+  loadActiveWorkspaceTasks: async () => {
+    const {activeWorkspaceId} = get();
+
+    if (activeWorkspaceId === undefined) {
+      bumpTaskLoadRequest();
+      set(workspaceTaskUi.cleared());
+      return;
+    }
+
+    await loadActiveWorkspaceWithTransition(set, activeWorkspaceId);
   },
 
   selectTask: taskId => set({selectedTaskId: taskId}),
@@ -108,27 +131,28 @@ export const useAppStore = create<AppState>((set, get) => ({
   reloadWorkspaces: async () => {
     const loadedWorkspaces = await listWorkspaces();
     if (loadedWorkspaces.length === 0) {
-      tasksLoadRequestId += 1;
+      bumpTaskLoadRequest();
       set({
         workspaces: [],
         activeWorkspaceId: undefined,
         workspacesLoadError: undefined,
         view: 'splash',
-        tasks: [],
-        isTasksLoading: false,
-        tasksLoadError: undefined,
-        selectedTaskId: undefined,
-        zoomParentId: undefined
+        ...workspaceTaskUi.cleared()
       });
       return;
     }
 
     const activeId = await loadWorkspaceSelection(loadedWorkspaces);
+    if (activeId === undefined) {
+      return;
+    }
+
+    bumpTaskLoadRequest();
     set({
       workspaces: loadedWorkspaces,
-      activeWorkspaceId: activeId,
       workspacesLoadError: undefined,
-      view: 'workspaces'
+      view: 'workspaces',
+      ...workspaceTaskUi.awaitingFirstLoad(activeId)
     });
   },
 
@@ -142,16 +166,16 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   reloadTasks: async () => {
     const {activeWorkspaceId} = get();
-    const setTaskLoad: SetTaskLoadState = partial => set(partial);
 
     if (activeWorkspaceId === undefined) {
-      clearTasksForNoWorkspace(setTaskLoad);
+      bumpTaskLoadRequest();
+      set(workspaceTaskUi.cleared());
       return;
     }
 
-    const requestId = beginTaskLoad(setTaskLoad);
+    const requestId = beginTaskLoad(set);
     const loadResult = await loadTasksForWorkspace(activeWorkspaceId);
-    applyTaskLoadResult(setTaskLoad, requestId, loadResult);
+    applySilentTaskLoad(set, requestId, loadResult);
   },
 
   initTasksListener: () => {
@@ -182,90 +206,37 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   deleteWorkspace: async workspaceId => {
+    const previousWorkspaces = get().workspaces;
     await removeWorkspace(workspaceId);
-    const remaining = get().workspaces.filter(workspace => workspace.id !== workspaceId);
+    const remaining = previousWorkspaces.filter(workspace => workspace.id !== workspaceId);
 
     if (remaining.length === 0) {
-      tasksLoadRequestId += 1;
+      bumpTaskLoadRequest();
       set({
         workspaces: [],
         activeWorkspaceId: undefined,
         workspacesLoadError: undefined,
         view: 'splash',
-        tasks: [],
-        isTasksLoading: false,
-        tasksLoadError: undefined,
-        selectedTaskId: undefined,
-        zoomParentId: undefined
+        ...workspaceTaskUi.cleared()
       });
       return;
     }
 
     // Switch to a remaining workspace. Prefer the next workspace after the deleted one, fall
     // back to the first in the list.
-    tasksLoadRequestId += 1;
     const nextWorkspace = remaining[0];
     set({workspaces: remaining});
     try {
-      await setActiveWorkspace(nextWorkspace.id);
+      await get().switchWorkspace(nextWorkspace.id, nextWorkspace.id);
     } catch (error) {
-      console.error('set_active_workspace failed after delete', error);
+      console.error('switch_workspace failed after delete', error);
+      bumpTaskLoadRequest();
+      set({
+        workspaces: remaining,
+        activeWorkspaceId: nextWorkspace.id,
+        ...workspaceTaskUi.cleared()
+      });
+      throw error;
     }
-    set({
-      activeWorkspaceId: nextWorkspace.id,
-      tasks: [],
-      isTasksLoading: false,
-      tasksLoadError: undefined,
-      selectedTaskId: undefined,
-      zoomParentId: undefined
-    });
   }
 }));
-
-/*
- * Helpers.
- */
-
-function clearTasksForNoWorkspace(setTaskLoad: SetTaskLoadState): void {
-  tasksLoadRequestId += 1;
-  setTaskLoad({tasks: [], tasksLoadError: undefined, isTasksLoading: false});
-}
-
-function beginTaskLoad(setTaskLoad: SetTaskLoadState): number {
-  const requestId = ++tasksLoadRequestId;
-  setTaskLoad({isTasksLoading: true, tasksLoadError: undefined});
-  return requestId;
-}
-
-async function loadTasksForWorkspace(workspaceId: string): Promise<TaskLoadResult> {
-  try {
-    const tasks = await getTasks(workspaceId);
-    return {ok: true, tasks};
-  } catch (error) {
-    return {ok: false, error};
-  }
-}
-
-function applyTaskLoadResult(
-  setTaskLoad: SetTaskLoadState,
-  requestId: number,
-  loadResult: TaskLoadResult
-): void {
-  if (requestId !== tasksLoadRequestId) {
-    return;
-  }
-
-  if (loadResult.ok) {
-    setTaskLoad({tasks: loadResult.tasks});
-  } else {
-    console.error('get_tasks failed', loadResult.error);
-    setTaskLoad({
-      tasksLoadError: invokeErrorMessage(loadResult.error, 'Could not load tasks.'),
-      tasks: []
-    });
-  }
-
-  if (requestId === tasksLoadRequestId) {
-    setTaskLoad({isTasksLoading: false});
-  }
-}

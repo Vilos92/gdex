@@ -30,15 +30,14 @@ export function WorkspacesLayout() {
  * Hooks.
  */
 
-/** Keeps task list and `tasks-changed` listener in sync while the workspaces shell is mounted. */
+/** Runs once on mount so the first workspace gets an enter transition without duplicating the sidebar switch flow. */
 function useWorkspaceTasksSync() {
-  const activeWorkspaceId = useAppStore(state => state.activeWorkspaceId);
-  const reloadTasks = useAppStore(state => state.reloadTasks);
+  const loadActiveWorkspaceTasks = useAppStore(state => state.loadActiveWorkspaceTasks);
   const initTasksListener = useAppStore(state => state.initTasksListener);
 
   useEffect(() => {
-    reloadTasks();
-  }, [activeWorkspaceId, reloadTasks]);
+    loadActiveWorkspaceTasks();
+  }, [loadActiveWorkspaceTasks]);
 
   useEffect(() => {
     const unsubscribe = initTasksListener();

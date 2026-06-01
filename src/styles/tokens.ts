@@ -38,3 +38,15 @@ export const palette = {
   codeBlockText: '#1a1a1a',
   codeBlockTextDark: '#e8e8e8'
 } as const;
+
+/** Pastel letter colors for collapsed workspace initials (readable on light and dark surfaces). */
+export const workspaceSwatches = [
+  {letter: '#7a9fd4', letterDark: '#adc8ef'},
+  {letter: '#6db5a8', letterDark: '#9dd9cf'},
+  {letter: '#a494d4', letterDark: '#c9bfe8'},
+  {letter: '#c9ad6e', letterDark: '#e8d4a0'},
+  {letter: '#d48a9e', letterDark: '#eab8c4'},
+  {letter: '#7cbd88', letterDark: '#abd9b4'},
+  {letter: '#6eb0ca', letterDark: '#9fd0e3'},
+  {letter: '#c492c0', letterDark: '#dfb8db'}
+] as const;

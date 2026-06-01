@@ -1,5 +1,7 @@
 import * as styles from '@/components/WorkspaceSidebar/workspaceSidebar.css';
 import type {Workspaces} from '@/lib/workspaceApi';
+import {workspaceSwatchIndex} from '@/lib/workspaceSwatch';
+import * as swatchStyles from '@/styles/workspaceSwatches.css';
 
 /*
  * Types.
@@ -10,16 +12,6 @@ export type CollapsedWorkspaceListProps = {
   activeWorkspaceId: string | undefined;
   onSelect: (workspaceId: string) => void;
 };
-
-/*
- * Styles.
- */
-
-function workspaceSquareClass(isActive: boolean): string {
-  return [styles.collapsedWorkspaceSquare, isActive ? styles.collapsedWorkspaceSquareActive : '']
-    .filter(Boolean)
-    .join(' ');
-}
 
 /*
  * Component.
@@ -45,7 +37,7 @@ export function CollapsedWorkspaceList({
               title={label}
               onClick={() => onSelect(workspace.id)}
             >
-              {workspaceInitial(workspace.name)}
+              <span class={workspaceLetterClass(workspace.name)}>{workspaceInitial(workspace.name)}</span>
             </button>
           </li>
         );
@@ -57,6 +49,22 @@ export function CollapsedWorkspaceList({
 /*
  * Helpers.
  */
+
+function workspaceSquareClass(isActive: boolean): string {
+  return [styles.collapsedWorkspaceSquare, isActive ? styles.collapsedWorkspaceSquareActive : '']
+    .filter(Boolean)
+    .join(' ');
+}
+
+function workspaceLetterClass(name: string): string {
+  const swatchIndex = workspaceSwatchIndex(name);
+  const letterClass = swatchStyles.collapsedWorkspaceSwatchLetterStyles[swatchIndex];
+  if (letterClass === undefined) {
+    throw new Error(`Missing collapsed workspace swatch letter style at index ${swatchIndex}`);
+  }
+
+  return letterClass;
+}
 
 function workspaceDisplayLabel(name: string): string {
   const trimmed = name.trim();

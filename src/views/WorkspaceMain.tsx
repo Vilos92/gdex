@@ -4,6 +4,7 @@ import {TaskBoard} from '@/components/TaskBoard/TaskBoard';
 import {TaskDetail} from '@/components/TaskDetail/TaskDetail';
 import * as taskStyles from '@/components/TaskList/taskList.css';
 import {useAppStore} from '@/stores/appStore';
+import * as transitionStyles from '@/styles/workspaceTransition.css';
 import * as styles from '@/views/views.css';
 
 /*
@@ -16,6 +17,7 @@ export function WorkspaceMain() {
     activeWorkspaceId,
     tasks,
     isLoading,
+    isWorkspaceMainVisible,
     loadErrorMessage,
     zoomParentId,
     selectedTaskId,
@@ -28,28 +30,31 @@ export function WorkspaceMain() {
     return <p class={styles.placeholder}>Select a workspace</p>;
   }
 
-  if (isLoading) {
-    return <p class={taskStyles.emptyMessage}>Loading tasks…</p>;
-  }
-
   if (loadErrorMessage !== undefined) {
     return (
-      <p class={taskStyles.taskLoadError} role="alert">
-        {loadErrorMessage}
-      </p>
+      <div class={[styles.workspaceMain, transitionStyles.workspaceMain].join(' ')}>
+        <p class={taskStyles.taskLoadError} role="alert">
+          {loadErrorMessage}
+        </p>
+      </div>
     );
   }
 
   return (
-    <div class={styles.workspaceMain}>
-      <TaskBoard
-        tasks={tasks}
-        workspace={activeWorkspace}
-        zoomParentId={zoomParentId}
-        selectedTaskId={selectedTaskId}
-        onSelectTask={selectTask}
-      />
-      <TaskDetail />
+    <div class={[styles.workspaceMain, transitionStyles.workspaceMain].join(' ')}>
+      {isWorkspaceMainVisible ? (
+        <>
+          <TaskBoard
+            tasks={tasks}
+            workspace={activeWorkspace}
+            zoomParentId={zoomParentId}
+            selectedTaskId={selectedTaskId}
+            isLoading={isLoading}
+            onSelectTask={selectTask}
+          />
+          <TaskDetail />
+        </>
+      ) : undefined}
     </div>
   );
 }
@@ -65,6 +70,7 @@ function useWorkspaceMainState() {
       activeWorkspaceId: state.activeWorkspaceId,
       tasks: state.tasks,
       isLoading: state.isTasksLoading,
+      isWorkspaceMainVisible: state.isWorkspaceMainVisible,
       loadErrorMessage: state.tasksLoadError,
       zoomParentId: state.zoomParentId,
       selectedTaskId: state.selectedTaskId,

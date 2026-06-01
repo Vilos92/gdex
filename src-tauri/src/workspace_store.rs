@@ -43,6 +43,16 @@ pub fn add_workspace(
     validate_workspace_paths(&config_path, &storage_path)?;
     let store = open_store(app)?;
     let mut workspaces = load_workspaces(&store)?;
+    let name = name.trim().to_owned();
+    if name.is_empty() {
+        return Err("workspace name must not be empty".to_owned());
+    }
+    if workspaces
+        .iter()
+        .any(|workspace| workspace.name.trim() == name)
+    {
+        return Err(format!("workspace name already exists: {name}"));
+    }
     let workspace = Workspace {
         id: new_workspace_id(),
         name,
