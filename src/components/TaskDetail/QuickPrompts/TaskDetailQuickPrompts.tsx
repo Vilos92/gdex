@@ -25,10 +25,6 @@ export function TaskDetailQuickPrompts({workspace, taskId, status}: TaskDetailQu
   const [selectedId, setSelectedId] = useState<AgentPrompt['id']>(DEFAULT_AGENT_PROMPT_ID);
 
   useEffect(() => {
-    setSelectedId(DEFAULT_AGENT_PROMPT_ID);
-  }, [taskId, workspace.id]);
-
-  useEffect(() => {
     setSelectedId(current => {
       const selected = buildAgentPrompts({workspace, taskId, status}).find(prompt => prompt.id === current);
       return selected?.isAvailable ? current : DEFAULT_AGENT_PROMPT_ID;

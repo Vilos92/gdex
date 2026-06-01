@@ -151,7 +151,12 @@ function TaskDetailContent({task, tasks, workspace, onOpenChildTask}: TaskDetail
       <TaskDetailHeader id={task.id} name={task.name} status={status} />
       <TaskDetailFields task={task} blockers={blockers} />
       {workspace !== undefined ? (
-        <TaskDetailQuickPrompts workspace={workspace} taskId={task.id} status={status} />
+        <TaskDetailQuickPrompts
+          key={`${workspace.id}:${task.id}`}
+          workspace={workspace}
+          taskId={task.id}
+          status={status}
+        />
       ) : undefined}
       <TaskDetailChildTasks childTasks={childTasks} onOpenChildTask={onOpenChildTask} />
     </aside>
