@@ -22,9 +22,13 @@ export const list = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '0.35rem',
+  flex: 1,
+  minHeight: 0,
   margin: 0,
   padding: 0,
-  listStyle: 'none'
+  listStyle: 'none',
+  overflowX: 'hidden',
+  overflowY: 'auto'
 });
 
 export const taskButton = style({

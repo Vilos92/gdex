@@ -1,6 +1,7 @@
 import dedent from 'ts-dedent';
 
 import type {TaskStatus} from '@/lib/taskApi';
+import type {Workspace} from '@/lib/workspaceApi';
 
 /*
  * Types.
@@ -20,7 +21,7 @@ export type AgentPrompt = {
 type AgentPromptDefinition = {
   id: AgentPromptId;
   label: string;
-  buildText: (workspaceName: string, taskId: string) => string;
+  buildText: (workspace: Workspace, taskId: string) => string;
 };
 
 /*
@@ -47,16 +48,16 @@ const visibilityByPromptId: Record<AgentPromptId, (status: TaskStatus) => boolea
 
 /** Agent instruction snippets in display order; unavailable prompts stay listed but marked disabled. */
 export function buildAgentPrompts(input: {
-  workspaceName: string;
+  workspace: Workspace;
   taskId: string;
   status: TaskStatus;
 }): readonly AgentPrompt[] {
-  const {workspaceName, taskId, status} = input;
+  const {workspace, taskId, status} = input;
 
   return AGENT_PROMPT_DEFINITIONS.map(definition => ({
     id: definition.id,
     label: definition.label,
-    text: definition.buildText(workspaceName, taskId),
+    text: definition.buildText(workspace, taskId),
     isAvailable: visibilityByPromptId[definition.id](status)
   }));
 }
@@ -70,48 +71,54 @@ function quoteCliArg(value: string): string {
   return `'${value.replace(/'/g, "'\\''")}'`;
 }
 
-function buildViewPrompt(workspaceName: string, taskId: string): string {
-  const ws = quoteCliArg(workspaceName);
+function dexBaseCommand(workspace: Workspace): string {
+  const configPath = quoteCliArg(workspace.configPath);
+  const storagePath = quoteCliArg(workspace.storagePath);
+  return `dex --config ${configPath} --storage-path ${storagePath}`;
+}
+
+function buildViewPrompt(workspace: Workspace, taskId: string): string {
+  const baseCommand = dexBaseCommand(workspace);
   const id = quoteCliArg(taskId);
 
   return agentPromptText`
-    View and understand dex task \`${taskId}\` (workspace \`${workspaceName}\`) — read only for now; do not start implementation.
-    Run \`gdex ${ws} show ${id} --full\`, summarize what the task is asking, and discuss scope or questions with the user.
-    Wait for explicit direction before changing code or running \`gdex ${ws} start ${id}\`.
+    View and understand dex task \`${taskId}\` (workspace \`${workspace.name}\`) — read only for now; do not start implementation.
+    Run \`${baseCommand} show ${id} --full\`, summarize what the task is asking, and discuss scope or questions with the user.
+    Wait for explicit direction before changing code or running \`${baseCommand} start ${id}\`.
   `;
 }
 
-function buildStartPrompt(workspaceName: string, taskId: string): string {
-  const ws = quoteCliArg(workspaceName);
+function buildStartPrompt(workspace: Workspace, taskId: string): string {
+  const baseCommand = dexBaseCommand(workspace);
   const id = quoteCliArg(taskId);
 
   return agentPromptText`
-    Kick off dex task \`${taskId}\` (workspace \`${workspaceName}\`).
-    Run \`gdex ${ws} start ${id}\`, then work through the task with the user.
+    Kick off dex task \`${taskId}\` (workspace \`${workspace.name}\`).
+    Run \`${baseCommand} start ${id}\`, then work through the task with the user.
     When implementation is done, run any self-feedback or validation the project expects (lint, typecheck, etc.).
     Pause for the human to review and commit your changes — do not mark the dex task complete until after that commit.
-    Then run \`gdex ${ws} complete ${id} --result "..."\` with a concise result summary.
+    Then run \`${baseCommand} complete ${id} --result "..."\` with a concise result summary.
   `;
 }
 
-function buildCompletePrompt(workspaceName: string, taskId: string): string {
-  const ws = quoteCliArg(workspaceName);
+function buildCompletePrompt(workspace: Workspace, taskId: string): string {
+  const baseCommand = dexBaseCommand(workspace);
   const id = quoteCliArg(taskId);
 
   return agentPromptText`
-    Mark dex task \`${taskId}\` complete (workspace \`${workspaceName}\`).
-    When done, run \`gdex ${ws} complete ${id} --result "..."\` with a concise result summary.
+    Mark dex task \`${taskId}\` complete (workspace \`${workspace.name}\`).
+    When done, run \`${baseCommand} complete ${id} --result "..."\` with a concise result summary.
   `;
 }
 
-function buildDeletePrompt(workspaceName: string, taskId: string): string {
-  const ws = quoteCliArg(workspaceName);
+function buildDeletePrompt(workspace: Workspace, taskId: string): string {
+  const baseCommand = dexBaseCommand(workspace);
   const id = quoteCliArg(taskId);
 
   return agentPromptText`
-    Delete dex task \`${taskId}\` safely (workspace \`${workspaceName}\`).
-    Run \`gdex ${ws} show ${id} --full\` first, warn about subtasks if any,
-    get user confirmation, then \`gdex ${ws} delete ${id}\` (or \`-f\` if appropriate).
+    Delete dex task \`${taskId}\` safely (workspace \`${workspace.name}\`).
+    Run \`${baseCommand} show ${id} --full\` first, warn about subtasks if any,
+    get user confirmation, then \`${baseCommand} delete ${id}\` (or \`-f\` if appropriate).
   `;
 }
 
@@ -121,9 +128,9 @@ function buildDeletePrompt(workspaceName: string, taskId: string): string {
  * @example
  * agentPromptText`
  *   Kick off dex task \`oobeapzz\` (workspace \`greg\`).
- *   Run \`gdex greg start oobeapzz\`, then work through the task with the user.
+ *   Run \`dex --config ... --storage-path ... start oobeapzz\`, then work through the task with the user.
  * `;
- * // => "Kick off dex task `oobeapzz` (workspace `greg`). Run `gdex greg start oobeapzz`, then work through the task with the user."
+ * // => "Kick off dex task `oobeapzz` (workspace `greg`). Run `dex --config ... --storage-path ... start oobeapzz`, then work through the task with the user."
  */
 function agentPromptText(templ: TemplateStringsArray, ...values: unknown[]): string {
   return dedent(templ, ...values).replace(/\n+/g, ' ');

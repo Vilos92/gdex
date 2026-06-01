@@ -4,13 +4,14 @@ import {AgentPromptCodeBlock} from '@/components/TaskDetail/QuickPrompts/AgentPr
 import * as styles from '@/components/TaskDetail/QuickPrompts/taskDetailQuickPrompts.css';
 import {type AgentPrompt, buildAgentPrompts, DEFAULT_AGENT_PROMPT_ID} from '@/lib/agentPrompts';
 import type {TaskStatus} from '@/lib/taskApi';
+import type {Workspace} from '@/lib/workspaceApi';
 
 /*
  * Types.
  */
 
 export type TaskDetailQuickPromptsProps = {
-  workspaceName: string;
+  workspace: Workspace;
   taskId: string;
   status: TaskStatus;
 };
@@ -19,22 +20,16 @@ export type TaskDetailQuickPromptsProps = {
  * Component.
  */
 
-export function TaskDetailQuickPrompts({workspaceName, taskId, status}: TaskDetailQuickPromptsProps) {
-  const prompts = buildAgentPrompts({workspaceName, taskId, status});
+export function TaskDetailQuickPrompts({workspace, taskId, status}: TaskDetailQuickPromptsProps) {
+  const prompts = buildAgentPrompts({workspace, taskId, status});
   const [selectedId, setSelectedId] = useState<AgentPrompt['id']>(DEFAULT_AGENT_PROMPT_ID);
 
   useEffect(() => {
-    setSelectedId(DEFAULT_AGENT_PROMPT_ID);
-  }, [taskId, workspaceName]);
-
-  useEffect(() => {
     setSelectedId(current => {
-      const selected = buildAgentPrompts({workspaceName, taskId, status}).find(
-        prompt => prompt.id === current
-      );
+      const selected = buildAgentPrompts({workspace, taskId, status}).find(prompt => prompt.id === current);
       return selected?.isAvailable ? current : DEFAULT_AGENT_PROMPT_ID;
     });
-  }, [status, workspaceName, taskId]);
+  }, [status, workspace, taskId]);
 
   const activePrompt = prompts.find(prompt => prompt.id === selectedId) ?? prompts[0];
   if (activePrompt === undefined) {
