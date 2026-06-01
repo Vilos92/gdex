@@ -14,6 +14,7 @@ export type TaskListProps = {
   tasks: Tasks;
   workspace: Workspace;
   selectedTaskId: string | undefined;
+  isLoading: boolean;
   onSelectTask: (taskId: string) => void;
 };
 
@@ -85,11 +86,14 @@ function TaskListItem({task, isSelected, onSelectTask, onContextMenu}: TaskListI
   );
 }
 
-export function TaskList({tasks, workspace, selectedTaskId, onSelectTask}: TaskListProps) {
+export function TaskList({tasks, workspace, selectedTaskId, isLoading, onSelectTask}: TaskListProps) {
   const sortedTasks = [...tasks].sort(compareTasks);
   const [contextMenu, setContextMenu] = useState<TaskContextMenuState | undefined>(undefined);
 
   if (sortedTasks.length === 0) {
+    if (isLoading) {
+      return null;
+    }
     return <p class={styles.emptyMessage}>No tasks at this level.</p>;
   }
 

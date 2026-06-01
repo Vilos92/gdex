@@ -30,11 +30,13 @@ export function AddWorkspacePanel({
   const [activationError, setActivationError] = useState<string | undefined>(undefined);
   const setWorkspaces = useAppStore(state => state.setWorkspaces);
   const setActiveWorkspaceId = useAppStore(state => state.setActiveWorkspaceId);
+  const loadActiveWorkspaceTasks = useAppStore(state => state.loadActiveWorkspaceTasks);
 
   const handleRegistered = (workspace: Workspace) =>
     appendRegisteredWorkspace(workspace, {
       setWorkspaces,
       setActiveWorkspaceId,
+      loadActiveWorkspaceTasks,
       setActivationError,
       closeForm: () => setIsFormOpen(false)
     });
@@ -61,6 +63,7 @@ export function AddWorkspacePanel({
 type AppendRegisteredWorkspaceDeps = {
   setWorkspaces: ReturnType<typeof useAppStore.getState>['setWorkspaces'];
   setActiveWorkspaceId: (id: string) => void;
+  loadActiveWorkspaceTasks: ReturnType<typeof useAppStore.getState>['loadActiveWorkspaceTasks'];
   setActivationError: (message: string | undefined) => void;
   closeForm: () => void;
 };
@@ -95,6 +98,13 @@ async function appendRegisteredWorkspace(workspace: Workspace, deps: AppendRegis
     return;
   }
   deps.setActiveWorkspaceId(workspaceId);
+  try {
+    await deps.loadActiveWorkspaceTasks();
+  } catch (error) {
+    console.error('load_active_workspace_tasks failed', error);
+    deps.setActivationError(invokeErrorMessage(error, 'Could not load workspace tasks.'));
+    return;
+  }
   deps.closeForm();
 }
 

@@ -116,7 +116,6 @@ export const collapsedWorkspaceSquare = style({
   fontSize: '0.875rem',
   fontWeight: 600,
   lineHeight: 1,
-  color: palette.text,
   selectors: {
     '&:hover': {
       backgroundColor: palette.accentMuted,
@@ -129,7 +128,6 @@ export const collapsedWorkspaceSquare = style({
   },
   '@media': {
     '(prefers-color-scheme: dark)': {
-      color: palette.textDark,
       selectors: {
         '&:hover': {
           backgroundColor: palette.accentMutedDark

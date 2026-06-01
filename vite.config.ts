@@ -1,7 +1,7 @@
 import preact from '@preact/preset-vite';
 import {vanillaExtractPlugin} from '@vanilla-extract/vite-plugin';
-import {defineConfig} from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import {defineConfig} from 'vitest/config';
 
 /*
  * Constants.
@@ -16,6 +16,11 @@ const host = process.env.TAURI_DEV_HOST;
 // https://vite.dev/config/
 export default defineConfig(async () => ({
   plugins: [tsconfigPaths(), vanillaExtractPlugin(), preact()],
+
+  test: {
+    environment: 'node',
+    include: ['src/**/*.test.ts']
+  },
 
   // Keep Tauri packages out of Vite pre-bundling so `window.__TAURI_INTERNALS__` resolves in the webview.
   optimizeDeps: {
