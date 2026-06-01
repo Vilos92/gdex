@@ -64,10 +64,6 @@ export const taskButton = style({
 export const taskButtonSelected = style({
   backgroundColor: palette.accentMuted,
   borderColor: palette.accent,
-  ...inDarkScheme({
-    backgroundColor: palette.accentMutedDark,
-    borderColor: palette.accent
-  }),
   selectors: {
     '&:hover': {
       backgroundColor: palette.accentMuted,

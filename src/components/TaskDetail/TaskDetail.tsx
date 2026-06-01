@@ -205,10 +205,7 @@ function TaskDetailFields({task, blockers}: TaskDetailFieldsProps) {
   return (
     <>
       {task.description !== undefined ? (
-        <details
-          class={disclosureStyles.panelDisclosureDetails}
-          open={!checkIsLongDescription(task.description)}
-        >
+        <details class={disclosureStyles.panelDisclosureDetails} open={!isLongDescription(task.description)}>
           <summary class={disclosureStyles.panelDisclosureSummary}>Description</summary>
           <p class={styles.sectionBody}>{task.description}</p>
         </details>
@@ -319,7 +316,7 @@ function statusLabel(status: TaskStatus): string {
   }
 }
 
-function checkIsLongDescription(description: string): boolean {
+function isLongDescription(description: string): boolean {
   const trimmed = description.trim();
   if (trimmed.length === 0) {
     return false;
