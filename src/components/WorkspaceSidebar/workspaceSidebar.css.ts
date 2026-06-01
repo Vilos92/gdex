@@ -136,7 +136,8 @@ export const collapsedWorkspaceSquare = style({
   }
 });
 
-export const collapsedWorkspaceSquareActive = style({
+/** Active workspace target (collapsed square or expanded list row). */
+const sidebarWorkspaceActive = style({
   backgroundColor: palette.accentMuted,
   borderColor: palette.accent,
   selectors: {
@@ -154,6 +155,8 @@ export const collapsedWorkspaceSquareActive = style({
     }
   }
 });
+
+export const collapsedWorkspaceSquareActive = sidebarWorkspaceActive;
 
 export const collapseToggle = panelIconButton;
 
@@ -211,24 +214,7 @@ export const workspaceButton = style({
   fontWeight: 500
 });
 
-export const workspaceButtonActive = style({
-  backgroundColor: palette.accentMuted,
-  borderColor: palette.accent,
-  selectors: {
-    '&:hover': {
-      backgroundColor: palette.accentMuted,
-      borderColor: palette.accent
-    },
-    [darkSelector(':hover')]: {
-      backgroundColor: palette.accentMutedDark,
-      borderColor: palette.accent
-    },
-    [darkSelector()]: {
-      backgroundColor: palette.accentMutedDark,
-      borderColor: palette.accent
-    }
-  }
-});
+export const workspaceButtonActive = sidebarWorkspaceActive;
 
 export const addSection = style({
   display: 'flex',

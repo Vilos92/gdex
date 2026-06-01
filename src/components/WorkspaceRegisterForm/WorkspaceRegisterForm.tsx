@@ -8,11 +8,9 @@ import * as formStyles from '@/styles/formFields.css';
  * Types.
  */
 
-type WorkspaceRegisterFormLayout = 'default' | 'sidebar';
-
 export type WorkspaceRegisterFormProps = {
   class?: string;
-  layout?: WorkspaceRegisterFormLayout;
+  layout?: 'default' | 'sidebar';
   onRegistered: (workspace: Workspace) => void | Promise<void>;
 };
 
@@ -20,7 +18,10 @@ export type WorkspaceRegisterFormProps = {
  * Styles.
  */
 
-function registerFormClass(layout: WorkspaceRegisterFormLayout, extraClass: string | undefined): string {
+function registerFormClass(
+  layout: NonNullable<WorkspaceRegisterFormProps['layout']>,
+  extraClass: string | undefined
+): string {
   return [styles.form, layout === 'sidebar' ? styles.formSidebar : '', extraClass].filter(Boolean).join(' ');
 }
 
