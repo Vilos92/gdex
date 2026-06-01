@@ -9,7 +9,7 @@ import {setActiveWorkspace} from '@/lib/workspaceApi';
 
 type TaskLoadResult = {ok: true; tasks: Tasks} | {ok: false; error: unknown};
 
-type WorkspaceTaskUiState = {
+export type WorkspaceTaskPaneState = {
   tasks: Tasks;
   isTasksLoading: boolean;
   tasksLoadError: string | undefined;
@@ -18,11 +18,11 @@ type WorkspaceTaskUiState = {
   zoomParentId: string | undefined;
 };
 
-type WorkspaceTransitionSet = (
-  partial: Partial<WorkspaceTaskUiState & {activeWorkspaceId: string | undefined}>
+export type WorkspaceTaskPaneSet = (
+  partial: Partial<WorkspaceTaskPaneState & {activeWorkspaceId: string | undefined}>
 ) => void;
 
-type WorkspaceTransitionGet = () => {
+export type WorkspaceTaskPaneGet = () => {
   activeWorkspaceId: string | undefined;
   isWorkspaceMainVisible: boolean;
 };
@@ -44,7 +44,7 @@ function checkIsStaleTaskLoadRequest(requestId: number): boolean {
 
 /** Named task-pane state slices so switch, boot, and clear paths stay aligned. */
 export const workspaceTaskUi = {
-  exiting(workspaceId: string): WorkspaceTaskUiState & {activeWorkspaceId: string} {
+  exiting(workspaceId: string): WorkspaceTaskPaneState & {activeWorkspaceId: string} {
     return {
       activeWorkspaceId: workspaceId,
       isWorkspaceMainVisible: false,
@@ -58,7 +58,7 @@ export const workspaceTaskUi = {
 
   activating(
     activeWorkspaceId: string | undefined
-  ): WorkspaceTaskUiState & {activeWorkspaceId: string | undefined} {
+  ): WorkspaceTaskPaneState & {activeWorkspaceId: string | undefined} {
     return {
       activeWorkspaceId,
       tasks: [],
@@ -70,7 +70,7 @@ export const workspaceTaskUi = {
     };
   },
 
-  awaitingFirstLoad(activeWorkspaceId: string): WorkspaceTaskUiState & {activeWorkspaceId: string} {
+  awaitingFirstLoad(activeWorkspaceId: string): WorkspaceTaskPaneState & {activeWorkspaceId: string} {
     return {
       activeWorkspaceId,
       tasks: [],
@@ -82,7 +82,7 @@ export const workspaceTaskUi = {
     };
   },
 
-  cleared(): WorkspaceTaskUiState {
+  cleared(): WorkspaceTaskPaneState {
     return {
       tasks: [],
       isTasksLoading: false,
@@ -93,7 +93,7 @@ export const workspaceTaskUi = {
     };
   },
 
-  revealed(loadResult: TaskLoadResult): WorkspaceTaskUiState {
+  revealed(loadResult: TaskLoadResult): WorkspaceTaskPaneState {
     if (loadResult.ok) {
       return {
         tasks: loadResult.tasks,
@@ -116,7 +116,7 @@ export const workspaceTaskUi = {
     };
   },
 
-  persistFailed(error: unknown): WorkspaceTaskUiState {
+  persistFailed(error: unknown): WorkspaceTaskPaneState {
     return {
       tasks: [],
       tasksLoadError: invokeErrorMessage(error, 'Could not set active workspace.'),
@@ -128,13 +128,15 @@ export const workspaceTaskUi = {
   }
 };
 
-export function beginTaskLoad(set: WorkspaceTransitionSet): number {
+export function beginTaskLoad(set: WorkspaceTaskPaneSet): number {
   const requestId = bumpTaskLoadRequest();
   set({isTasksLoading: true, tasksLoadError: undefined});
   return requestId;
 }
 
-export async function loadTasksForWorkspace(workspaceId: string): Promise<TaskLoadResult> {
+export async function loadTasksForWorkspace(
+  workspaceId: string
+): Promise<{ok: true; tasks: Tasks} | {ok: false; error: unknown}> {
   try {
     const tasks = await getTasks(workspaceId);
     return {ok: true, tasks};
@@ -144,9 +146,9 @@ export async function loadTasksForWorkspace(workspaceId: string): Promise<TaskLo
 }
 
 export function applySilentTaskLoad(
-  set: WorkspaceTransitionSet,
+  set: WorkspaceTaskPaneSet,
   requestId: number,
-  loadResult: TaskLoadResult
+  loadResult: {ok: true; tasks: Tasks} | {ok: false; error: unknown}
 ): void {
   if (checkIsStaleTaskLoadRequest(requestId)) {
     return;
@@ -172,8 +174,8 @@ export function applySilentTaskLoad(
  * Phase 3 — animate the main pane in with loaded (or error) content.
  */
 export async function switchWorkspaceWithTransition(
-  set: WorkspaceTransitionSet,
-  get: WorkspaceTransitionGet,
+  set: WorkspaceTaskPaneSet,
+  get: WorkspaceTaskPaneGet,
   workspaceId: string
 ): Promise<void> {
   if (workspaceId === get().activeWorkspaceId) {
@@ -181,28 +183,13 @@ export async function switchWorkspaceWithTransition(
   }
 
   const requestId = bumpTaskLoadRequest();
-
-  const applyExitState = () => {
-    set(workspaceTaskUi.exiting(workspaceId));
-  };
-
-  if (get().isWorkspaceMainVisible) {
-    await runViewTransition('workspace-exit', applyExitState);
-  } else {
-    applyExitState();
-  }
+  await exitWorkspaceMain(set, get, workspaceId);
 
   if (checkIsStaleTaskLoadRequest(requestId)) {
     return;
   }
 
-  try {
-    await setActiveWorkspace(workspaceId);
-  } catch (error) {
-    console.error('set_active_workspace failed', error);
-    await revealWorkspaceMain(set, requestId, workspaceTaskUi.persistFailed(error));
-    throw error;
-  }
+  await persistActiveWorkspace(set, requestId, workspaceId);
 
   if (checkIsStaleTaskLoadRequest(requestId)) {
     return;
@@ -214,7 +201,7 @@ export async function switchWorkspaceWithTransition(
 
 /** Load tasks and reveal the main pane with an enter transition when supported. */
 export async function loadActiveWorkspaceWithTransition(
-  set: WorkspaceTransitionSet,
+  set: WorkspaceTaskPaneSet,
   activeWorkspaceId: string
 ): Promise<void> {
   const requestId = beginTaskLoad(set);
@@ -222,10 +209,41 @@ export async function loadActiveWorkspaceWithTransition(
   await revealWorkspaceMain(set, requestId, workspaceTaskUi.revealed(loadResult));
 }
 
-async function revealWorkspaceMain(
-  set: WorkspaceTransitionSet,
+async function exitWorkspaceMain(
+  set: WorkspaceTaskPaneSet,
+  get: WorkspaceTaskPaneGet,
+  workspaceId: string
+): Promise<void> {
+  const applyExitState = () => {
+    set(workspaceTaskUi.exiting(workspaceId));
+  };
+
+  if (get().isWorkspaceMainVisible) {
+    await runViewTransition('workspace-exit', applyExitState);
+    return;
+  }
+
+  applyExitState();
+}
+
+async function persistActiveWorkspace(
+  set: WorkspaceTaskPaneSet,
   requestId: number,
-  nextUi: WorkspaceTaskUiState
+  workspaceId: string
+): Promise<void> {
+  try {
+    await setActiveWorkspace(workspaceId);
+  } catch (error) {
+    console.error('set_active_workspace failed', error);
+    await revealWorkspaceMain(set, requestId, workspaceTaskUi.persistFailed(error));
+    throw error;
+  }
+}
+
+async function revealWorkspaceMain(
+  set: WorkspaceTaskPaneSet,
+  requestId: number,
+  nextUi: WorkspaceTaskPaneState
 ): Promise<void> {
   if (checkIsStaleTaskLoadRequest(requestId)) {
     return;

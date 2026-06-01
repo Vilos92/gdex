@@ -1,12 +1,6 @@
 import {flushSync} from 'preact/compat';
 
 /*
- * Types.
- */
-
-type WorkspaceViewTransitionType = 'workspace-exit' | 'workspace-enter';
-
-/*
  * Helpers.
  */
 
@@ -16,7 +10,10 @@ export function checkHasViewTransition(): boolean {
 }
 
 /** Runs a DOM update inside a typed view transition when available. */
-export function runViewTransition(type: WorkspaceViewTransitionType, update: () => void): Promise<void> {
+export function runViewTransition(
+  type: 'workspace-exit' | 'workspace-enter',
+  update: () => void
+): Promise<void> {
   if (!checkHasViewTransition()) {
     update();
     return Promise.resolve();
