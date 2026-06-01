@@ -9,6 +9,7 @@ import type {Workspaces} from '@/lib/workspaceApi';
 export type CollapsedWorkspaceSidebarBodyProps = {
   workspaces: Workspaces;
   activeWorkspaceId: string | undefined;
+  isWorkspaceSwitching: boolean;
   selectError: string | undefined;
   onSelect: (workspaceId: string) => void;
   onAddWorkspace: () => void;
@@ -21,6 +22,7 @@ export type CollapsedWorkspaceSidebarBodyProps = {
 export function CollapsedWorkspaceSidebarBody({
   workspaces,
   activeWorkspaceId,
+  isWorkspaceSwitching,
   selectError,
   onSelect,
   onAddWorkspace
@@ -36,6 +38,7 @@ export function CollapsedWorkspaceSidebarBody({
         <CollapsedWorkspaceList
           workspaces={workspaces}
           activeWorkspaceId={activeWorkspaceId}
+          isWorkspaceSwitching={isWorkspaceSwitching}
           onSelect={onSelect}
         />
       </div>

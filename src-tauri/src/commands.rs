@@ -3,6 +3,7 @@
 use tauri::{AppHandle, State};
 
 use crate::dex_client::{DexClient, DexProject, DexTask};
+use crate::theme_store::{self, ThemeMode};
 use crate::watcher::TaskWatcher;
 use crate::workspace_store::{self, validate_dex_storage_path, Workspace};
 
@@ -87,6 +88,16 @@ pub fn get_task(
 ///
 /// Returns `Ok(())` when both checks pass, or an `Err` with a user-readable description
 /// of the first failure.
+#[tauri::command]
+pub fn get_theme_mode(app: AppHandle) -> Result<ThemeMode, String> {
+    theme_store::get_theme_mode(&app)
+}
+
+#[tauri::command]
+pub fn set_theme_mode(app: AppHandle, mode: ThemeMode) -> Result<(), String> {
+    theme_store::set_theme_mode(&app, mode)
+}
+
 #[tauri::command]
 pub fn validate_workspace(
     dex: State<'_, DexClient>,

@@ -1,5 +1,6 @@
 import {style} from '@vanilla-extract/css';
 
+import {inDarkScheme} from '@/styles/darkScheme';
 import {palette} from '@/styles/tokens';
 
 /*
@@ -28,11 +29,9 @@ export const splashSubtitle = style({
   maxWidth: '28rem',
   textAlign: 'center',
   color: palette.textMuted,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textMutedDark
-    }
-  }
+  ...inDarkScheme({
+    color: palette.textMutedDark
+  })
 });
 
 export const appFrame = style({
@@ -74,11 +73,9 @@ export const placeholder = style({
   margin: 0,
   fontSize: '1.125rem',
   color: palette.textMuted,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textMutedDark
-    }
-  }
+  ...inDarkScheme({
+    color: palette.textMutedDark
+  })
 });
 
 export const loading = style({
@@ -87,11 +84,9 @@ export const loading = style({
   alignItems: 'center',
   justifyContent: 'center',
   color: palette.textMuted,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textMutedDark
-    }
-  }
+  ...inDarkScheme({
+    color: palette.textMutedDark
+  })
 });
 
 export const loadError = style({

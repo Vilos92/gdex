@@ -1,5 +1,6 @@
 import {style} from '@vanilla-extract/css';
-
+import {darkSelector, inDarkScheme} from '@/styles/darkScheme';
+import {panelIconButton} from '@/styles/iconButton.css';
 import {palette} from '@/styles/tokens';
 
 /*
@@ -14,12 +15,18 @@ export const topBar = style({
   padding: '0 1.25rem',
   borderBottom: `1px solid ${palette.border}`,
   backgroundColor: palette.surface,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      borderColor: palette.borderDark,
-      backgroundColor: palette.surfaceDark
-    }
-  }
+  ...inDarkScheme({
+    borderColor: palette.borderDark,
+    backgroundColor: palette.surfaceDark
+  })
+});
+
+export const topBarMain = style({
+  display: 'flex',
+  alignItems: 'center',
+  flex: 1,
+  minWidth: 0,
+  gap: '0.5rem'
 });
 
 export const breadcrumb = style({
@@ -59,7 +66,6 @@ export const breadcrumbSegment = style([
     transition: 'none',
     color: palette.link,
     textDecoration: 'inherit',
-    cursor: 'pointer',
     selectors: {
       '&:hover': {
         borderColor: 'transparent',
@@ -77,15 +83,9 @@ export const breadcrumbSegment = style([
         outline: `2px solid ${palette.accent}`,
         outlineOffset: '2px',
         borderRadius: '4px'
-      }
-    },
-    '@media': {
-      '(prefers-color-scheme: dark)': {
-        selectors: {
-          '&:hover': {
-            color: palette.linkHoverDark
-          }
-        }
+      },
+      [darkSelector(':hover')]: {
+        color: palette.linkHoverDark
       }
     }
   }
@@ -95,11 +95,9 @@ export const breadcrumbSeparator = style([
   breadcrumbItem,
   {
     color: palette.textMuted,
-    '@media': {
-      '(prefers-color-scheme: dark)': {
-        color: palette.textMutedDark
-      }
-    }
+    ...inDarkScheme({
+      color: palette.textMutedDark
+    })
   }
 ]);
 
@@ -107,11 +105,9 @@ export const breadcrumbCurrent = style([
   breadcrumbItem,
   {
     color: palette.textMuted,
-    '@media': {
-      '(prefers-color-scheme: dark)': {
-        color: palette.textMutedDark
-      }
-    }
+    ...inDarkScheme({
+      color: palette.textMutedDark
+    })
   }
 ]);
 
@@ -122,3 +118,5 @@ export const appTitle = style([
     letterSpacing: '-0.02em'
   }
 ]);
+
+export const themeToggle = style([panelIconButton]);

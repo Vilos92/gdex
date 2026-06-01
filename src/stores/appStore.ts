@@ -3,6 +3,14 @@ import {create} from 'zustand';
 
 import {invokeErrorMessage} from '@/lib/error';
 import type {Tasks} from '@/lib/taskApi';
+import {
+  applyThemeMode,
+  hydrateThemeFromDisk,
+  nextThemeMode,
+  persistThemeMode,
+  readThemeModeCache,
+  syncNativeWindowTheme
+} from '@/lib/theme';
 import {listWorkspaces, removeWorkspace} from '@/lib/workspaceApi';
 import {loadWorkspaceSelection} from '@/lib/workspaceSelection';
 import {
@@ -14,6 +22,7 @@ import {
   switchWorkspaceWithTransition,
   workspaceTaskUi
 } from '@/lib/workspaceViewTransition';
+import type {ThemeMode} from '@/schemas/theme';
 import type {Workspaces} from '@/schemas/workspace';
 
 /*
@@ -33,6 +42,7 @@ type AppData = {
   isWorkspaceMainVisible: boolean;
   selectedTaskId: string | undefined;
   zoomParentId: string | undefined;
+  themeMode: ThemeMode;
 };
 
 type WorkspacesUpdater = Workspaces | ((workspaces: Workspaces) => Workspaces);
@@ -62,6 +72,9 @@ type AppActions = {
    * If at least one workspace remains, the first one is activated.
    */
   deleteWorkspace: (workspaceId: string) => Promise<void>;
+  hydrateTheme: () => Promise<void>;
+  cycleThemeMode: () => Promise<void>;
+  handleSystemColorSchemeChange: () => void;
 };
 
 type AppState = AppData & AppActions;
@@ -81,6 +94,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   isWorkspaceMainVisible: true,
   selectedTaskId: undefined,
   zoomParentId: undefined,
+  themeMode: readThemeModeCache() ?? 'auto',
 
   setView: view => set({view}),
 
@@ -203,6 +217,27 @@ export const useAppStore = create<AppState>((set, get) => ({
       disposed = true;
       unlisten?.();
     };
+  },
+
+  hydrateTheme: async () => {
+    const mode = await hydrateThemeFromDisk();
+    set({themeMode: mode});
+  },
+
+  cycleThemeMode: async () => {
+    const nextMode = nextThemeMode(get().themeMode);
+    await persistThemeMode(nextMode);
+    set({themeMode: nextMode});
+  },
+
+  handleSystemColorSchemeChange: () => {
+    if (get().themeMode !== 'auto') {
+      return;
+    }
+    const resolved = applyThemeMode('auto');
+    syncNativeWindowTheme('auto', resolved).catch(error => {
+      console.error('native window theme sync failed', error);
+    });
   },
 
   deleteWorkspace: async workspaceId => {

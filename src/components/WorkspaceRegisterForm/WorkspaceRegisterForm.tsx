@@ -8,8 +8,11 @@ import * as formStyles from '@/styles/formFields.css';
  * Types.
  */
 
+export type WorkspaceRegisterFormLayout = 'default' | 'sidebar';
+
 export type WorkspaceRegisterFormProps = {
   class?: string;
+  layout?: WorkspaceRegisterFormLayout;
   onRegistered: (workspace: Workspace) => void | Promise<void>;
 };
 
@@ -17,20 +20,25 @@ export type WorkspaceRegisterFormProps = {
  * Styles.
  */
 
-function registerFormClass(extraClass: string | undefined): string {
-  return [styles.form, extraClass].filter(Boolean).join(' ');
+function registerFormClass(layout: WorkspaceRegisterFormLayout, extraClass: string | undefined): string {
+  return [styles.form, layout === 'sidebar' ? styles.formSidebar : '', extraClass].filter(Boolean).join(' ');
 }
 
 /*
  * Component.
  */
 
-export function WorkspaceRegisterForm({class: className, onRegistered}: WorkspaceRegisterFormProps) {
+export function WorkspaceRegisterForm({
+  class: className,
+  layout = 'default',
+  onRegistered
+}: WorkspaceRegisterFormProps) {
   const registration = useWorkspaceRegistration(onRegistered);
+  const isSidebarLayout = layout === 'sidebar';
 
   return (
     <form
-      class={registerFormClass(className)}
+      class={registerFormClass(layout, className)}
       onSubmit={event => {
         event.preventDefault();
         registration.submitRegistration();
@@ -42,9 +50,10 @@ export function WorkspaceRegisterForm({class: className, onRegistered}: Workspac
         </label>
         <input
           id="workspace-name"
+          class={isSidebarLayout ? styles.nameInput : undefined}
           value={registration.name}
           onInput={event => registration.setName(event.currentTarget.value)}
-          placeholder="greg"
+          placeholder="hello world"
           autoComplete="off"
         />
       </div>
@@ -53,6 +62,7 @@ export function WorkspaceRegisterForm({class: className, onRegistered}: Workspac
         label="Dex config file"
         path={registration.configPath}
         emptyLabel="No config selected"
+        isStacked={isSidebarLayout}
         onPick={registration.selectConfig}
       />
 
@@ -60,6 +70,7 @@ export function WorkspaceRegisterForm({class: className, onRegistered}: Workspac
         label="Dex storage directory"
         path={registration.storagePath}
         emptyLabel="No storage directory selected"
+        isStacked={isSidebarLayout}
         onPick={registration.selectStorage}
       />
 

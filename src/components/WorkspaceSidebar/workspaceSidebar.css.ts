@@ -1,5 +1,5 @@
 import {style} from '@vanilla-extract/css';
-
+import {darkSelector, inDarkScheme} from '@/styles/darkScheme';
 import {panelIconButton} from '@/styles/iconButton.css';
 import {palette} from '@/styles/tokens';
 
@@ -12,14 +12,13 @@ const sidebarSurface = {
   minHeight: 0,
   overflow: 'hidden',
   borderRight: `1px solid ${palette.border}`,
-  backgroundColor: palette.surface,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      borderColor: palette.borderDark,
-      backgroundColor: palette.surfaceDark
-    }
-  }
+  backgroundColor: palette.surface
 } as const;
+
+const sidebarSurfaceDark = inDarkScheme({
+  borderColor: palette.borderDark,
+  backgroundColor: palette.surfaceDark
+});
 
 export const sidebar = style({
   display: 'flex',
@@ -29,7 +28,8 @@ export const sidebar = style({
   minWidth: '8.5rem',
   maxWidth: '13rem',
   padding: '1rem',
-  ...sidebarSurface
+  ...sidebarSurface,
+  ...sidebarSurfaceDark
 });
 
 export const sidebarBody = style({
@@ -52,7 +52,8 @@ export const sidebarCollapsed = style({
   minWidth: '2.75rem',
   maxWidth: '2.75rem',
   padding: '1rem 0.35rem',
-  ...sidebarSurface
+  ...sidebarSurface,
+  ...sidebarSurfaceDark
 });
 
 export const sidebarCollapsedBody = style({
@@ -102,9 +103,9 @@ export const collapsedWorkspaceList = style({
 });
 
 export const collapsedWorkspaceSquare = style({
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
+  display: 'grid',
+  placeItems: 'center',
+  boxSizing: 'border-box',
   width: '2rem',
   height: '2rem',
   margin: 0,
@@ -116,6 +117,9 @@ export const collapsedWorkspaceSquare = style({
   fontSize: '0.875rem',
   fontWeight: 600,
   lineHeight: 1,
+  textAlign: 'center',
+  textBoxTrim: 'trim-both',
+  textBoxEdge: 'cap alphabetic',
   selectors: {
     '&:hover': {
       backgroundColor: palette.accentMuted,
@@ -124,15 +128,10 @@ export const collapsedWorkspaceSquare = style({
     '&:focus-visible': {
       outline: `2px solid ${palette.accent}`,
       outlineOffset: '2px'
-    }
-  },
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      selectors: {
-        '&:hover': {
-          backgroundColor: palette.accentMutedDark
-        }
-      }
+    },
+    [darkSelector(':hover')]: {
+      backgroundColor: palette.accentMutedDark,
+      borderColor: 'transparent'
     }
   }
 });
@@ -140,8 +139,16 @@ export const collapsedWorkspaceSquare = style({
 export const collapsedWorkspaceSquareActive = style({
   backgroundColor: palette.accentMuted,
   borderColor: palette.accent,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
+  selectors: {
+    '&:hover': {
+      backgroundColor: palette.accentMuted,
+      borderColor: palette.accent
+    },
+    [darkSelector(':hover')]: {
+      backgroundColor: palette.accentMutedDark,
+      borderColor: palette.accent
+    },
+    [darkSelector()]: {
       backgroundColor: palette.accentMutedDark,
       borderColor: palette.accent
     }
@@ -207,8 +214,16 @@ export const workspaceButton = style({
 export const workspaceButtonActive = style({
   backgroundColor: palette.accentMuted,
   borderColor: palette.accent,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
+  selectors: {
+    '&:hover': {
+      backgroundColor: palette.accentMuted,
+      borderColor: palette.accent
+    },
+    [darkSelector(':hover')]: {
+      backgroundColor: palette.accentMutedDark,
+      borderColor: palette.accent
+    },
+    [darkSelector()]: {
       backgroundColor: palette.accentMutedDark,
       borderColor: palette.accent
     }
@@ -218,14 +233,12 @@ export const workspaceButtonActive = style({
 export const addSection = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '0.75rem',
-  paddingTop: '0.5rem',
+  gap: '1rem',
+  paddingTop: '0.75rem',
   borderTop: `1px solid ${palette.border}`,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      borderColor: palette.borderDark
-    }
-  }
+  ...inDarkScheme({
+    borderColor: palette.borderDark
+  })
 });
 
 export const addToggle = style({

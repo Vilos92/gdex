@@ -115,5 +115,5 @@ function renderRegisterForm(
   if (!isFormOpen) {
     return undefined;
   }
-  return <WorkspaceRegisterForm onRegistered={onRegistered} />;
+  return <WorkspaceRegisterForm layout="sidebar" onRegistered={onRegistered} />;
 }

@@ -8,6 +8,7 @@ import type {Workspaces} from '@/lib/workspaceApi';
 export type WorkspaceListProps = {
   workspaces: Workspaces;
   activeWorkspaceId: string | undefined;
+  isWorkspaceSwitching: boolean;
   onSelect: (workspaceId: string) => void;
 };
 
@@ -23,7 +24,12 @@ function workspaceButtonClass(isActive: boolean): string {
  * Component.
  */
 
-export function WorkspaceList({workspaces, activeWorkspaceId, onSelect}: WorkspaceListProps) {
+export function WorkspaceList({
+  workspaces,
+  activeWorkspaceId,
+  isWorkspaceSwitching,
+  onSelect
+}: WorkspaceListProps) {
   return (
     <ul class={styles.workspaceList}>
       {workspaces.map(workspace => {
@@ -34,6 +40,7 @@ export function WorkspaceList({workspaces, activeWorkspaceId, onSelect}: Workspa
               type="button"
               class={workspaceButtonClass(isActive)}
               aria-current={isActive ? 'true' : undefined}
+              disabled={isWorkspaceSwitching}
               onClick={() => onSelect(workspace.id)}
             >
               {workspace.name}

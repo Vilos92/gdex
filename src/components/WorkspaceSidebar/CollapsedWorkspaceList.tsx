@@ -10,6 +10,7 @@ import * as swatchStyles from '@/styles/workspaceSwatches.css';
 export type CollapsedWorkspaceListProps = {
   workspaces: Workspaces;
   activeWorkspaceId: string | undefined;
+  isWorkspaceSwitching: boolean;
   onSelect: (workspaceId: string) => void;
 };
 
@@ -20,6 +21,7 @@ export type CollapsedWorkspaceListProps = {
 export function CollapsedWorkspaceList({
   workspaces,
   activeWorkspaceId,
+  isWorkspaceSwitching,
   onSelect
 }: CollapsedWorkspaceListProps) {
   return (
@@ -31,13 +33,14 @@ export function CollapsedWorkspaceList({
           <li key={workspace.id}>
             <button
               type="button"
-              class={workspaceSquareClass(isActive)}
+              class={workspaceSquareClass(isActive, workspace.name)}
               aria-current={isActive ? 'true' : undefined}
               aria-label={label}
               title={label}
+              disabled={isWorkspaceSwitching}
               onClick={() => onSelect(workspace.id)}
             >
-              <span class={workspaceLetterClass(workspace.name)}>{workspaceInitial(workspace.name)}</span>
+              {workspaceInitial(workspace.name)}
             </button>
           </li>
         );
@@ -50,8 +53,12 @@ export function CollapsedWorkspaceList({
  * Helpers.
  */
 
-function workspaceSquareClass(isActive: boolean): string {
-  return [styles.collapsedWorkspaceSquare, isActive ? styles.collapsedWorkspaceSquareActive : '']
+function workspaceSquareClass(isActive: boolean, name: string): string {
+  return [
+    styles.collapsedWorkspaceSquare,
+    workspaceLetterClass(name),
+    isActive ? styles.collapsedWorkspaceSquareActive : ''
+  ]
     .filter(Boolean)
     .join(' ');
 }

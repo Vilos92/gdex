@@ -1,5 +1,6 @@
 import {style} from '@vanilla-extract/css';
 
+import {inDarkScheme} from '@/styles/darkScheme';
 import {palette} from '@/styles/tokens';
 
 /*
@@ -9,7 +10,7 @@ import {palette} from '@/styles/tokens';
 export const field = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '0.35rem',
+  gap: '0.5rem',
   textAlign: 'left'
 });
 
@@ -20,8 +21,22 @@ export const label = style({
 
 export const pathRow = style({
   display: 'flex',
-  gap: '0.5rem',
+  gap: '0.65rem',
   alignItems: 'stretch'
+});
+
+export const pathRowStacked = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'stretch',
+  gap: '0.5rem'
+});
+
+export const pathChooseButton = style({
+  alignSelf: 'flex-start',
+  padding: '0.45em 0.85em',
+  fontSize: '0.875rem',
+  whiteSpace: 'nowrap'
 });
 
 export const pathValue = style({
@@ -36,20 +51,16 @@ export const pathValue = style({
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   color: palette.textMuted,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      borderColor: palette.borderDark,
-      backgroundColor: palette.surfaceDark,
-      color: palette.textMutedDark
-    }
-  }
+  ...inDarkScheme({
+    borderColor: palette.borderDark,
+    backgroundColor: palette.surfaceDark,
+    color: palette.textMutedDark
+  })
 });
 
 export const pathValueSet = style({
   color: palette.text,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.textDark
-    }
-  }
+  ...inDarkScheme({
+    color: palette.textDark
+  })
 });

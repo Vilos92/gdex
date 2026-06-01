@@ -1,5 +1,5 @@
 import {style} from '@vanilla-extract/css';
-
+import {darkSelector, inDarkScheme} from '@/styles/darkScheme';
 import {panelIconButton} from '@/styles/iconButton.css';
 import {fonts, palette} from '@/styles/tokens';
 
@@ -15,11 +15,9 @@ export const quickPromptStack = style({
   borderRadius: '8px',
   backgroundColor: palette.codeBlockBg,
   overflow: 'hidden',
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      backgroundColor: palette.codeBlockBgDark
-    }
-  }
+  ...inDarkScheme({
+    backgroundColor: palette.codeBlockBgDark
+  })
 });
 
 export const quickPromptSelect = style({
@@ -34,29 +32,28 @@ export const quickPromptSelect = style({
   fontSize: '0.875rem',
   fontWeight: 500,
   lineHeight: 1.4,
-  cursor: 'pointer',
   boxShadow: 'none',
   transition: 'background-color 120ms',
-  ':hover': {
-    backgroundColor: palette.accentMuted
-  },
-  ':focus-visible': {
-    outline: `2px solid ${palette.controlBorderActive}`,
-    outlineOffset: '-2px',
-    backgroundColor: palette.accentMuted
-  },
-  '@media': {
-    '(prefers-color-scheme: dark)': {
+  selectors: {
+    '&:hover': {
+      backgroundColor: palette.accentMuted
+    },
+    '&:focus-visible': {
+      outline: `2px solid ${palette.controlBorderActive}`,
+      outlineOffset: '-2px',
+      backgroundColor: palette.accentMuted
+    },
+    [darkSelector(':hover')]: {
+      backgroundColor: palette.accentMutedDark
+    },
+    [darkSelector(':focus-visible')]: {
+      outline: `2px solid ${palette.controlBorderActive}`,
+      outlineOffset: '-2px',
+      backgroundColor: palette.accentMutedDark
+    },
+    [darkSelector()]: {
       borderBottomColor: palette.borderDark,
-      color: palette.textDark,
-      selectors: {
-        '&:hover': {
-          backgroundColor: palette.accentMutedDark
-        },
-        '&:focus-visible': {
-          backgroundColor: palette.accentMutedDark
-        }
-      }
+      color: palette.textDark
     }
   }
 });
@@ -91,31 +88,24 @@ export const quickPromptCopyButton = style([
         backgroundColor: palette.controlBgActive,
         borderColor: 'transparent',
         boxShadow: 'none'
-      }
-    },
-    '@media': {
-      '(prefers-color-scheme: dark)': {
-        selectors: {
-          '&:hover': {
-            backgroundColor: palette.pageBgDark,
-            color: palette.textDark
-          },
-          '&:active': {
-            backgroundColor: palette.controlBgActiveDark
-          }
-        }
+      },
+      [darkSelector(':hover')]: {
+        backgroundColor: palette.pageBgDark,
+        borderColor: 'transparent',
+        boxShadow: 'none',
+        color: palette.textDark
+      },
+      [darkSelector(':active')]: {
+        backgroundColor: palette.controlBgActiveDark,
+        borderColor: 'transparent',
+        boxShadow: 'none'
       }
     }
   }
 ]);
 
 export const quickPromptCopyButtonCopied = style({
-  color: palette.accent,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.accent
-    }
-  }
+  color: palette.accent
 });
 
 export const quickPromptCodeText = style({
@@ -129,9 +119,7 @@ export const quickPromptCodeText = style({
   whiteSpace: 'pre-wrap',
   wordBreak: 'break-word',
   color: palette.codeBlockText,
-  '@media': {
-    '(prefers-color-scheme: dark)': {
-      color: palette.codeBlockTextDark
-    }
-  }
+  ...inDarkScheme({
+    color: palette.codeBlockTextDark
+  })
 });

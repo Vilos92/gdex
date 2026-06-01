@@ -1,5 +1,6 @@
 import {style} from '@vanilla-extract/css';
 
+import {inDarkScheme} from '@/styles/darkScheme';
 import {workspaceSwatches} from '@/styles/tokens';
 
 /*
@@ -10,11 +11,8 @@ import {workspaceSwatches} from '@/styles/tokens';
 export const collapsedWorkspaceSwatchLetterStyles = workspaceSwatches.map(swatch =>
   style({
     color: swatch.letter,
-    lineHeight: 1,
-    '@media': {
-      '(prefers-color-scheme: dark)': {
-        color: swatch.letterDark
-      }
-    }
+    ...inDarkScheme({
+      color: swatch.letterDark
+    })
   })
 );
