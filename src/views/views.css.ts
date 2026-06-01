@@ -81,7 +81,9 @@ export const workspaceMainDetail = style({
   minHeight: 0,
   overflow: 'hidden',
   display: 'flex',
-  flexDirection: 'column'
+  flexDirection: 'column',
+  containerType: 'inline-size',
+  containerName: 'task-detail'
 });
 
 export const workspaceMainMessage = style({

@@ -19,8 +19,6 @@ export const panel = style({
   minHeight: 0,
   overflowY: 'auto',
   overflowWrap: 'anywhere',
-  containerType: 'inline-size',
-  containerName: 'task-detail',
   '@container': {
     'task-detail (max-width: 24rem)': {
       gap: '0.85rem'
