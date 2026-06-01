@@ -1,4 +1,4 @@
-import {style} from '@vanilla-extract/css';
+import {globalStyle, style} from '@vanilla-extract/css';
 
 import {inDarkScheme} from '@/styles/darkScheme';
 import {palette} from '@/styles/tokens';
@@ -6,6 +6,12 @@ import {palette} from '@/styles/tokens';
 /*
  * Styles.
  */
+
+globalStyle('@property --task-board-width', {
+  syntax: '<length>',
+  inherits: false,
+  initialValue: '13rem'
+} as unknown as Parameters<typeof globalStyle>[1]);
 
 export const splash = style({
   minHeight: '100vh',
@@ -59,14 +65,29 @@ export const main = style({
 });
 
 export const workspaceMain = style({
-  display: 'flex',
+  display: 'grid',
   flex: 1,
-  gap: '1rem',
   width: '100%',
   alignItems: 'stretch',
   minHeight: 0,
   minWidth: 0,
-  overflow: 'hidden'
+  overflow: 'hidden',
+  gridTemplateColumns: 'var(--task-board-width, 13rem) auto 1fr',
+  columnGap: '1rem'
+});
+
+export const workspaceMainDetail = style({
+  minWidth: 0,
+  minHeight: 0,
+  overflow: 'hidden',
+  display: 'flex',
+  flexDirection: 'column',
+  containerType: 'inline-size',
+  containerName: 'task-detail'
+});
+
+export const workspaceMainMessage = style({
+  gridColumn: '1 / -1'
 });
 
 export const placeholder = style({
