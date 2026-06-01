@@ -13,12 +13,18 @@ export const panel = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '1.5rem',
-  flex: '1 1 0',
-  alignSelf: 'stretch',
+  flex: 1,
   minWidth: 0,
   minHeight: 0,
   overflowY: 'auto',
-  overflowWrap: 'anywhere'
+  overflowWrap: 'anywhere',
+  containerType: 'inline-size',
+  containerName: 'task-detail',
+  '@container': {
+    'task-detail (max-width: 24rem)': {
+      gap: '1rem'
+    }
+  }
 });
 
 export const name = style({
@@ -26,7 +32,12 @@ export const name = style({
   fontSize: '1.375rem',
   fontWeight: 600,
   letterSpacing: '-0.02em',
-  lineHeight: 1.3
+  lineHeight: 1.3,
+  '@container': {
+    'task-detail (max-width: 24rem)': {
+      fontSize: '1.125rem'
+    }
+  }
 });
 
 export const sectionBody = style({

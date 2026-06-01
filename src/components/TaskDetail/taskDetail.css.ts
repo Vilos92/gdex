@@ -1,6 +1,7 @@
 import {style} from '@vanilla-extract/css';
 
 import {darkSelector, inDarkScheme} from '@/styles/darkScheme';
+import {listRowButton} from '@/styles/listRowButton.css';
 import {palette} from '@/styles/tokens';
 
 export {section, sectionLabel} from '@/styles/panelSection.css';
@@ -13,12 +14,18 @@ export const panel = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '1.25rem',
-  flex: '1 1 0',
-  alignSelf: 'stretch',
+  flex: 1,
   minWidth: 0,
   minHeight: 0,
   overflowY: 'auto',
-  overflowWrap: 'anywhere'
+  overflowWrap: 'anywhere',
+  containerType: 'inline-size',
+  containerName: 'task-detail',
+  '@container': {
+    'task-detail (max-width: 24rem)': {
+      gap: '0.85rem'
+    }
+  }
 });
 
 export const panelEmptyMessage = style({
@@ -35,7 +42,12 @@ export const title = style({
   fontSize: '1.375rem',
   fontWeight: 600,
   letterSpacing: '-0.02em',
-  lineHeight: 1.3
+  lineHeight: 1.3,
+  '@container': {
+    'task-detail (max-width: 24rem)': {
+      fontSize: '1.125rem'
+    }
+  }
 });
 
 export const titleDone = style({
@@ -49,7 +61,13 @@ export const titleDone = style({
 export const statusRow = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '0.5rem'
+  gap: '0.5rem',
+  flexWrap: 'wrap',
+  '@container': {
+    'task-detail (max-width: 24rem)': {
+      gap: '0.35rem'
+    }
+  }
 });
 
 export const statusBadge = style({
@@ -117,19 +135,17 @@ export const childTasksSection = style({
   marginTop: '0.25rem'
 });
 
-export const childTaskButton = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.65rem',
-  width: '100%',
-  textAlign: 'left',
-  padding: '0.6em 0.75em',
-  borderRadius: '8px',
-  border: `1px solid transparent`,
-  backgroundColor: 'transparent',
-  boxShadow: 'none',
-  fontWeight: 500
-});
+export const childTaskButton = style([
+  listRowButton,
+  {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.65rem',
+    width: '100%',
+    textAlign: 'left',
+    padding: '0.6em 0.75em'
+  }
+]);
 
 export const childTaskName = style({
   flex: 1,
@@ -161,6 +177,11 @@ export const taskIdButton = style({
   gap: '0.3em',
   padding: '0.15em 0.4em',
   marginTop: '0.1rem',
+  '@container': {
+    'task-detail (max-width: 24rem)': {
+      display: 'none'
+    }
+  },
   background: 'none',
   border: '1px solid transparent',
   borderRadius: '4px',

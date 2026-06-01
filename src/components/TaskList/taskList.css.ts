@@ -1,6 +1,7 @@
 import {style} from '@vanilla-extract/css';
 
-import {darkSelector, inDarkScheme} from '@/styles/darkScheme';
+import {inDarkScheme} from '@/styles/darkScheme';
+import {listRowButton, listRowButtonSelected} from '@/styles/listRowButton.css';
 import {palette} from '@/styles/tokens';
 
 /*
@@ -11,12 +12,14 @@ export const board = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '1rem',
-  flex: '0 1 13rem',
-  alignSelf: 'stretch',
-  minWidth: '7rem',
-  maxWidth: '16rem',
+  flex: 1,
   minHeight: 0,
-  overflow: 'hidden'
+  overflow: 'hidden',
+  '@container': {
+    'task-board (max-width: 9rem)': {
+      gap: '0.5rem'
+    }
+  }
 });
 
 export const list = style({
@@ -32,61 +35,36 @@ export const list = style({
   overflowY: 'auto'
 });
 
-export const taskButton = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.65rem',
-  width: '100%',
-  textAlign: 'left',
-  padding: '0.6em 0.75em',
-  borderRadius: '8px',
-  border: `1px solid transparent`,
-  backgroundColor: palette.surface,
-  boxShadow: 'none',
-  fontWeight: 500,
-  selectors: {
-    [darkSelector()]: {
-      backgroundColor: palette.surfaceDark
-    },
-    '&:hover': {
-      backgroundColor: palette.accentMuted,
-      borderColor: 'transparent',
-      boxShadow: 'none'
-    },
-    [darkSelector(':hover')]: {
-      backgroundColor: palette.accentMutedDark,
-      borderColor: 'transparent',
-      boxShadow: 'none'
+export const taskButton = style([
+  listRowButton,
+  {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.65rem',
+    width: '100%',
+    textAlign: 'left',
+    padding: '0.6em 0.75em',
+    '@container': {
+      'task-board (max-width: 9rem)': {
+        gap: '0.4rem',
+        padding: '0.45em 0.5em'
+      }
     }
   }
-});
+]);
 
-export const taskButtonSelected = style({
-  backgroundColor: palette.accentMuted,
-  borderColor: palette.accent,
-  selectors: {
-    '&:hover': {
-      backgroundColor: palette.accentMuted,
-      borderColor: palette.accent,
-      boxShadow: 'none'
-    },
-    [darkSelector(':hover')]: {
-      backgroundColor: palette.accentMutedDark,
-      borderColor: palette.accent,
-      boxShadow: 'none'
-    },
-    [darkSelector()]: {
-      backgroundColor: palette.accentMutedDark,
-      borderColor: palette.accent
-    }
-  }
-});
+export const taskButtonSelected = listRowButtonSelected;
 
 export const statusDot = style({
   flexShrink: 0,
   width: '0.5rem',
   height: '0.5rem',
-  borderRadius: '50%'
+  borderRadius: '50%',
+  '@container': {
+    'task-board (max-width: 9rem)': {
+      display: 'none'
+    }
+  }
 });
 
 export const statusPending = style({
@@ -112,7 +90,12 @@ export const taskName = style({
   minWidth: 0,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap'
+  whiteSpace: 'nowrap',
+  '@container': {
+    'task-board (max-width: 9rem)': {
+      fontSize: '0.8125rem'
+    }
+  }
 });
 
 export const taskNameDone = style({

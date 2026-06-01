@@ -26,6 +26,7 @@
     "fmt:rust:check": "cargo fmt --manifest-path src-tauri/Cargo.toml --check"
   },
   "dependencies": {
+    "@preact/signals": "^2.9.1",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-dialog": "~2",
     "@tauri-apps/plugin-fs": "~2",

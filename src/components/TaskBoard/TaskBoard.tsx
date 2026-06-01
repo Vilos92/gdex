@@ -1,3 +1,4 @@
+import * as paneStyles from '@/components/TaskBoard/taskBoard.css';
 import {TaskList} from '@/components/TaskList/TaskList';
 import * as styles from '@/components/TaskList/taskList.css';
 import type {Tasks} from '@/lib/taskApi';
@@ -31,14 +32,16 @@ export function TaskBoard({
   const levelTasks = tasksAtLevel(tasks, zoomParentId);
 
   return (
-    <div class={styles.board}>
-      <TaskList
-        tasks={levelTasks}
-        workspace={workspace}
-        selectedTaskId={selectedTaskId}
-        isLoading={isLoading}
-        onSelectTask={onSelectTask}
-      />
+    <div id="task-board" class={paneStyles.pane}>
+      <div class={styles.board}>
+        <TaskList
+          tasks={levelTasks}
+          workspace={workspace}
+          selectedTaskId={selectedTaskId}
+          isLoading={isLoading}
+          onSelectTask={onSelectTask}
+        />
+      </div>
     </div>
   );
 }

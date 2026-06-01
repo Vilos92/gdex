@@ -3,6 +3,7 @@ import {create} from 'zustand';
 
 import {invokeErrorMessage} from '@/lib/error';
 import type {Tasks} from '@/lib/taskApi';
+import {TASK_BOARD_WIDTH_DEFAULT_PX} from '@/lib/taskBoardWidth';
 import {
   applyThemeMode,
   hydrateThemeFromDisk,
@@ -43,6 +44,7 @@ type AppData = {
   selectedTaskId: string | undefined;
   zoomParentId: string | undefined;
   themeMode: ThemeMode;
+  taskBoardWidthPx: number;
 };
 
 type WorkspacesUpdater = Workspaces | ((workspaces: Workspaces) => Workspaces);
@@ -75,6 +77,7 @@ type AppActions = {
   hydrateTheme: () => Promise<void>;
   cycleThemeMode: () => Promise<void>;
   handleSystemColorSchemeChange: () => void;
+  setTaskBoardWidthPx: (widthPx: number) => void;
 };
 
 type AppState = AppData & AppActions;
@@ -95,8 +98,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   selectedTaskId: undefined,
   zoomParentId: undefined,
   themeMode: readThemeModeCache() ?? 'auto',
+  taskBoardWidthPx: TASK_BOARD_WIDTH_DEFAULT_PX,
 
   setView: view => set({view}),
+
+  setTaskBoardWidthPx: taskBoardWidthPx => set({taskBoardWidthPx}),
 
   setWorkspaces: workspaces =>
     set(state => ({

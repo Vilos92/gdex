@@ -1,6 +1,7 @@
 import {style} from '@vanilla-extract/css';
-import {darkSelector, inDarkScheme} from '@/styles/darkScheme';
+import {inDarkScheme} from '@/styles/darkScheme';
 import {panelIconButton} from '@/styles/iconButton.css';
+import {listRowButtonInset, listRowButtonSelected} from '@/styles/listRowButton.css';
 import {palette} from '@/styles/tokens';
 
 /*
@@ -102,61 +103,26 @@ export const collapsedWorkspaceList = style({
   width: '100%'
 });
 
-export const collapsedWorkspaceSquare = style({
-  display: 'grid',
-  placeItems: 'center',
-  boxSizing: 'border-box',
-  width: '2rem',
-  height: '2rem',
-  margin: 0,
-  padding: 0,
-  border: `1px solid transparent`,
-  borderRadius: '8px',
-  backgroundColor: 'transparent',
-  boxShadow: 'none',
-  fontSize: '0.875rem',
-  fontWeight: 600,
-  lineHeight: 1,
-  textAlign: 'center',
-  textBoxTrim: 'trim-both',
-  textBoxEdge: 'cap alphabetic',
-  selectors: {
-    '&:hover': {
-      backgroundColor: palette.accentMuted,
-      borderColor: 'transparent'
-    },
-    '&:focus-visible': {
-      outline: `2px solid ${palette.accent}`,
-      outlineOffset: '2px'
-    },
-    [darkSelector(':hover')]: {
-      backgroundColor: palette.accentMutedDark,
-      borderColor: 'transparent'
-    }
+export const collapsedWorkspaceSquare = style([
+  listRowButtonInset,
+  {
+    display: 'grid',
+    placeItems: 'center',
+    boxSizing: 'border-box',
+    width: '2rem',
+    height: '2rem',
+    margin: 0,
+    padding: 0,
+    fontSize: '0.875rem',
+    fontWeight: 600,
+    lineHeight: 1,
+    textAlign: 'center',
+    textBoxTrim: 'trim-both',
+    textBoxEdge: 'cap alphabetic'
   }
-});
+]);
 
-/** Active workspace target (collapsed square or expanded list row). */
-const sidebarWorkspaceActive = style({
-  backgroundColor: palette.accentMuted,
-  borderColor: palette.accent,
-  selectors: {
-    '&:hover': {
-      backgroundColor: palette.accentMuted,
-      borderColor: palette.accent
-    },
-    [darkSelector(':hover')]: {
-      backgroundColor: palette.accentMutedDark,
-      borderColor: palette.accent
-    },
-    [darkSelector()]: {
-      backgroundColor: palette.accentMutedDark,
-      borderColor: palette.accent
-    }
-  }
-});
-
-export const collapsedWorkspaceSquareActive = sidebarWorkspaceActive;
+export const collapsedWorkspaceSquareActive = listRowButtonSelected;
 
 export const collapseToggle = panelIconButton;
 
@@ -203,18 +169,16 @@ export const workspaceList = style({
   listStyle: 'none'
 });
 
-export const workspaceButton = style({
-  width: '100%',
-  textAlign: 'left',
-  padding: '0.55em 0.75em',
-  borderRadius: '8px',
-  border: `1px solid transparent`,
-  backgroundColor: 'transparent',
-  boxShadow: 'none',
-  fontWeight: 500
-});
+export const workspaceButton = style([
+  listRowButtonInset,
+  {
+    width: '100%',
+    textAlign: 'left',
+    padding: '0.55em 0.75em'
+  }
+]);
 
-export const workspaceButtonActive = sidebarWorkspaceActive;
+export const workspaceButtonActive = listRowButtonSelected;
 
 export const addSection = style({
   display: 'flex',

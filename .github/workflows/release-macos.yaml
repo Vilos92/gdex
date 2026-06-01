@@ -1,0 +1,56 @@
+name: Release (macOS Apple Silicon)
+
+# v* tag → draft release with the arm64 build. Publish after you've smoke-tested the draft.
+# workflow_dispatch → build only, artifacts on the run (no GitHub release).
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One run per ref. Don't cancel in progress — half-uploaded drafts are annoying to fix.
+concurrency:
+  group: release-macos-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build aarch64-apple-darwin
+    runs-on: macos-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/install-rust
+        with:
+          cache: "true"
+
+      - uses: ./.github/actions/install-bun-and-dependencies
+
+      # Runner is already arm64. Explicit target keeps bundle paths predictable.
+      - name: Add Rust target
+        run: rustup target add aarch64-apple-darwin
+        shell: bash
+
+      # Unsigned for now. APPLE_* when we care — https://v2.tauri.app/distribute/sign/macos/
+      - uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # action-v0.6.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tauriScript: bun run tauri
+          args: --target aarch64-apple-darwin
+          tagName: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+          releaseName: ${{ startsWith(github.ref, 'refs/tags/') && format('gdex {0}', github.ref_name) || '' }}
+          releaseBody: See release assets for the macOS Apple Silicon build (gdex __VERSION__).
+          releaseDraft: true
+          prerelease: false
+          uploadWorkflowArtifacts: ${{ github.event_name == 'workflow_dispatch' }}
+          workflowArtifactNamePattern: gdex-macos-arm64-[bundle]

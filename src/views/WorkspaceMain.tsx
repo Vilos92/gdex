@@ -1,8 +1,11 @@
+import {useEffect, useRef} from 'preact/hooks';
 import {useShallow} from 'zustand/shallow';
 
 import {TaskBoard} from '@/components/TaskBoard/TaskBoard';
 import {TaskDetail} from '@/components/TaskDetail/TaskDetail';
 import * as taskStyles from '@/components/TaskList/taskList.css';
+import {WorkspaceResizer} from '@/components/WorkspaceResizer/WorkspaceResizer';
+import {applyTaskBoardWidthToElement} from '@/lib/taskBoardWidth';
 import {useAppStore} from '@/stores/appStore';
 import * as transitionStyles from '@/styles/workspaceTransition.css';
 import * as styles from '@/views/views.css';
@@ -12,6 +15,7 @@ import * as styles from '@/views/views.css';
  */
 
 export function WorkspaceMain() {
+  const gridRef = useRef<HTMLDivElement>(null);
   const {
     workspaces,
     activeWorkspaceId,
@@ -21,8 +25,18 @@ export function WorkspaceMain() {
     loadErrorMessage,
     zoomParentId,
     selectedTaskId,
-    selectTask
+    selectTask,
+    taskBoardWidthPx,
+    setTaskBoardWidthPx
   } = useWorkspaceMainState();
+
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (grid === null) {
+      return;
+    }
+    applyTaskBoardWidthToElement(grid, taskBoardWidthPx);
+  }, [taskBoardWidthPx]);
 
   const activeWorkspace = workspaces.find(workspace => workspace.id === activeWorkspaceId);
 
@@ -33,7 +47,7 @@ export function WorkspaceMain() {
   if (loadErrorMessage !== undefined) {
     return (
       <div class={[styles.workspaceMain, transitionStyles.workspaceMain].join(' ')}>
-        <p class={taskStyles.taskLoadError} role="alert">
+        <p class={[taskStyles.taskLoadError, styles.workspaceMainMessage].join(' ')} role="alert">
           {loadErrorMessage}
         </p>
       </div>
@@ -41,7 +55,7 @@ export function WorkspaceMain() {
   }
 
   return (
-    <div class={[styles.workspaceMain, transitionStyles.workspaceMain].join(' ')}>
+    <div ref={gridRef} class={[styles.workspaceMain, transitionStyles.workspaceMain].join(' ')}>
       {isWorkspaceMainVisible ? (
         <>
           <TaskBoard
@@ -52,7 +66,14 @@ export function WorkspaceMain() {
             isLoading={isLoading}
             onSelectTask={selectTask}
           />
-          <TaskDetail />
+          <WorkspaceResizer
+            gridRef={gridRef}
+            committedWidthPx={taskBoardWidthPx}
+            onCommitWidth={setTaskBoardWidthPx}
+          />
+          <div class={styles.workspaceMainDetail}>
+            <TaskDetail />
+          </div>
         </>
       ) : undefined}
     </div>
@@ -74,7 +95,9 @@ function useWorkspaceMainState() {
       loadErrorMessage: state.tasksLoadError,
       zoomParentId: state.zoomParentId,
       selectedTaskId: state.selectedTaskId,
-      selectTask: state.selectTask
+      selectTask: state.selectTask,
+      taskBoardWidthPx: state.taskBoardWidthPx,
+      setTaskBoardWidthPx: state.setTaskBoardWidthPx
     }))
   );
 }

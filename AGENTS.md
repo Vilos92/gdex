@@ -30,6 +30,12 @@ Living conventions for this repo. Order and wording can evolve—ask whether new
 - **Props types** are named **`{ComponentName}Props`** (e.g. `TaskListProps` for `TaskList`). Do not type props inline on the component; declare them under **Types.** in the file layout below. With **`children`**, use **`PropsWithChildren<{ … }>`** (other props in the generic object).
 - **`class`:** optional (`class?: string`); omit at call sites when unused. Prefer Vanilla Extract `class={styles.foo}` over ad-hoc strings.
 
+## Preact signals (`@preact/signals`)
+
+- Reach for **signals** when updates fire often and must not re-render unrelated UI (e.g. column drag: `data-dragging` styling without touching the task panes).
+- **`useState`:** local UI state inside one component that does not need fine-grained subscribers.
+- **Zustand:** session or app state shared across views (e.g. committed column width after drag ends). Not for per-frame drag writes.
+
 ## Vanilla Extract
 
 - Styling uses **Vanilla Extract** (`@vanilla-extract/css`, `@vanilla-extract/vite-plugin`)—same stack as **vilos92.com**, not Tailwind.
