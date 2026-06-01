@@ -7,7 +7,7 @@ import * as listStyles from '@/components/TaskList/taskList.css';
 import {WorkspaceHomePanel} from '@/components/WorkspaceHomePanel/WorkspaceHomePanel';
 import {useClipboardCopy} from '@/hooks/useClipboardCopy';
 import {compareTasks, type Task, type TaskStatus, type Tasks, taskStatus} from '@/lib/taskApi';
-import type {Workspaces} from '@/lib/workspaceApi';
+import type {Workspace, Workspaces} from '@/lib/workspaceApi';
 import {useAppStore} from '@/stores/appStore';
 
 /*
@@ -17,7 +17,7 @@ import {useAppStore} from '@/stores/appStore';
 type TaskDetailContentProps = {
   task: Task;
   tasks: Tasks;
-  workspaceName: string | undefined;
+  workspace: Workspace | undefined;
   onOpenChildTask: (taskId: string) => void;
 };
 
@@ -122,7 +122,7 @@ export function TaskDetail() {
     <TaskDetailContent
       task={task}
       tasks={tasks}
-      workspaceName={activeWorkspace?.name}
+      workspace={activeWorkspace}
       onOpenChildTask={openChildTask}
     />
   );
@@ -141,7 +141,7 @@ function TaskDetailNoSelection({workspaces, activeWorkspaceId}: TaskDetailNoSele
   );
 }
 
-function TaskDetailContent({task, tasks, workspaceName, onOpenChildTask}: TaskDetailContentProps) {
+function TaskDetailContent({task, tasks, workspace, onOpenChildTask}: TaskDetailContentProps) {
   const status = taskStatus(task);
   const childTasks = resolveChildTasks(tasks, task.children);
   const blockers = resolveBlockers(tasks, task.blockedBy);
@@ -150,8 +150,8 @@ function TaskDetailContent({task, tasks, workspaceName, onOpenChildTask}: TaskDe
     <aside class={styles.panel} aria-label="Task details">
       <TaskDetailHeader id={task.id} name={task.name} status={status} />
       <TaskDetailFields task={task} blockers={blockers} />
-      {workspaceName !== undefined ? (
-        <TaskDetailQuickPrompts workspaceName={workspaceName} taskId={task.id} status={status} />
+      {workspace !== undefined ? (
+        <TaskDetailQuickPrompts workspace={workspace} taskId={task.id} status={status} />
       ) : undefined}
       <TaskDetailChildTasks childTasks={childTasks} onOpenChildTask={onOpenChildTask} />
     </aside>

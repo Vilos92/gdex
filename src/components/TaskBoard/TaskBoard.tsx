@@ -1,6 +1,7 @@
 import {TaskList} from '@/components/TaskList/TaskList';
 import * as styles from '@/components/TaskList/taskList.css';
 import type {Tasks} from '@/lib/taskApi';
+import type {Workspace} from '@/lib/workspaceApi';
 
 /*
  * Types.
@@ -8,7 +9,7 @@ import type {Tasks} from '@/lib/taskApi';
 
 export type TaskBoardProps = {
   tasks: Tasks;
-  workspaceName: string;
+  workspace: Workspace;
   zoomParentId: string | undefined;
   selectedTaskId: string | undefined;
   onSelectTask: (taskId: string) => void;
@@ -18,20 +19,14 @@ export type TaskBoardProps = {
  * Component.
  */
 
-export function TaskBoard({
-  tasks,
-  workspaceName,
-  zoomParentId,
-  selectedTaskId,
-  onSelectTask
-}: TaskBoardProps) {
+export function TaskBoard({tasks, workspace, zoomParentId, selectedTaskId, onSelectTask}: TaskBoardProps) {
   const levelTasks = tasksAtLevel(tasks, zoomParentId);
 
   return (
     <div class={styles.board}>
       <TaskList
         tasks={levelTasks}
-        workspaceName={workspaceName}
+        workspace={workspace}
         selectedTaskId={selectedTaskId}
         onSelectTask={onSelectTask}
       />

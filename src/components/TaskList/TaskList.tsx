@@ -4,6 +4,7 @@ import {useState} from 'preact/hooks';
 import {TaskAgentPromptMenu} from '@/components/TaskAgentPromptMenu/TaskAgentPromptMenu';
 import * as styles from '@/components/TaskList/taskList.css';
 import {compareTasks, type Task, type TaskStatus, type Tasks, taskStatus} from '@/lib/taskApi';
+import type {Workspace} from '@/lib/workspaceApi';
 
 /*
  * Types.
@@ -11,7 +12,7 @@ import {compareTasks, type Task, type TaskStatus, type Tasks, taskStatus} from '
 
 export type TaskListProps = {
   tasks: Tasks;
-  workspaceName: string;
+  workspace: Workspace;
   selectedTaskId: string | undefined;
   onSelectTask: (taskId: string) => void;
 };
@@ -84,7 +85,7 @@ function TaskListItem({task, isSelected, onSelectTask, onContextMenu}: TaskListI
   );
 }
 
-export function TaskList({tasks, workspaceName, selectedTaskId, onSelectTask}: TaskListProps) {
+export function TaskList({tasks, workspace, selectedTaskId, onSelectTask}: TaskListProps) {
   const sortedTasks = [...tasks].sort(compareTasks);
   const [contextMenu, setContextMenu] = useState<TaskContextMenuState | undefined>(undefined);
 
@@ -108,7 +109,7 @@ export function TaskList({tasks, workspaceName, selectedTaskId, onSelectTask}: T
       {contextMenu !== undefined
         ? createPortal(
             <TaskAgentPromptMenu
-              workspaceName={workspaceName}
+              workspace={workspace}
               task={contextMenu.task}
               position={{x: contextMenu.x, y: contextMenu.y}}
               onClose={() => setContextMenu(undefined)}

@@ -4,13 +4,14 @@ import {TaskAgentPromptMenuItem} from '@/components/TaskAgentPromptMenu/TaskAgen
 import * as styles from '@/components/TaskAgentPromptMenu/taskAgentPromptMenu.css';
 import {buildAgentPrompts} from '@/lib/agentPrompts';
 import {type Task, taskStatus} from '@/lib/taskApi';
+import type {Workspace} from '@/lib/workspaceApi';
 
 /*
  * Types.
  */
 
 export type TaskAgentPromptMenuProps = {
-  workspaceName: string;
+  workspace: Workspace;
   task: Task;
   position: {x: number; y: number};
   onClose: () => void;
@@ -20,10 +21,10 @@ export type TaskAgentPromptMenuProps = {
  * Component.
  */
 
-export function TaskAgentPromptMenu({workspaceName, task, position, onClose}: TaskAgentPromptMenuProps) {
+export function TaskAgentPromptMenu({workspace, task, position, onClose}: TaskAgentPromptMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const prompts = buildAgentPrompts({
-    workspaceName,
+    workspace,
     taskId: task.id,
     status: taskStatus(task)
   });

@@ -44,7 +44,7 @@ export function WorkspaceMain() {
     <div class={styles.workspaceMain}>
       <TaskBoard
         tasks={tasks}
-        workspaceName={activeWorkspace.name}
+        workspace={activeWorkspace}
         zoomParentId={zoomParentId}
         selectedTaskId={selectedTaskId}
         onSelectTask={selectTask}
