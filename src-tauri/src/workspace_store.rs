@@ -47,7 +47,10 @@ pub fn add_workspace(
     if name.is_empty() {
         return Err("workspace name must not be empty".to_owned());
     }
-    if workspaces.iter().any(|workspace| workspace.name == name) {
+    if workspaces
+        .iter()
+        .any(|workspace| workspace.name.trim() == name)
+    {
         return Err(format!("workspace name already exists: {name}"));
     }
     let workspace = Workspace {

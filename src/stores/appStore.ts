@@ -42,7 +42,10 @@ type AppActions = {
   setWorkspaces: (workspaces: WorkspacesUpdater) => void;
   setActiveWorkspaceId: (activeWorkspaceId: string | undefined) => void;
   /** Sidebar selection: exit transition, load tasks, enter transition. */
-  switchWorkspace: (workspaceId: string) => Promise<void>;
+  switchWorkspace: (
+    workspaceId: string,
+    restoreActiveWorkspaceIdOnPersistFailure?: string | undefined
+  ) => Promise<void>;
   /** Initial mount and programmatic activation (enter transition). */
   loadActiveWorkspaceTasks: () => Promise<void>;
   selectTask: (taskId: string) => void;
@@ -91,7 +94,13 @@ export const useAppStore = create<AppState>((set, get) => ({
     set(workspaceTaskUi.activating(activeWorkspaceId));
   },
 
-  switchWorkspace: workspaceId => switchWorkspaceWithTransition(set, get, workspaceId),
+  switchWorkspace: (workspaceId, restoreActiveWorkspaceIdOnPersistFailure) =>
+    switchWorkspaceWithTransition(
+      set,
+      get,
+      workspaceId,
+      restoreActiveWorkspaceIdOnPersistFailure ?? get().activeWorkspaceId
+    ),
 
   loadActiveWorkspaceTasks: async () => {
     const {activeWorkspaceId} = get();
@@ -197,8 +206,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   deleteWorkspace: async workspaceId => {
+    const previousWorkspaces = get().workspaces;
     await removeWorkspace(workspaceId);
-    const remaining = get().workspaces.filter(workspace => workspace.id !== workspaceId);
+    const remaining = previousWorkspaces.filter(workspace => workspace.id !== workspaceId);
 
     if (remaining.length === 0) {
       bumpTaskLoadRequest();
@@ -217,9 +227,16 @@ export const useAppStore = create<AppState>((set, get) => ({
     const nextWorkspace = remaining[0];
     set({workspaces: remaining});
     try {
-      await get().switchWorkspace(nextWorkspace.id);
+      await get().switchWorkspace(nextWorkspace.id, nextWorkspace.id);
     } catch (error) {
       console.error('switch_workspace failed after delete', error);
+      bumpTaskLoadRequest();
+      set({
+        workspaces: remaining,
+        activeWorkspaceId: nextWorkspace.id,
+        ...workspaceTaskUi.cleared()
+      });
+      throw error;
     }
   }
 }));

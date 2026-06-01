@@ -27,6 +27,10 @@ export type WorkspaceTaskPaneGet = () => {
   isWorkspaceMainVisible: boolean;
 };
 
+type WorkspaceTaskPaneReveal = WorkspaceTaskPaneState & {
+  activeWorkspaceId?: string | undefined;
+};
+
 /*
  * Helpers.
  */
@@ -176,7 +180,8 @@ export function applySilentTaskLoad(
 export async function switchWorkspaceWithTransition(
   set: WorkspaceTaskPaneSet,
   get: WorkspaceTaskPaneGet,
-  workspaceId: string
+  workspaceId: string,
+  restoreOnPersistFailure: string | undefined
 ): Promise<void> {
   if (workspaceId === get().activeWorkspaceId) {
     return;
@@ -189,14 +194,9 @@ export async function switchWorkspaceWithTransition(
     return;
   }
 
-  await persistActiveWorkspace(set, requestId, workspaceId);
+  await persistActiveWorkspace(set, requestId, workspaceId, restoreOnPersistFailure);
 
-  if (checkIsStaleTaskLoadRequest(requestId)) {
-    return;
-  }
-
-  const loadResult = await loadTasksForWorkspace(workspaceId);
-  await revealWorkspaceMain(set, requestId, workspaceTaskUi.revealed(loadResult));
+  await loadAndRevealWorkspace(set, requestId, workspaceId);
 }
 
 /** Load tasks and reveal the main pane with an enter transition when supported. */
@@ -205,7 +205,19 @@ export async function loadActiveWorkspaceWithTransition(
   activeWorkspaceId: string
 ): Promise<void> {
   const requestId = beginTaskLoad(set);
-  const loadResult = await loadTasksForWorkspace(activeWorkspaceId);
+  await loadAndRevealWorkspace(set, requestId, activeWorkspaceId);
+}
+
+async function loadAndRevealWorkspace(
+  set: WorkspaceTaskPaneSet,
+  requestId: number,
+  workspaceId: string
+): Promise<void> {
+  if (checkIsStaleTaskLoadRequest(requestId)) {
+    return;
+  }
+
+  const loadResult = await loadTasksForWorkspace(workspaceId);
   await revealWorkspaceMain(set, requestId, workspaceTaskUi.revealed(loadResult));
 }
 
@@ -229,13 +241,18 @@ async function exitWorkspaceMain(
 async function persistActiveWorkspace(
   set: WorkspaceTaskPaneSet,
   requestId: number,
-  workspaceId: string
+  workspaceId: string,
+  restoreActiveWorkspaceId: string | undefined
 ): Promise<void> {
   try {
     await setActiveWorkspace(workspaceId);
   } catch (error) {
     console.error('set_active_workspace failed', error);
-    await revealWorkspaceMain(set, requestId, workspaceTaskUi.persistFailed(error));
+    const rollbackState: WorkspaceTaskPaneReveal = {
+      ...workspaceTaskUi.persistFailed(error),
+      activeWorkspaceId: restoreActiveWorkspaceId
+    };
+    await revealWorkspaceMain(set, requestId, rollbackState);
     throw error;
   }
 }
@@ -243,7 +260,7 @@ async function persistActiveWorkspace(
 async function revealWorkspaceMain(
   set: WorkspaceTaskPaneSet,
   requestId: number,
-  nextUi: WorkspaceTaskPaneState
+  nextUi: WorkspaceTaskPaneReveal
 ): Promise<void> {
   if (checkIsStaleTaskLoadRequest(requestId)) {
     return;
