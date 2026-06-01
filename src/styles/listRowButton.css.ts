@@ -1,30 +1,13 @@
 import {style} from '@vanilla-extract/css';
 
-import {darkHtmlSelector, darkSelector} from '@/styles/darkScheme';
+import {darkSelector} from '@/styles/darkScheme';
 import {palette} from '@/styles/tokens';
 
 /*
  * Styles.
  */
 
-/** Hover / pointer-down fill for list rows and the workspace column resizer. */
-export const panelInteractiveHighlightSelectors = {
-  '&:hover': {
-    backgroundColor: palette.accentMuted
-  },
-  [darkSelector(':hover')]: {
-    backgroundColor: palette.accentMutedDark
-  },
-  '&[data-dragging="true"]': {
-    backgroundColor: palette.accentMuted
-  },
-  [`${darkHtmlSelector} &[data-dragging="true"]`]: {
-    backgroundColor: palette.accentMutedDark
-  }
-} as const;
-
 const listRowHoverSelectors = {
-  ...panelInteractiveHighlightSelectors,
   '&:hover': {
     backgroundColor: palette.accentMuted,
     borderColor: 'transparent',
