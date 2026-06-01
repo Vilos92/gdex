@@ -1,93 +1,11 @@
-import {globalStyle, style} from '@vanilla-extract/css';
-import {darkHtmlSelector, darkSelector, inDarkScheme} from '@/styles/darkScheme';
+import {style} from '@vanilla-extract/css';
+import {darkSelector, inDarkScheme} from '@/styles/darkScheme';
 import {panelIconButton} from '@/styles/iconButton.css';
 import {fonts, palette} from '@/styles/tokens';
 
 /*
  * Styles.
  */
-
-/** Collapsible quick-prompt block (closed by default; native `<details>` disclosure). */
-export const quickPromptsDetails = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.4rem',
-  minWidth: 0
-});
-
-/** Matches `sectionLabel`; disclosure chevron via `::before` (›). */
-export const quickPromptsSummary = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.5rem',
-  margin: 0,
-  padding: '0.15rem 0.1rem 0.15rem 0.2rem',
-  borderRadius: '4px',
-  fontSize: '0.75rem',
-  fontWeight: 600,
-  letterSpacing: '0.04em',
-  textTransform: 'uppercase',
-  color: palette.textMuted,
-  listStyle: 'none',
-  cursor: 'default',
-  userSelect: 'none',
-  overflow: 'visible',
-  ...inDarkScheme({
-    color: palette.textMutedDark
-  }),
-  selectors: {
-    '&::-webkit-details-marker': {
-      display: 'none'
-    },
-    '&::marker': {
-      content: '""'
-    },
-    '&::before': {
-      content: '"›"',
-      display: 'inline-flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexShrink: 0,
-      width: '0.65rem',
-      fontSize: '0.875rem',
-      fontWeight: 600,
-      lineHeight: 1,
-      color: 'inherit',
-      transform: 'translateY(-0.03em)',
-      transition: 'transform 120ms'
-    },
-    '&:hover': {
-      color: palette.textMuted,
-      backgroundColor: palette.accentMuted
-    },
-    '&:focus': {
-      color: palette.textMuted
-    },
-    '&:focus-visible': {
-      outline: `2px solid ${palette.accent}`,
-      outlineOffset: '2px'
-    },
-    [darkSelector(':hover')]: {
-      color: palette.textMutedDark,
-      backgroundColor: palette.accentMutedDark
-    },
-    [darkSelector(':focus')]: {
-      color: palette.textMutedDark
-    }
-  }
-});
-
-globalStyle(`${quickPromptsDetails}[open] ${quickPromptsSummary}::before`, {
-  transform: 'rotate(90deg) translateY(-0.03em)'
-});
-
-globalStyle(`${quickPromptsDetails}[open] ${quickPromptsSummary}`, {
-  color: palette.textMuted
-});
-
-globalStyle(`${darkHtmlSelector} ${quickPromptsDetails}[open] ${quickPromptsSummary}`, {
-  color: palette.textMutedDark
-});
 
 export const quickPromptStack = style({
   display: 'flex',
