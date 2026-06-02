@@ -5,9 +5,12 @@ mod theme_store;
 mod watcher;
 mod workspace_store;
 
+use std::path::PathBuf;
+
 use dex::resolve_dex_binary_path;
 use dex_client::DexClient;
 use tauri::Manager;
+use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -22,7 +25,20 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .setup(|app| {
-            let dex_path = resolve_dex_binary_path()?;
+            let dex_path = match resolve_dex_binary_path() {
+                Ok(path) => path,
+                Err(error) => {
+                    app.dialog()
+                        .message(format!(
+                            "{error}\n\nInstall the dex CLI and restart gdex, or set DEX_BINARY to its full path."
+                        ))
+                        .title("Dex not found")
+                        .kind(MessageDialogKind::Warning)
+                        .show(|_| {});
+                    // Placeholder so the app can open; dex commands return a clear error until dex is installed.
+                    PathBuf::from("dex")
+                }
+            };
             app.manage(DexClient::new(dex_path));
 
             let task_watcher = watcher::TaskWatcher::new(app.handle().clone());

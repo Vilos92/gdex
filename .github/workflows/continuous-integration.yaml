@@ -80,3 +80,18 @@ jobs:
       - uses: ./.github/actions/install-bun-and-dependencies
       - name: Clippy
         run: bun run clippy
+
+  tauri-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/install-rust
+        with:
+          cache: "true"
+          tauri-deps: "true"
+      - uses: ./.github/actions/install-bun-and-dependencies
+      - name: Tauri build
+        run: bun run tauri build

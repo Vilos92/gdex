@@ -1,0 +1,36 @@
+# macOS Tauri bundle on every push to main (e.g. after merge). Artifacts expire; not a GitHub Release.
+name: macOS artifact
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  tauri-build-macos:
+    runs-on: macos-latest
+    permissions:
+      contents: read
+      actions: write
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/install-rust
+        with:
+          cache: "true"
+      - uses: ./.github/actions/install-bun-and-dependencies
+      - name: Tauri build
+        run: bun run tauri build
+      - name: Upload macOS bundles
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: gdex-macos-${{ github.sha }}
+          path: |
+            src-tauri/target/release/bundle/macos/*.app
+            src-tauri/target/release/bundle/dmg/*.dmg
+          if-no-files-found: error
+          retention-days: 14

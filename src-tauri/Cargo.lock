@@ -908,6 +908,7 @@ dependencies = [
 name = "gdex"
 version = "0.1.0"
 dependencies = [
+ "dirs",
  "notify-debouncer-mini",
  "serde",
  "serde_json",
