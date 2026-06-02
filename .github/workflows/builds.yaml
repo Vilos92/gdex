@@ -1,5 +1,3 @@
-# Desktop installables (sidebar: "Builds"). Checks stay in continuous-integration.yaml.
-# Add jobs here as desktop-linux / desktop-windows when we ship those artifacts.
 name: Builds
 
 on:
@@ -28,13 +26,11 @@ jobs:
           cache: "true"
       - uses: ./.github/actions/install-bun-and-dependencies
       - name: Tauri build
-        run: bun run tauri build
+        run: bun run tauri build -- --bundles app
       - name: Upload macOS desktop bundles
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: gdex-desktop-macos-${{ github.sha }}
-          path: |
-            src-tauri/target/release/bundle/macos/*.app
-            src-tauri/target/release/bundle/dmg/*.dmg
+          path: src-tauri/target/release/bundle/macos/*.app
           if-no-files-found: error
           retention-days: 14

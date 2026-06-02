@@ -1,128 +1,102 @@
 # Agent notes
 
-Living conventions for this repo. Order and wording can evolve—ask whether new habits belong here.
+Living conventions for this repo. Ask whether new habits belong here vs `README.md`.
 
 ## Bun
 
-- This repo is **Bun-first**. Use **Bun** for dependency installs, `package.json` scripts, and ad-hoc tooling (`bun install`, `bun run …`, `bunx …` / `bun x …`). Do not reach for npm, pnpm, or npx in instructions or habits unless something in the stack truly requires it.
-- When upstream docs show `npm` / `pnpm` / `npx`, prefer the **Bun equivalent** so the workflow stays consistent.
-- After pulling remote changes, run **`bun install`** before dev or validation.
+- **Bun-first** for installs and scripts (`bun install`, `bun run …`, `bun x …`). Prefer Bun equivalents when upstream docs use npm/pnpm/npx. Run **`bun install`** after pulling.
 
 ## TypeScript
 
-- Prefer **`type` over `interface`** unless you truly need declaration merging (we do not).
-- Prefer **`undefined` over `null`**. Model absence as `undefined` in app shapes; use **`.optional()`** in Zod when we add schemas, not **`.nullable().optional()`**. Do not use `?? null` in app code unless a type contract explicitly requires `null` (rare).
-- **`??` vs `||`:** use **`??`** to default `null`/`undefined` only. Reserve **`||`** for boolean conditions and deliberate truthiness. Treating `''` as absent belongs in a named helper, not `value || fallback`.
-- **Avoid redundant nullish coalescing:** do not write `x ?? undefined` when `x` is already `T | undefined` with no `null`.
-- **Exports:** do not export types, functions, or constants unless another file imports them (or we deliberately expose a stable public API). Prefer module-private symbols until then.
-- **`?` vs `| undefined`:** use optional properties (`prop?:`) when callers often omit the key entirely (e.g. wide public or library-style surfaces). For **internal** components and modules, prefer required keys with `T | undefined` when a value may be absent—every call site passes the prop explicitly, and absence is `undefined`, not “key not passed.” **Exception:** props normally omitted when unused—especially **`class?`** and other familiar DOM-style optional props—stay `prop?: T`; do not write `prop={undefined}` at call sites.
-- **Readonly arrays:** when a value is only read or copied (`.map`, spread, pass-through), type it as **`readonly T[]`** or a named alias (e.g. `Workspaces` in `workspaceApi.ts`). Mutable `T[]` is still assignable at call sites; use a fresh array when the callee must own writes.
+- Prefer **`type` over `interface`** unless you need declaration merging (we do not).
+- Prefer **`undefined` over `null`**. Model absence as `undefined`; Zod **`.optional()`**, not **`.nullable().optional()`**. No `?? null` unless a contract requires `null`.
+- **`??` vs `||`:** **`??`** for nullish default only; **`||`** for booleans / deliberate truthiness. Empty-string-as-absent → named helper, not `value || fallback`.
+- No **`x ?? undefined`** when `x` is already `T | undefined` without `null`.
+- **Exports:** module-private until another file imports (or we ship a stable public API).
+- **`?` vs `| undefined`:** optional props (`prop?:`) for wide/omitted keys; internal call sites use required `prop: T | undefined`. **Exception:** DOM-style props (`class?`, etc.) stay optional—omit at call sites when unused.
+- **Readonly arrays** for read-only / pass-through data (`readonly T[]` or named aliases like `Workspaces`).
 
 ## Imports
 
-- **`@/*` → `./src/*`** in `tsconfig` `paths`. Import every `src/` module via `@/` (`@/App`, `@/styles/tokens`); no relative paths between `src/` files.
-- **UI under `src/`:** `App.tsx` at the root; **`views/`**, **`components/`**, **`hooks/`**, **`schemas/`** next to **`lib/`** and **`styles/`** (not `src/app/`).
-- **`components/` layout:** one subfolder per UI slice—no bare **`*.tsx`** at **`components/`** root. Colocate the entry module and its component-scoped **`*.css.ts`** in that folder; import via a full **`@/`** path to the file (not the folder alone). Shared leaf UI (icons) lives under **`components/icons/`**; shared style modules not tied to one component live under **`src/styles/`** (with **`tokens`** and **`global`**).
-- No **`.ts` / `.tsx`** suffixes on import paths (`allowImportingTsExtensions: false`).
+- **`@/*` → `./src/*`**. No relative imports between `src/` files; no **`.ts` / `.tsx`** suffixes on paths.
+- **`App.tsx`** at `src/` root; **`views/`**, **`components/`**, **`hooks/`**, **`schemas/`**, **`lib/`**, **`styles/`** (not `src/app/`).
+- **`components/`:** one subfolder per slice; colocate **`*.css.ts`**; import the file via **`@/`** (not the folder). Icons → **`components/icons/`**; shared styles → **`src/styles/`**.
 
 ## Preact components
 
-- **Props types** are named **`{ComponentName}Props`** (e.g. `TaskListProps` for `TaskList`). Do not type props inline on the component; declare them under **Types.** in the file layout below. With **`children`**, use **`PropsWithChildren<{ … }>`** (other props in the generic object).
-- **`class`:** optional (`class?: string`); omit at call sites when unused. Prefer Vanilla Extract `class={styles.foo}` over ad-hoc strings.
+- Props type **`{ComponentName}Props`** under **Types.**; not inline on the component. **`PropsWithChildren<{ … }>`** when needed.
+- **`class?: string`** — omit when unused; prefer Vanilla Extract `class={styles.foo}`.
 
 ## Preact signals (`@preact/signals`)
 
-- Reach for **signals** when updates fire often and must not re-render unrelated UI (e.g. column drag: `data-dragging` styling without touching the task panes).
-- **`useState`:** local UI state inside one component that does not need fine-grained subscribers.
-- **Zustand:** session or app state shared across views (e.g. committed column width after drag ends). Not for per-frame drag writes.
+- **Signals** for frequent updates without broad re-renders (e.g. column drag styling).
+- **`useState`** for local UI in one component.
+- **Zustand** for cross-view session state—not per-frame drag writes.
 
 ## Vanilla Extract
 
-- Styling uses **Vanilla Extract** (`@vanilla-extract/css`, `@vanilla-extract/vite-plugin`)—same stack as **vilos92.com**, not Tailwind.
-- Co-locate styles in **`*.css.ts`** next to the UI; put cross-cutting **`*.css.ts`** (tokens, globals, reusable class groups like panel sections) under **`src/styles/`**.
-- **`tokens.ts`** holds palette and shared constants; **`global.css.ts`** holds `globalStyle` resets; other **`src/styles/*.css.ts`** modules export shared `style()` names; component files export slice-local classes consumed as `class={styles.foo}` in Preact.
-- Import global styles once from **`main.tsx`** (side-effect import of `@/styles/global.css`).
+- **`*.css.ts`** colocated with UI; shared tokens/globals/patterns under **`src/styles/`** (`tokens.ts`, `global.css.ts`).
+- Import globals once from **`main.tsx`** (`@/styles/global.css`).
 
 ## File layout (section comments)
 
-Use `/* Section name. */` blocks. Read top-down: main entry first, **Helpers.** last.
+`/* Section name. */` blocks, blank line before/after. Top-down: entry first, **Helpers.** last.
 
-**Order** (omit unused sections; never add empty **Types.** / **Helpers.** blocks):
+**Order** (omit unused; no empty **Types.** / **Helpers.**):
 
-1. **Types.** · **Constants.** — swap when paths or literals must come first
-2. **Schemas.** — Zod schemas; used in `src/schemas/` modules and inline when a single schema is local to one file
-3. Entry surface (one per file — pick what matches):
-   - **Script.** — browser bootstrap (`main.tsx`)
-   - **Component.** — Preact UI (`*.tsx` under `src/`)
-   - **Styles.** — Vanilla Extract (`*.css.ts`)
-   - **Config.** — tooling default export (`vite.config.ts`)
-4. **Hooks.** — custom hooks when a file grows past a single component
-5. **Helpers.** — private helpers only; always after the entry surface and any UI sections
+1. **Types.** · **Constants.**
+2. **Schemas.** (or inline single-schema in one file)
+3. Entry: **Script.** | **Component.** | **Styles.** | **Config.**
+4. **Hooks.**
+5. **Helpers.**
 
-**Lean files** (one export, few lines): one matching entry block (**Script.**, **Component.**, **Config.**, etc.) is enough.
-
-**Tests:** when we add Vitest, co-locate **`{module}.test.ts`** with the module under test. Use **Constants.** (fixtures) → **Tests.** (`describe` / `test`) inside the file.
-
-Blank line before and after each section block, and between the comment and the code below it.
+**Tests:** colocate **`{module}.test.ts`**; **Constants.** (fixtures) → **Tests.** when the file uses section blocks.
 
 ## Code style
 
-- Prefer a **functional** style: fewer reassignments unless performance or clarity really wins.
-- Avoid deep nesting (nested functions × loops × ternaries). Prefer **small helpers** with **early returns**.
-- Prefer **array helpers** (`map`, `filter`, `reduce`, etc.) for readability unless hot paths need a hand-tuned loop. **Do not use `forEach`**—use a **`for`…`of`** (or indexed `for`) when you need imperative iteration.
+- Functional style; early returns; small helpers over deep nesting.
+- Prefer **`map` / `filter` / `reduce`**; no **`forEach`**—use **`for`…`of`** (or indexed `for`) when imperative.
 
 ## Comments
 
-- Prefer **why** (intent, tradeoffs, invariants) over **what**; drop comments that only restate the code.
-- **JSDoc** on exports and non-trivial helpers when the contract is not obvious—often one crisp line is enough.
-- In `//` / `/** */` prose, **backtick code identifiers** (`invoke`, `palette.pageBg`); not section headers (`/* Component. */`).
+- **Why** over **what**. Short **JSDoc** when the contract is non-obvious.
+- In prose, backtick **identifiers** (`invoke`), not section headers.
 
 ## Naming
 
-- **Booleans:** name as **predicates**—a short auxiliary/state prefix plus a noun or participle so the name reads like a yes/no question. Common prefixes include **`is`**, **`has`**, **`did`**, **`should`**, **`can`**, **`was`**, **`needs`** (`isLoading`, `hasSelection`, `didCopy`, `shouldRetry`). The list is illustrative, not exhaustive; pick the prefix that matches the question (“is it …?”, “did it …?”, “should we …?”).
-- **Locals:** context-readable names (`greetMessage`, `taskId`)—not `e`, `res`, `n`, `x` unless in a tiny scope where the meaning is obvious.
+- **Booleans:** predicate prefixes (`is`, `has`, `did`, `should`, `can`, …).
+- **Locals:** readable names (`taskId`), not `e` / `x` unless scope is tiny.
 
 ## Fail fast
 
-- Prefer **loud, immediate failure** over letting the app keep running in a **useless or misleading state**. Validate required configuration and Tauri/plugin assumptions **as early as we can**, and **throw** with a clear message when something required is missing or invalid.
-- On the Rust side, prefer **`Result`** and explicit errors for command boundaries instead of panicking in user-facing paths.
+- Throw with a clear message rather than run in a misleading state. Rust command boundaries: **`Result`**, not panic in user-facing paths.
 
 ## Tauri
 
-- Frontend lives under **`src/`**; the native shell and commands live under **`src-tauri/`**.
-- Call Rust from the UI via **`invoke`** (`@tauri-apps/api/core`). Keep command names and payloads stable; document new commands in Rust with a short comment on intent.
-- Day-to-day desktop dev: **`bun run tauri dev`** (Vite + Tauri). **`bun run build`** is the Vite production web bundle only; Tauri app packaging uses the Tauri CLI separately.
+- UI **`src/`**; shell/commands **`src-tauri/`**. **`invoke`** via `@tauri-apps/api/core`; keep command names stable; brief Rust comment on new commands.
+- **`bun run build`** = Vite bundle only; desktop packaging = Tauri CLI (`README.md`).
 
-## Rust (Clippy and rustfmt)
+## Rust
 
-**Clippy** is Rust’s built-in linter (like Biome for TS). It catches suspicious patterns, needless clones, bad `Option`/`Result` handling, and APIs that are easy to misuse. We run it with **warnings denied** so anything Clippy flags fails the command.
-
-- **`bun run clippy`** — `cargo clippy` on `src-tauri` with **`-D warnings`** (warnings become errors). Compiles the crate (typecheck is implicit; no separate `cargo check` script).
-- **`bun run fmt:rust`** — format Rust in place.
-- **`bun run fmt:rust:check`** — CI-style “would `cargo fmt` change files?” check.
-
-**rustfmt** is the standard Rust formatter (like Biome format for TS). Run **`fmt:rust:check`** / **`fmt:rust`** on every Rust touch; pair with Clippy only when that touch is non-trivial (see Validation).
-
-**`rust-toolchain.toml`** (repo root) pins the Rust version and installs **rustfmt** + **clippy** via rustup so local machines and CI match. Bump the `channel` when upgrading Rust project-wide.
-
-No custom `clippy.toml` yet—defaults plus `-D warnings`. If we add lint groups or `allow` attributes, document the **why** here.
+- **`rust-toolchain.toml`** pins channel + **rustfmt** / **clippy** (keep in sync with `.github/actions/install-rust`).
+- Touching **`src-tauri/`**: **`bun run fmt:rust:check`** and **`bun run clippy`** (`-D warnings`). No custom **`clippy.toml`** yet—document any future **`allow`** here.
 
 ## Validation
 
-**When:** after a **large diff** or **high-impact** touch (`src/`, `src-tauri/`, `vite.config.ts`, capabilities) and **always before commit**.
+**When:** large or high-impact diff (`src/`, `src-tauri/`, `vite.config.ts`, capabilities); before commit.
 
-**Loop** before commit (shortest → longest; stop on first failure):
+**Loop** (stop on first failure):
 
-1. `bun run check` — Biome format + lint (CI: `fmt:check`, `lint:ci`)
+1. `bun run check`
 2. `bun run typecheck`
-3. `bun run fallow:audit` — dead code, unused exports, baselines (CI passes `--base`; see workflow)
-4. **`bun run fmt:rust:check`** then **`bun run clippy`** — only when the diff touches **`src-tauri/`**, **`rust-toolchain.toml`**, or **`src-tauri/Cargo.toml`** / **`Cargo.lock`**
+3. `bun run fallow:audit` (CI: `--base` on PRs; see workflow)
+4. **`bun run fmt:rust:check`** then **`bun run clippy`** — only if the diff touches **`src-tauri/`**, **`rust-toolchain.toml`**, or **`src-tauri/Cargo.{toml,lock}`**
 
-**Rust locally:** skip step 4 on TS-only or tooling-only work. Clippy compiles the full Tauri dependency graph and is slow; CI **`rust-clippy`** / **`rust-fmt`** run on every push and PR. Run step 4 after substantive Rust edits or when fixing a Clippy or rustfmt failure—not as a default “run the whole loop” step.
+Skip step 4 on TS-only work. Clippy is slow; run it after substantive Rust edits or when fixing a Rust CI failure.
 
-**CI** (`.github/workflows/continuous-integration.yaml`) runs these jobs in parallel on every push and PR (`rust-clippy` needs Linux Tauri deps via **`install-rust`** **`tauri-deps: true`**):
+**CI job → local command:**
 
-| Job           | Local equivalent         |
+| Job           | Local                    |
 | ------------- | ------------------------ |
 | `fmt`         | `bun run fmt:check`      |
 | `lint`        | `bun run lint:ci`        |
@@ -131,26 +105,6 @@ No custom `clippy.toml` yet—defaults plus `-D warnings`. If we add lint groups
 | `rust-fmt`    | `bun run fmt:rust:check` |
 | `rust-clippy` | `bun run clippy`         |
 
-**Builds** (`.github/workflows/builds.yaml`, sidebar **Builds**): **`desktop-macos`** on **push** to **`main`**, every **PR**, and **workflow_dispatch**; uploads expiring artifacts (`gdex-desktop-macos-<sha>`). **concurrency** cancels overlapping runs on the same ref. Not a GitHub Release. Future: **`desktop-linux`** / **`desktop-windows`** in the same workflow.
+**Builds** workflow (`builds.yaml`): macOS **`.app`** on push to **`main`**, PRs, and **workflow_dispatch** — `bun run tauri build -- --bundles app` (no DMG on CI). **`install-rust`** needs **`tauri-deps: true`** only on **`rust-clippy`**, not **`rust-fmt`**.
 
-**CI notes:** No **`cargo test`** job; Tauri packaging is **Builds** only (macOS runner).
-
-**Findings:** fix—wire code, add or extend **`entry`** in `.fallowrc.jsonc`, or delete. Do not suppress to greenwash.
-
-**Must ignore?** Ask the human first; aim for a healthy codebase, not a quiet audit.
-
-- **Temporary** (follow-up PR): `TODO` + reason; smallest suppression only if needed.
-- **Permanent** (e.g. generated export): comment at the ignore explaining why.
-
-No fallow/lint waivers or “reserved for later” files without human approval and that documentation. Do not use **`fallow-rs/fallow@v2`** or Actions cache for **`.fallow/`**—run the lockfile-pinned CLI via **`bun run fallow:audit`**.
-
-**Baselines** (paths in `.fallowrc.jsonc`; versioned, not hand-edited):
-
-- **`dupes-baseline.json`** — grandfathered duplicate clone groups. Audit compares the PR diff against this snapshot; with default **new-only** gating, only **new** clones fail. Empty `clone_groups` means none accepted yet—dedupe in code, do not patch the JSON to greenwash.
-- **`health-baseline.json`** — grandfathered health findings (complexity, coverage gaps, etc.); same new-only comparison. Empty `runtime_coverage_findings` / `target_keys` means a clean slate.
-- **Refreshing baselines** is intentional debt recording: `fallow dupes --save-baseline` and `fallow health --save-baseline` (human-driven after review—not an agent default when audit fails).
-- **`cache/`** and **`cache.bin`** are local-only (`.fallow/.gitignore`); CI needs the baseline JSON files present in the repo.
-
-## Keeping this file useful
-
-When we lock in a new convention or clarify a recurring detail, ask whether it should be added or tightened in `AGENTS.md`.
+**Fallow:** fix, **`entry`** in **`.fallowrc.jsonc`**, or delete—no greenwash. Ask the human before permanent ignores or baselines. **`bun run fallow:audit`** only (not **`fallow-rs/fallow@v2`**). Baselines **`dupes-baseline.json`** / **`health-baseline.json`** are versioned; refresh with **`fallow dupes --save-baseline`** / **`fallow health --save-baseline`** after human review—not by default when audit fails.
