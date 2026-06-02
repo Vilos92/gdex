@@ -42,19 +42,14 @@ pub(crate) fn resolve_dex_binary_path() -> Result<PathBuf, ResolveDexBinaryError
             env_var: DEX_BINARY_ENV,
             path: path.clone(),
         })?;
-        return fs::canonicalize(&path).map_err(|source| ResolveDexBinaryError::Canonicalize {
-            path,
-            source,
-        });
+        return fs::canonicalize(&path)
+            .map_err(|source| ResolveDexBinaryError::Canonicalize { path, source });
     }
 
     lookup_dex_on_path(gui_augmented_path().as_os_str(), &env::current_dir()?)
 }
 
-fn lookup_dex_on_path(
-    search_path: &OsStr,
-    cwd: &Path,
-) -> Result<PathBuf, ResolveDexBinaryError> {
+fn lookup_dex_on_path(search_path: &OsStr, cwd: &Path) -> Result<PathBuf, ResolveDexBinaryError> {
     match which_in("dex", Some(search_path), cwd) {
         Ok(path) => Ok(path),
         Err(which::Error::CannotFindBinaryPath) => Err(ResolveDexBinaryError::NotFound {
