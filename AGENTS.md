@@ -120,7 +120,7 @@ No custom `clippy.toml` yet—defaults plus `-D warnings`. If we add lint groups
 
 **Rust locally:** skip step 4 on TS-only or tooling-only work. Clippy compiles the full Tauri dependency graph and is slow; CI **`rust-clippy`** / **`rust-fmt`** run on every push and PR. Run step 4 after substantive Rust edits or when fixing a Clippy or rustfmt failure—not as a default “run the whole loop” step.
 
-**CI** (`.github/workflows/continuous-integration.yaml`) runs these jobs in parallel on every push and PR:
+**CI** (`.github/workflows/continuous-integration.yaml`) runs these jobs in parallel on every push and PR (`tauri-build` needs Linux Tauri deps like `rust-clippy`):
 
 | Job           | Local equivalent         |
 | ------------- | ------------------------ |
@@ -130,8 +130,9 @@ No custom `clippy.toml` yet—defaults plus `-D warnings`. If we add lint groups
 | `fallow`      | `bun run fallow:audit`   |
 | `rust-fmt`    | `bun run fmt:rust:check` |
 | `rust-clippy` | `bun run clippy`         |
+| `tauri-build` | `bun run tauri build`    |
 
-Rust jobs use **`rust-toolchain.toml`**, Linux Tauri system deps (Clippy only), and **[rust-cache](https://github.com/Swatinem/rust-cache)** keyed on **`src-tauri/Cargo.lock`** (and registry) so PR builds reuse compiled deps. CI does **not** run `bun run build`, `cargo test`, or Tauri packaging—those stay local or in a release workflow later.
+**CI notes:** Ubuntu Tauri compile jobs need **`install-rust`** with **`tauri-deps: true`**. macOS bundles are built only in **`macos-artifact.yaml`** on push to **`main`**, not on PR **`tauri-build`**. CI has no **`cargo test`** job.
 
 **Findings:** fix—wire code, add or extend **`entry`** in `.fallowrc.jsonc`, or delete. Do not suppress to greenwash.
 
