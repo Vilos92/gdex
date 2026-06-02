@@ -36,7 +36,7 @@ GitHub Actions on every push and PR:
 | Workflow | What it does |
 | -------- | ------------ |
 | **Continuous Integration** | Biome format/lint, typecheck, fallow, Rust fmt, Clippy |
-| **Builds** | macOS `bun run tauri build -- --bundles app` → downloadable **`.app`** artifact (14-day retention) |
+| **Builds** | macOS `bun run tauri build --bundles app` → downloadable **`.app`** artifact (14-day retention) |
 
 **Builds** runs on push to **`main`**, all PRs, and manual **workflow_dispatch**. CI skips DMG bundling (Finder/AppleScript is unreliable on runners). Download artifacts from the workflow run’s **Artifacts** tab.
 

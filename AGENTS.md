@@ -105,6 +105,6 @@ Skip step 4 on TS-only work. Clippy is slow; run it after substantive Rust edits
 | `rust-fmt`    | `bun run fmt:rust:check` |
 | `rust-clippy` | `bun run clippy`         |
 
-**Builds** workflow (`builds.yaml`): macOS **`.app`** on push to **`main`**, PRs, and **workflow_dispatch** — `bun run tauri build -- --bundles app` (no DMG on CI). **`install-rust`** needs **`tauri-deps: true`** only on **`rust-clippy`**, not **`rust-fmt`**.
+**Builds** workflow (`builds.yaml`): macOS **`.app`** on push to **`main`**, PRs, and **workflow_dispatch** — `bun run tauri build --bundles app` (no DMG on CI). **`install-rust`** needs **`tauri-deps: true`** only on **`rust-clippy`**, not **`rust-fmt`**.
 
 **Fallow:** fix, **`entry`** in **`.fallowrc.jsonc`**, or delete—no greenwash. Ask the human before permanent ignores or baselines. **`bun run fallow:audit`** only (not **`fallow-rs/fallow@v2`**). Baselines **`dupes-baseline.json`** / **`health-baseline.json`** are versioned; refresh with **`fallow dupes --save-baseline`** / **`fallow health --save-baseline`** after human review—not by default when audit fails.
