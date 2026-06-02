@@ -8,6 +8,8 @@ use std::time::{Duration, Instant};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+use crate::dex::gui_augmented_path;
+
 const DEX_COMMAND_TIMEOUT: Duration = Duration::from_secs(30);
 
 /* Types. */
@@ -99,6 +101,7 @@ impl DexClient {
 impl DexClient {
     fn run_dex(&self, project: &DexProject, args: &[&str]) -> Result<String, DexError> {
         let mut child = Command::new(&self.binary_path)
+            .env("PATH", gui_augmented_path())
             .arg("--config")
             .arg(&project.config_path)
             .arg("--storage-path")

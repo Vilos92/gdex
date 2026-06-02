@@ -60,7 +60,7 @@ fn lookup_dex_on_path(search_path: &OsStr, cwd: &Path) -> Result<PathBuf, Resolv
 }
 
 /// PATH plus common install locations when the app is opened from Finder/DMG (not a login shell).
-fn gui_augmented_path() -> OsString {
+pub(crate) fn gui_augmented_path() -> OsString {
     let mut dirs: Vec<PathBuf> = env::var_os("PATH")
         .map(|path| env::split_paths(&path).collect())
         .unwrap_or_default();
@@ -72,11 +72,111 @@ fn gui_augmented_path() -> OsString {
 
     if let Some(home) = dirs::home_dir() {
         append_search_dir(&mut dirs, home.join(".bun/bin"));
+        append_search_dir(&mut dirs, home.join(".volta/bin"));
         append_search_dir(&mut dirs, home.join(".cargo/bin"));
         append_search_dir(&mut dirs, home.join(".local/bin"));
+        append_nvm_node_bins(&mut dirs, &home);
     }
 
+    append_search_dir(&mut dirs, "/opt/homebrew/opt/node/bin");
+
     env::join_paths(dirs).unwrap_or_else(|_| OsString::from("/usr/bin:/bin"))
+}
+
+/// Adds `~/.nvm/versions/node/<resolved>/bin` from nvm's default alias when present.
+fn append_nvm_node_bins(dirs: &mut Vec<PathBuf>, home: &Path) {
+    let default_alias = home.join(".nvm/alias/default");
+    let Ok(alias) = fs::read_to_string(&default_alias) else {
+        return;
+    };
+    let alias = alias.trim();
+    if alias.is_empty() {
+        return;
+    }
+
+    let versions_root = home.join(".nvm/versions/node");
+    let Some(bin_dir) = resolve_nvm_bin_dir(home, &versions_root, alias) else {
+        return;
+    };
+    append_search_dir(dirs, bin_dir);
+}
+
+fn resolve_nvm_bin_dir(home: &Path, versions_root: &Path, alias: &str) -> Option<PathBuf> {
+    if let Some(bin) = nvm_bin_for_version_name(versions_root, alias) {
+        return Some(bin);
+    }
+    if let Some(bin) = resolve_nvm_named_alias(home, alias) {
+        return Some(bin);
+    }
+    resolve_nvm_version_match(versions_root, alias)
+}
+
+fn nvm_bin_for_version_name(versions_root: &Path, version: &str) -> Option<PathBuf> {
+    let trimmed = version.trim_start_matches('v');
+    for candidate in [version, trimmed, &format!("v{trimmed}")] {
+        let bin = versions_root.join(candidate).join("bin");
+        if bin.is_dir() {
+            return Some(bin);
+        }
+    }
+    None
+}
+
+fn resolve_nvm_named_alias(home: &Path, alias: &str) -> Option<PathBuf> {
+    let alias_file = home.join(".nvm/alias").join(alias);
+    let Ok(target) = fs::read_to_string(&alias_file) else {
+        return None;
+    };
+    let target = target.trim();
+    if target.is_empty() {
+        return None;
+    }
+    let versions_root = home.join(".nvm/versions/node");
+    resolve_nvm_bin_dir(home, &versions_root, target)
+}
+
+fn resolve_nvm_version_match(versions_root: &Path, pattern: &str) -> Option<PathBuf> {
+    let entries = fs::read_dir(versions_root).ok()?;
+    let mut matches = Vec::new();
+    for entry in entries.flatten() {
+        let name = entry.file_name().to_string_lossy().into_owned();
+        if nvm_version_matches_pattern(&name, pattern) {
+            matches.push(name);
+        }
+    }
+    let best = matches
+        .into_iter()
+        .max_by(|left, right| nvm_version_dir_cmp(left, right))?;
+    nvm_bin_for_version_name(versions_root, &best)
+}
+
+fn nvm_version_matches_pattern(version_dir: &str, pattern: &str) -> bool {
+    let version_dir = version_dir.trim_start_matches('v');
+    let pattern = pattern.trim_start_matches('v');
+    if pattern == "lts/*" || pattern == "lts" {
+        return version_dir.contains("lts")
+            || version_dir
+                .chars()
+                .next()
+                .is_some_and(|c| c.is_ascii_digit());
+    }
+    version_dir == pattern
+        || version_dir.starts_with(&format!("{pattern}."))
+        || version_dir.starts_with(pattern)
+}
+
+fn nvm_version_dir_cmp(left: &str, right: &str) -> std::cmp::Ordering {
+    let left_parts = nvm_version_parts(left);
+    let right_parts = nvm_version_parts(right);
+    left_parts.cmp(&right_parts)
+}
+
+fn nvm_version_parts(version_dir: &str) -> Vec<u64> {
+    version_dir
+        .trim_start_matches('v')
+        .split('.')
+        .filter_map(|part| part.parse().ok())
+        .collect()
 }
 
 fn append_search_dir(dirs: &mut Vec<PathBuf>, dir: impl Into<PathBuf>) {
@@ -158,9 +258,28 @@ mod tests {
         if let Some(home) = dirs::home_dir() {
             let bun_bin = home.join(".bun/bin");
             assert!(joined.contains(&bun_bin.to_string_lossy().to_string()));
+            let volta_bin = home.join(".volta/bin");
+            assert!(joined.contains(&volta_bin.to_string_lossy().to_string()));
             let cargo_bin = home.join(".cargo/bin");
             assert!(joined.contains(&cargo_bin.to_string_lossy().to_string()));
         }
+    }
+
+    #[test]
+    fn append_nvm_node_bins_adds_default_version_bin() {
+        let home = env::temp_dir().join("gdex-nvm-home");
+        let _ = fs::remove_dir_all(&home);
+        let version = "20.11.0";
+        let bin_dir = home.join(".nvm/versions/node").join(version).join("bin");
+        fs::create_dir_all(&bin_dir).expect("create nvm bin dir");
+        fs::create_dir_all(home.join(".nvm/alias")).expect("create nvm alias dir");
+        fs::write(home.join(".nvm/alias/default"), version).expect("write default alias");
+
+        let mut dirs = Vec::new();
+        append_nvm_node_bins(&mut dirs, &home);
+        assert!(dirs.iter().any(|dir| dir == &bin_dir));
+
+        let _ = fs::remove_dir_all(home);
     }
 
     #[test]
