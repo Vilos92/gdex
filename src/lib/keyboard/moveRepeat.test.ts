@@ -37,6 +37,23 @@ describe('createMoveRepeat', () => {
     expect(steps).toEqual(['moveDown', 'moveDown', 'moveDown']);
   });
 
+  test('does not start an interval when the delayed step fails', () => {
+    let step = 0;
+    const repeat = createMoveRepeat(() => {
+      step += 1;
+      return step === 1;
+    });
+
+    repeat.begin('j', 'moveDown');
+    expect(step).toBe(1);
+
+    vi.advanceTimersByTime(MOVE_REPEAT_DELAY_MS);
+    expect(step).toBe(2);
+
+    vi.advanceTimersByTime(MOVE_REPEAT_INTERVAL_MS * 3);
+    expect(step).toBe(2);
+  });
+
   test('stops when endIfKey matches the key that started the session', () => {
     const steps: string[] = [];
     const repeat = createMoveRepeat(action => {

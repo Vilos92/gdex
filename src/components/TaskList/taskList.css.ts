@@ -35,13 +35,15 @@ export const list = style({
   overflowY: 'auto'
 });
 
-/** Task-board selected row. */
+/** Task-board selected row. Keep a focus ring on top of the selection border for keyboard users. */
 export const taskButtonSelected = style([
   listRowButtonSelected,
   {
     selectors: {
-      '&:focus': {outline: 'none'},
-      '&:focus-visible': {outline: 'none'}
+      '&:focus-visible': {
+        outline: `2px solid ${palette.accent}`,
+        outlineOffset: '2px'
+      }
     }
   }
 ]);

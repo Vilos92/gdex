@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useRef} from 'preact/hooks';
+import {useEffect, useRef} from 'preact/hooks';
 import {useShallow} from 'zustand/shallow';
 
 import {TaskBoard} from '@/components/TaskBoard/TaskBoard';
@@ -32,19 +32,12 @@ export function WorkspaceMain() {
     setTaskBoardWidthPx
   } = useWorkspaceMainState();
 
-  const applyNavigation = useCallback(
-    (patch: {zoomParentId: string | undefined; selectedTaskId: string | undefined}) => {
-      setTaskListNavigation(patch);
-    },
-    [setTaskListNavigation]
-  );
-
   useTaskListKeyboard({
     isEnabled: isWorkspaceMainVisible,
     tasks,
     zoomParentId,
     selectedTaskId,
-    onApplyNavigation: applyNavigation
+    onApplyNavigation: setTaskListNavigation
   });
 
   useEffect(() => {

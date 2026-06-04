@@ -100,6 +100,7 @@ export function TaskList({
   contextMenu
 }: TaskListProps) {
   const sortedTasks = [...tasks].sort(compareTasks);
+  const selectedExists = selectedTaskId !== undefined && sortedTasks.some(task => task.id === selectedTaskId);
 
   if (sortedTasks.length === 0) {
     if (isLoading) {
@@ -116,7 +117,11 @@ export function TaskList({
             key={task.id}
             task={task}
             isSelected={task.id === selectedTaskId}
-            isTabStop={task.id === selectedTaskId || (selectedTaskId === undefined && index === 0)}
+            isTabStop={
+              task.id === selectedTaskId ||
+              (selectedTaskId === undefined && index === 0) ||
+              (!selectedExists && index === 0)
+            }
             onSelectTask={onSelectTask}
             onContextMenu={onContextMenu}
           />

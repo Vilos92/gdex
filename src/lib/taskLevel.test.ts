@@ -59,4 +59,8 @@ describe('sortedTasksAtLevel', () => {
   test('returns root tasks sorted by compareTasks', () => {
     expect(sortedTasksAtLevel(tasks, undefined).map(task => task.id)).toEqual(['a', 'b']);
   });
+
+  test('returns child tasks under a zoom parent', () => {
+    expect(sortedTasksAtLevel(tasks, 'a').map(task => task.id)).toEqual(['a1']);
+  });
 });

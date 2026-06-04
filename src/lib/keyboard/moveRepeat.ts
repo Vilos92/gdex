@@ -85,6 +85,10 @@ export function createMoveRepeat(runStep: (action: MoveRepeatAction) => boolean)
       }
 
       tick();
+      if (!session || session.key !== key) {
+        return;
+      }
+
       session.intervalTimer = setInterval(tick, MOVE_REPEAT_INTERVAL_MS);
     }, MOVE_REPEAT_DELAY_MS);
 
