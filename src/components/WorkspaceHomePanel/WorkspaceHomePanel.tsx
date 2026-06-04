@@ -1,6 +1,7 @@
 import {useState} from 'preact/hooks';
 import {useShallow} from 'zustand/shallow';
 
+import {WorkspaceHomeQuickPrompts} from '@/components/WorkspaceHomePanel/WorkspaceHomeQuickPrompts';
 import * as styles from '@/components/WorkspaceHomePanel/workspaceHomePanel.css';
 import {invokeErrorMessage} from '@/lib/error';
 import type {Workspace} from '@/lib/workspaceApi';
@@ -59,6 +60,8 @@ export function WorkspaceHomePanel({workspace}: WorkspaceHomePanelProps) {
         <h3 class={styles.sectionLabel}>Storage path</h3>
         <p class={styles.sectionBody}>{workspace.storagePath}</p>
       </section>
+
+      <WorkspaceHomeQuickPrompts workspace={workspace} />
 
       <div class={styles.actionsSection}>
         {isConfirming ? (

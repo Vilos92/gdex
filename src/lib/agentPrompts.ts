@@ -9,10 +9,21 @@ import type {Workspace} from '@/lib/workspaceApi';
 
 type AgentPromptId = 'view' | 'start' | 'complete' | 'delete';
 
+export type WorkspaceAgentPromptId = 'list' | 'create';
+
 export const DEFAULT_AGENT_PROMPT_ID = 'view' as const;
+
+export const DEFAULT_WORKSPACE_AGENT_PROMPT_ID = 'list' as const;
 
 export type AgentPrompt = {
   id: 'view' | 'start' | 'complete' | 'delete';
+  label: string;
+  text: string;
+  isAvailable: boolean;
+};
+
+export type WorkspaceAgentPrompt = {
+  id: WorkspaceAgentPromptId;
   label: string;
   text: string;
   isAvailable: boolean;
@@ -22,6 +33,12 @@ type AgentPromptDefinition = {
   id: AgentPromptId;
   label: string;
   buildText: (workspace: Workspace, taskId: string) => string;
+};
+
+type WorkspaceAgentPromptDefinition = {
+  id: WorkspaceAgentPromptId;
+  label: string;
+  buildText: (workspace: Workspace) => string;
 };
 
 /*
@@ -35,6 +52,11 @@ const AGENT_PROMPT_DEFINITIONS: readonly AgentPromptDefinition[] = [
   {id: 'delete', label: 'Delete task', buildText: buildDeletePrompt}
 ];
 
+const WORKSPACE_AGENT_PROMPT_DEFINITIONS: readonly WorkspaceAgentPromptDefinition[] = [
+  {id: 'list', label: 'List tasks', buildText: buildWorkspaceListPrompt},
+  {id: 'create', label: 'Create root task', buildText: buildWorkspaceCreatePrompt}
+];
+
 const visibilityByPromptId: Record<AgentPromptId, (status: TaskStatus) => boolean> = {
   view: () => true,
   start: status => status === 'pending',
@@ -46,7 +68,7 @@ const visibilityByPromptId: Record<AgentPromptId, (status: TaskStatus) => boolea
  * Script.
  */
 
-/** Agent instruction snippets in display order; unavailable prompts stay listed but marked disabled. */
+/** Agent instruction snippets in display order. Unavailable prompts stay listed but marked disabled. */
 export function buildAgentPrompts(input: {
   workspace: Workspace;
   taskId: string;
@@ -59,6 +81,16 @@ export function buildAgentPrompts(input: {
     label: definition.label,
     text: definition.buildText(workspace, taskId),
     isAvailable: visibilityByPromptId[definition.id](status)
+  }));
+}
+
+/** Workspace-home agent prompts (list, create root task). All available on the root panel. */
+export function buildWorkspaceAgentPrompts(workspace: Workspace): readonly WorkspaceAgentPrompt[] {
+  return WORKSPACE_AGENT_PROMPT_DEFINITIONS.map(definition => ({
+    id: definition.id,
+    label: definition.label,
+    text: definition.buildText(workspace),
+    isAvailable: true
   }));
 }
 
@@ -107,7 +139,30 @@ function buildCompletePrompt(workspace: Workspace, taskId: string): string {
 
   return agentPromptText`
     Mark dex task \`${taskId}\` complete (workspace \`${workspace.name}\`).
-    When done, run \`${baseCommand} complete ${id} --result "..."\` with a concise result summary.
+    If you just finished implementation: tell the user the work is ready for review, remind them to commit when satisfied, and wait for explicit approval before running complete.
+    When the human confirms (and any code is committed), run \`${baseCommand} complete ${id} --result "..."\` with a concise result summary.
+  `;
+}
+
+function buildWorkspaceListPrompt(workspace: Workspace): string {
+  const baseCommand = dexBaseCommand(workspace);
+
+  return agentPromptText`
+    Survey dex tasks in workspace \`${workspace.name}\`.
+    Run \`${baseCommand} list\` to see the tree; add \`--all\` if completed tasks matter.
+    Summarize top-level and in-progress work for the user. Do not create, start, complete, or delete tasks unless asked.
+  `;
+}
+
+function buildWorkspaceCreatePrompt(workspace: Workspace): string {
+  const baseCommand = dexBaseCommand(workspace);
+  const titlePlaceholder = quoteCliArg('TASK_TITLE');
+  const descriptionPlaceholder = quoteCliArg('TASK_DESCRIPTION');
+
+  return agentPromptText`
+    Create a new root-level dex task in workspace \`${workspace.name}\`.
+    Agree on title and description with the user first, then run \`${baseCommand} create ${titlePlaceholder} --description ${descriptionPlaceholder}\` (replace placeholders with the agreed values).
+    Run \`${baseCommand} show <new-id> --full\` to confirm creation and share the new task ID. Do not start or complete the task unless the user asks.
   `;
 }
 

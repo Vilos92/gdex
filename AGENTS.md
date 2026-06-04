@@ -64,7 +64,7 @@ Living conventions for this repo. Ask whether new habits belong here vs `README.
 
 ## Naming
 
-- **Booleans:** predicate prefixes (`is`, `has`, `did`, `should`, `can`, …).
+- **Booleans:** predicate prefixes (`is`, `has`, `did`, `should`, `can`, …) for locals, props, and fields — not bare adjectives or state nouns (`open` → `isOpen`, `loading` → `isLoading`).
 - **Locals:** readable names (`taskId`), not `e` / `x` unless scope is tiny.
 
 ## Fail fast
