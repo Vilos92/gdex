@@ -1,6 +1,6 @@
 import {style} from '@vanilla-extract/css';
-
-import {inDarkScheme} from '@/styles/darkScheme';
+import {TASK_BOARD_ID} from '@/lib/keyboard/scope';
+import {darkHtmlSelector, inDarkScheme} from '@/styles/darkScheme';
 import {listRowButton, listRowButtonSelected} from '@/styles/listRowButton.css';
 import {palette} from '@/styles/tokens';
 
@@ -35,6 +35,33 @@ export const list = style({
   overflowY: 'auto'
 });
 
+/** Task-board selected row. Keep a focus ring on top of the selection border for keyboard users. */
+export const taskButtonSelected = style([
+  listRowButtonSelected,
+  {
+    selectors: {
+      '&:focus-visible': {
+        outline: `2px solid ${palette.accent}`,
+        outlineOffset: '2px'
+      }
+    }
+  }
+]);
+
+// Keyboard navigation leaves `:hover` stuck on the last mouse-targeted row. See `suppressBoardHoverUntilPointerMove`.
+const suppressHoverWhileKeyboardDriving = {
+  [`#${TASK_BOARD_ID}[data-suppress-hover] &:hover:not(.${taskButtonSelected})`]: {
+    backgroundColor: palette.surface,
+    borderColor: 'transparent',
+    boxShadow: 'none'
+  },
+  [`${darkHtmlSelector} #${TASK_BOARD_ID}[data-suppress-hover] &:hover:not(.${taskButtonSelected})`]: {
+    backgroundColor: palette.surfaceDark,
+    borderColor: 'transparent',
+    boxShadow: 'none'
+  }
+} as const;
+
 export const taskButton = style([
   listRowButton,
   {
@@ -44,6 +71,7 @@ export const taskButton = style([
     width: '100%',
     textAlign: 'left',
     padding: '0.6em 0.75em',
+    selectors: suppressHoverWhileKeyboardDriving,
     '@container': {
       'task-board (max-width: 9rem)': {
         gap: '0.4rem',
@@ -52,8 +80,6 @@ export const taskButton = style([
     }
   }
 ]);
-
-export const taskButtonSelected = listRowButtonSelected;
 
 export const statusDot = style({
   flexShrink: 0,

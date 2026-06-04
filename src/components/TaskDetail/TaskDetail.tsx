@@ -6,7 +6,7 @@ import * as styles from '@/components/TaskDetail/taskDetail.css';
 import * as listStyles from '@/components/TaskList/taskList.css';
 import {WorkspaceHomePanel} from '@/components/WorkspaceHomePanel/WorkspaceHomePanel';
 import {useClipboardCopy} from '@/hooks/useClipboardCopy';
-import {compareTasks, type Task, type TaskStatus, type Tasks, taskStatus} from '@/lib/taskApi';
+import {compareTasks, findTaskById, type Task, type TaskStatus, type Tasks, taskStatus} from '@/lib/taskApi';
 import type {Workspace, Workspaces} from '@/lib/workspaceApi';
 import {useAppStore} from '@/stores/appStore';
 import * as disclosureStyles from '@/styles/panelDisclosure.css';
@@ -278,10 +278,6 @@ function useTaskDetailState() {
 /*
  * Helpers.
  */
-
-function findTaskById(tasks: Tasks, taskId: string): Task | undefined {
-  return tasks.find(task => task.id === taskId);
-}
 
 function resolveChildTasks(tasks: Tasks, childIds: readonly string[]): Task[] {
   const byId = new Map(tasks.map(task => [task.id, task]));
