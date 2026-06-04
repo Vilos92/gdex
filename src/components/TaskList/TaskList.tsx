@@ -1,5 +1,4 @@
 import {createPortal} from 'preact/compat';
-import {useState} from 'preact/hooks';
 
 import {TaskAgentPromptMenu} from '@/components/TaskAgentPromptMenu/TaskAgentPromptMenu';
 import * as styles from '@/components/TaskList/taskList.css';
@@ -16,19 +15,23 @@ export type TaskListProps = {
   selectedTaskId: string | undefined;
   isLoading: boolean;
   onSelectTask: (taskId: string) => void;
+  onContextMenu: (task: Task, position: {x: number; y: number}) => void;
+  contextMenu:
+    | {
+        task: Task;
+        x: number;
+        y: number;
+        onClose: () => void;
+      }
+    | undefined;
 };
 
 type TaskListItemProps = {
   task: Task;
   isSelected: boolean;
+  isTabStop: boolean;
   onSelectTask: (taskId: string) => void;
   onContextMenu: (task: Task, position: {x: number; y: number}) => void;
-};
-
-type TaskContextMenuState = {
-  task: Task;
-  x: number;
-  y: number;
 };
 
 /*
@@ -62,7 +65,7 @@ function taskStatusDotClass(status: TaskStatus): string {
  * Component.
  */
 
-function TaskListItem({task, isSelected, onSelectTask, onContextMenu}: TaskListItemProps) {
+function TaskListItem({task, isSelected, isTabStop, onSelectTask, onContextMenu}: TaskListItemProps) {
   const status = taskStatus(task);
 
   const handleContextMenu = (event: MouseEvent) => {
@@ -71,24 +74,32 @@ function TaskListItem({task, isSelected, onSelectTask, onContextMenu}: TaskListI
   };
 
   return (
-    <li>
-      <button
-        type="button"
-        class={taskRowButtonClass(isSelected)}
-        aria-current={isSelected ? 'true' : undefined}
-        onClick={() => onSelectTask(task.id)}
-        onContextMenu={handleContextMenu}
-      >
-        <span class={taskStatusDotClass(status)} title={statusLabel(status)} />
-        <span class={taskNameClass(status)}>{task.name}</span>
-      </button>
-    </li>
+    <button
+      type="button"
+      class={taskRowButtonClass(isSelected)}
+      data-task-id={task.id}
+      role="option"
+      tabIndex={isTabStop ? 0 : -1}
+      aria-selected={isSelected ? 'true' : 'false'}
+      onClick={() => onSelectTask(task.id)}
+      onContextMenu={handleContextMenu}
+    >
+      <span class={taskStatusDotClass(status)} title={statusLabel(status)} />
+      <span class={taskNameClass(status)}>{task.name}</span>
+    </button>
   );
 }
 
-export function TaskList({tasks, workspace, selectedTaskId, isLoading, onSelectTask}: TaskListProps) {
+export function TaskList({
+  tasks,
+  workspace,
+  selectedTaskId,
+  isLoading,
+  onSelectTask,
+  onContextMenu,
+  contextMenu
+}: TaskListProps) {
   const sortedTasks = [...tasks].sort(compareTasks);
-  const [contextMenu, setContextMenu] = useState<TaskContextMenuState | undefined>(undefined);
 
   if (sortedTasks.length === 0) {
     if (isLoading) {
@@ -99,24 +110,25 @@ export function TaskList({tasks, workspace, selectedTaskId, isLoading, onSelectT
 
   return (
     <>
-      <ul class={styles.list}>
-        {sortedTasks.map(task => (
+      <div class={styles.list} role="listbox" aria-label="Tasks">
+        {sortedTasks.map((task, index) => (
           <TaskListItem
             key={task.id}
             task={task}
             isSelected={task.id === selectedTaskId}
+            isTabStop={task.id === selectedTaskId || (selectedTaskId === undefined && index === 0)}
             onSelectTask={onSelectTask}
-            onContextMenu={(targetTask, position) => setContextMenu({task: targetTask, ...position})}
+            onContextMenu={onContextMenu}
           />
         ))}
-      </ul>
+      </div>
       {contextMenu !== undefined
         ? createPortal(
             <TaskAgentPromptMenu
               workspace={workspace}
               task={contextMenu.task}
               position={{x: contextMenu.x, y: contextMenu.y}}
-              onClose={() => setContextMenu(undefined)}
+              onClose={contextMenu.onClose}
             />,
             document.body
           )

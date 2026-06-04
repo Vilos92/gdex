@@ -1,7 +1,10 @@
+import {useState} from 'preact/hooks';
+
 import * as paneStyles from '@/components/TaskBoard/taskBoard.css';
 import {TaskList} from '@/components/TaskList/TaskList';
 import * as styles from '@/components/TaskList/taskList.css';
-import type {Tasks} from '@/lib/taskApi';
+import type {Task, Tasks} from '@/lib/taskApi';
+import {tasksAtLevel} from '@/lib/taskLevel';
 import type {Workspace} from '@/lib/workspaceApi';
 
 /*
@@ -17,6 +20,12 @@ export type TaskBoardProps = {
   onSelectTask: (taskId: string) => void;
 };
 
+type TaskContextMenuState = {
+  task: Task;
+  x: number;
+  y: number;
+};
+
 /*
  * Component.
  */
@@ -30,6 +39,7 @@ export function TaskBoard({
   onSelectTask
 }: TaskBoardProps) {
   const levelTasks = tasksAtLevel(tasks, zoomParentId);
+  const [contextMenu, setContextMenu] = useState<TaskContextMenuState | undefined>(undefined);
 
   return (
     <div id="task-board" class={paneStyles.pane}>
@@ -40,19 +50,10 @@ export function TaskBoard({
           selectedTaskId={selectedTaskId}
           isLoading={isLoading}
           onSelectTask={onSelectTask}
+          onContextMenu={(targetTask, position) => setContextMenu({task: targetTask, ...position})}
+          contextMenu={contextMenu && {...contextMenu, onClose: () => setContextMenu(undefined)}}
         />
       </div>
     </div>
   );
-}
-
-/*
- * Helpers.
- */
-
-function tasksAtLevel(tasks: Tasks, parentId: string | undefined): Tasks {
-  if (parentId === undefined) {
-    return tasks.filter(task => task.parentId === undefined);
-  }
-  return tasks.filter(task => task.parentId === parentId);
 }

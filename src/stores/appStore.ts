@@ -2,7 +2,8 @@ import {listen} from '@tauri-apps/api/event';
 import {create} from 'zustand';
 
 import {invokeErrorMessage} from '@/lib/error';
-import type {Tasks} from '@/lib/taskApi';
+import type {NavigationPatch} from '@/lib/keyboard/taskListNavigation';
+import {findTaskById, type Tasks} from '@/lib/taskApi';
 import {TASK_BOARD_WIDTH_DEFAULT_PX} from '@/lib/taskBoardWidth';
 import {
   applyThemeMode,
@@ -61,6 +62,8 @@ type AppActions = {
   /** Initial mount and programmatic activation (enter transition). */
   loadActiveWorkspaceTasks: () => Promise<void>;
   selectTask: (taskId: string) => void;
+  /** Atomically update list zoom and selection (keyboard navigation). */
+  setTaskListNavigation: (patch: NavigationPatch) => void;
   zoomTo: (parentId: string | undefined) => void;
   /** Set list zoom and detail selection together (breadcrumb navigation). */
   navigateToTask: (taskId: string | undefined) => void;
@@ -136,6 +139,8 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   selectTask: taskId => set({selectedTaskId: taskId}),
 
+  setTaskListNavigation: patch => set(patch),
+
   zoomTo: parentId => set({zoomParentId: parentId}),
 
   navigateToTask: taskId => {
@@ -144,7 +149,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       return;
     }
 
-    const task = get().tasks.find(row => row.id === taskId);
+    const task = findTaskById(get().tasks, taskId);
     set({zoomParentId: task?.parentId, selectedTaskId: taskId});
   },
 
