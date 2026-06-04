@@ -23,6 +23,10 @@ export async function getTasks(workspaceId: string): Promise<Tasks> {
  * Helpers.
  */
 
+export function findTaskById(tasks: Tasks, taskId: string): Task | undefined {
+  return tasks.find(task => task.id === taskId);
+}
+
 export function taskStatus(task: Task): TaskStatus {
   if (task.completed) {
     return 'done';

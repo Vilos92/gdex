@@ -83,7 +83,11 @@ export const workspaceMainDetail = style({
   display: 'flex',
   flexDirection: 'column',
   containerType: 'inline-size',
-  containerName: 'task-detail'
+  containerName: 'task-detail',
+  selectors: {
+    '&:focus': {outline: 'none'},
+    '&:focus-visible': {outline: 'none'}
+  }
 });
 
 export const workspaceMainMessage = style({

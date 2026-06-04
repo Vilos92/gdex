@@ -5,6 +5,7 @@ import {TaskBoard} from '@/components/TaskBoard/TaskBoard';
 import {TaskDetail} from '@/components/TaskDetail/TaskDetail';
 import * as taskStyles from '@/components/TaskList/taskList.css';
 import {WorkspaceResizer} from '@/components/WorkspaceResizer/WorkspaceResizer';
+import {useTaskListKeyboard} from '@/hooks/useTaskListKeyboard';
 import {applyTaskBoardWidthToElement} from '@/lib/taskBoardWidth';
 import {useAppStore} from '@/stores/appStore';
 import * as transitionStyles from '@/styles/workspaceTransition.css';
@@ -26,9 +27,18 @@ export function WorkspaceMain() {
     zoomParentId,
     selectedTaskId,
     selectTask,
+    setTaskListNavigation,
     taskBoardWidthPx,
     setTaskBoardWidthPx
   } = useWorkspaceMainState();
+
+  useTaskListKeyboard({
+    isEnabled: isWorkspaceMainVisible,
+    tasks,
+    zoomParentId,
+    selectedTaskId,
+    onApplyNavigation: setTaskListNavigation
+  });
 
   useEffect(() => {
     const grid = gridRef.current;
@@ -71,7 +81,7 @@ export function WorkspaceMain() {
             committedWidthPx={taskBoardWidthPx}
             onCommitWidth={setTaskBoardWidthPx}
           />
-          <div class={styles.workspaceMainDetail}>
+          <div id="task-detail" tabIndex={-1} class={styles.workspaceMainDetail}>
             <TaskDetail />
           </div>
         </>
@@ -96,6 +106,7 @@ function useWorkspaceMainState() {
       zoomParentId: state.zoomParentId,
       selectedTaskId: state.selectedTaskId,
       selectTask: state.selectTask,
+      setTaskListNavigation: state.setTaskListNavigation,
       taskBoardWidthPx: state.taskBoardWidthPx,
       setTaskBoardWidthPx: state.setTaskBoardWidthPx
     }))

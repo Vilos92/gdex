@@ -26,7 +26,7 @@ export function WorkspaceSidebar() {
   const asideClass = isCollapsed ? styles.sidebarCollapsed : styles.sidebar;
 
   return (
-    <aside class={asideClass} aria-label="Workspaces">
+    <aside class={asideClass} data-workspace-sidebar aria-label="Workspaces">
       <WorkspaceSidebarHeader isCollapsed={isCollapsed} onToggleCollapsed={toggleCollapsed} />
       {isCollapsed ? (
         <CollapsedWorkspaceSidebarBody
