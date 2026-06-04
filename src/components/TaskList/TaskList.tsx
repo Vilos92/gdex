@@ -100,14 +100,12 @@ export function TaskList({
   contextMenu
 }: TaskListProps) {
   const sortedTasks = [...tasks].sort(compareTasks);
-  const selectedExists = selectedTaskId !== undefined && sortedTasks.some(task => task.id === selectedTaskId);
 
   if (sortedTasks.length === 0) {
-    if (isLoading) {
-      return null;
-    }
-    return <p class={styles.emptyMessage}>No tasks at this level.</p>;
+    return renderEmptyTaskList(isLoading);
   }
+
+  const selectedExists = checkSelectedTaskExists(sortedTasks, selectedTaskId);
 
   return (
     <>
@@ -117,27 +115,13 @@ export function TaskList({
             key={task.id}
             task={task}
             isSelected={task.id === selectedTaskId}
-            isTabStop={
-              task.id === selectedTaskId ||
-              (selectedTaskId === undefined && index === 0) ||
-              (!selectedExists && index === 0)
-            }
+            isTabStop={checkIsTaskTabStop(task.id, index, selectedTaskId, selectedExists)}
             onSelectTask={onSelectTask}
             onContextMenu={onContextMenu}
           />
         ))}
       </div>
-      {contextMenu !== undefined
-        ? createPortal(
-            <TaskAgentPromptMenu
-              workspace={workspace}
-              task={contextMenu.task}
-              position={{x: contextMenu.x, y: contextMenu.y}}
-              onClose={contextMenu.onClose}
-            />,
-            document.body
-          )
-        : undefined}
+      {renderTaskListContextMenu(workspace, contextMenu)}
     </>
   );
 }
@@ -145,6 +129,51 @@ export function TaskList({
 /*
  * Helpers.
  */
+
+function renderEmptyTaskList(isLoading: boolean) {
+  if (isLoading) {
+    return null;
+  }
+
+  return <p class={styles.emptyMessage}>No tasks at this level.</p>;
+}
+
+function checkSelectedTaskExists(sortedTasks: Tasks, selectedTaskId: string | undefined): boolean {
+  return selectedTaskId !== undefined && sortedTasks.some(task => task.id === selectedTaskId);
+}
+
+function checkIsTaskTabStop(
+  taskId: string,
+  index: number,
+  selectedTaskId: string | undefined,
+  selectedExists: boolean
+): boolean {
+  if (taskId === selectedTaskId) {
+    return true;
+  }
+
+  if (index !== 0) {
+    return false;
+  }
+
+  return selectedTaskId === undefined || !selectedExists;
+}
+
+function renderTaskListContextMenu(workspace: Workspace, contextMenu: TaskListProps['contextMenu']) {
+  if (contextMenu === undefined) {
+    return undefined;
+  }
+
+  return createPortal(
+    <TaskAgentPromptMenu
+      workspace={workspace}
+      task={contextMenu.task}
+      position={{x: contextMenu.x, y: contextMenu.y}}
+      onClose={contextMenu.onClose}
+    />,
+    document.body
+  );
+}
 
 function statusLabel(status: TaskStatus): string {
   switch (status) {
