@@ -35,7 +35,7 @@ export function QuickPromptsPanel<TId extends string>({
   );
 
   useEffect(() => {
-    setSelectedId(current => resolveQuickPromptSelection(prompts, current, defaultPromptId));
+    setSelectedId(prevSelectedId => resolveQuickPromptSelection(prompts, prevSelectedId, defaultPromptId));
   }, [defaultPromptId, prompts]);
 
   const activePrompt = prompts.find(prompt => prompt.id === selectedId) ?? prompts[0];
