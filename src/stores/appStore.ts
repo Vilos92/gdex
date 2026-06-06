@@ -46,6 +46,7 @@ type AppData = {
   zoomParentId: string | undefined;
   themeMode: ThemeMode;
   taskBoardWidthPx: number;
+  isSidebarCollapsed: boolean;
 };
 
 type WorkspacesUpdater = Workspaces | ((workspaces: Workspaces) => Workspaces);
@@ -81,6 +82,7 @@ type AppActions = {
   cycleThemeMode: () => Promise<void>;
   handleSystemColorSchemeChange: () => void;
   setTaskBoardWidthPx: (widthPx: number) => void;
+  toggleSidebarCollapsed: () => void;
 };
 
 type AppState = AppData & AppActions;
@@ -102,10 +104,13 @@ export const useAppStore = create<AppState>((set, get) => ({
   zoomParentId: undefined,
   themeMode: readThemeModeCache() ?? 'auto',
   taskBoardWidthPx: TASK_BOARD_WIDTH_DEFAULT_PX,
+  isSidebarCollapsed: true,
 
   setView: view => set({view}),
 
   setTaskBoardWidthPx: taskBoardWidthPx => set({taskBoardWidthPx}),
+
+  toggleSidebarCollapsed: () => set(state => ({isSidebarCollapsed: !state.isSidebarCollapsed})),
 
   setWorkspaces: workspaces =>
     set(state => ({
