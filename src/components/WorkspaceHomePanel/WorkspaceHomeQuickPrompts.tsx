@@ -22,7 +22,6 @@ export function WorkspaceHomeQuickPrompts({workspace}: WorkspaceHomeQuickPrompts
       key={workspace.id}
       prompts={prompts}
       defaultPromptId={DEFAULT_WORKSPACE_AGENT_PROMPT_ID}
-      isInitiallyOpen
     />
   );
 }

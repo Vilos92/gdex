@@ -20,11 +20,5 @@ export type TaskDetailQuickPromptsProps = {
 export function TaskDetailQuickPrompts({workspace, taskId, status}: TaskDetailQuickPromptsProps) {
   const prompts = buildAgentPrompts({workspace, taskId, status});
 
-  return (
-    <QuickPromptsPanel
-      key={`${workspace.id}:${taskId}`}
-      prompts={prompts}
-      defaultPromptId={DEFAULT_AGENT_PROMPT_ID}
-    />
-  );
+  return <QuickPromptsPanel prompts={prompts} defaultPromptId={DEFAULT_AGENT_PROMPT_ID} />;
 }
