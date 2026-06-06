@@ -1,12 +1,9 @@
 import {useEffect, useLayoutEffect, useRef} from 'preact/hooks';
 import {tinykeys} from 'tinykeys';
-import {KEY_BINDINGS, type KeyAction} from '@/lib/keyboard/keyBindings';
-import {
-  checkIsMoveRepeatKey,
-  createMoveRepeat,
-  type MoveRepeatAction,
-  moveRepeatActionForKey
-} from '@/lib/keyboard/moveRepeat';
+import {type ChromeShortcutContext, handleChromeShortcut} from '@/lib/keyboard/chromeShortcuts';
+import {CHROME_KEY_BINDINGS, KEY_BINDINGS, type KeyAction} from '@/lib/keyboard/keyBindings';
+import {checkIsMoveRepeatKey, createMoveRepeat, type MoveRepeatAction} from '@/lib/keyboard/moveRepeat';
+import {handleMoveRepeatKeyDown} from '@/lib/keyboard/moveRepeatKeyDown';
 import {
   checkHasAgentPromptMenu,
   checkIsEditableKeyboardTarget,
@@ -26,6 +23,7 @@ import {
   type NavigationState
 } from '@/lib/keyboard/taskListNavigation';
 import type {Tasks} from '@/lib/taskApi';
+import type {Workspaces} from '@/schemas/workspace';
 
 /*
  * Types.
@@ -60,18 +58,30 @@ const NON_MOVE_KEY_HANDLERS: Partial<Record<KeyAction, NonMoveKeyHandler>> = {
  * Hooks.
  */
 
-export function useTaskListKeyboard({
-  isEnabled,
+export function useWindowKeyboard({
+  isTaskListEnabled,
   tasks,
   zoomParentId,
   selectedTaskId,
-  onApplyNavigation
+  onApplyNavigation,
+  workspaces,
+  activeWorkspaceId,
+  isWorkspaceSwitching,
+  switchWorkspace,
+  toggleSidebarCollapsed,
+  cycleThemeMode
 }: {
-  isEnabled: boolean;
+  isTaskListEnabled: boolean;
   tasks: Tasks;
   zoomParentId: string | undefined;
   selectedTaskId: string | undefined;
   onApplyNavigation: (patch: NavigationPatch) => void;
+  workspaces: Workspaces;
+  activeWorkspaceId: string | undefined;
+  isWorkspaceSwitching: boolean;
+  switchWorkspace: (workspaceId: string) => Promise<void>;
+  toggleSidebarCollapsed: () => void;
+  cycleThemeMode: () => Promise<void>;
 }): void {
   const contextRef = useRef<KeyboardContext>({
     readState: () => ({tasks, zoomParentId, selectedTaskId}),
@@ -83,21 +93,35 @@ export function useTaskListKeyboard({
     onApplyNavigation
   };
 
+  const chromeContextRef = useRef<ChromeShortcutContext>({
+    readChromeState: () => ({workspaces, activeWorkspaceId, isWorkspaceSwitching}),
+    toggleSidebarCollapsed,
+    switchWorkspace,
+    cycleThemeMode
+  });
+
+  chromeContextRef.current = {
+    readChromeState: () => ({workspaces, activeWorkspaceId, isWorkspaceSwitching}),
+    toggleSidebarCollapsed,
+    switchWorkspace,
+    cycleThemeMode
+  };
+
   const isKeyboardDrivingRef = useRef(false);
   const pendingFocusRef = useRef<PendingFocusTarget | undefined>(undefined);
 
   useLayoutEffect(() => {
     const pending = pendingFocusRef.current;
-    if (!isEnabled || pending === undefined) {
+    if (!isTaskListEnabled || pending === undefined) {
       return;
     }
 
     pendingFocusRef.current = undefined;
     applyPendingFocus(pending);
-  }, [isEnabled, selectedTaskId, zoomParentId]);
+  }, [isTaskListEnabled, selectedTaskId, zoomParentId]);
 
   useEffect(() => {
-    if (!isEnabled) {
+    if (!isTaskListEnabled) {
       return;
     }
 
@@ -112,36 +136,26 @@ export function useTaskListKeyboard({
     return () => {
       document.removeEventListener('pointerdown', endKeyboardDrivingOnPointerDown);
     };
-  }, [isEnabled]);
+  }, [isTaskListEnabled]);
 
   useEffect(() => {
-    if (!isEnabled) {
-      return;
-    }
-
     const readContext = (): KeyboardContext => contextRef.current;
+    const readChromeContext = (): ChromeShortcutContext => chromeContextRef.current;
 
-    const moveRepeat = createMoveRepeat(action =>
-      applyMoveStep(readContext(), action, isKeyboardDrivingRef, pendingFocusRef)
-    );
+    const moveRepeat = createMoveRepeat(action => {
+      if (!isTaskListEnabled) {
+        return false;
+      }
+
+      return applyMoveStep(readContext(), action, isKeyboardDrivingRef, pendingFocusRef);
+    });
 
     const onKeyDown = (event: KeyboardEvent) => {
-      const moveAction = moveRepeatActionForKey(event.key);
-      if (moveAction === undefined) {
+      if (!isTaskListEnabled) {
         return;
       }
 
-      if (!checkShouldHandleKey(event, isKeyboardDrivingRef)) {
-        return;
-      }
-
-      event.preventDefault();
-
-      if (event.repeat) {
-        return;
-      }
-
-      moveRepeat.begin(event.key, moveAction);
+      handleMoveRepeatKeyDown(event, moveRepeat, event => checkShouldHandleKey(event, isKeyboardDrivingRef));
     };
 
     const onKeyUp = (event: KeyboardEvent) => {
@@ -154,20 +168,31 @@ export function useTaskListKeyboard({
       moveRepeat.stop();
     };
 
-    const keyMap = Object.fromEntries(
-      KEY_BINDINGS.filter(binding => !MOVE_REPEAT_ACTIONS.has(binding.action)).map(binding => [
+    const taskListKeyMap = isTaskListEnabled
+      ? Object.fromEntries(
+          KEY_BINDINGS.filter(binding => !MOVE_REPEAT_ACTIONS.has(binding.action)).map(binding => [
+            binding.tinykey,
+            (event: KeyboardEvent) =>
+              handleKey(
+                event,
+                binding.action,
+                readContext().readState,
+                readContext().onApplyNavigation,
+                isKeyboardDrivingRef,
+                pendingFocusRef
+              )
+          ])
+        )
+      : {};
+
+    const chromeKeyMap = Object.fromEntries(
+      CHROME_KEY_BINDINGS.map(binding => [
         binding.tinykey,
-        (event: KeyboardEvent) =>
-          handleKey(
-            event,
-            binding.action,
-            readContext().readState,
-            readContext().onApplyNavigation,
-            isKeyboardDrivingRef,
-            pendingFocusRef
-          )
+        (event: KeyboardEvent) => handleChromeShortcut(event, binding.action, readChromeContext())
       ])
     ) as Record<string, (event: KeyboardEvent) => void>;
+
+    const keyMap = {...taskListKeyMap, ...chromeKeyMap} as Record<string, (event: KeyboardEvent) => void>;
 
     const unsubscribeTinykeys = tinykeys(window, keyMap);
 
@@ -182,7 +207,7 @@ export function useTaskListKeyboard({
       window.removeEventListener('blur', onWindowBlur);
       moveRepeat.stop();
     };
-  }, [isEnabled]);
+  }, [isTaskListEnabled]);
 }
 
 /*

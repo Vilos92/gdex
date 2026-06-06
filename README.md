@@ -2,6 +2,25 @@
 
 Desktop viewer for [dex](https://dex.rip/) tasks. Tauri + Preact + Vanilla Extract.
 
+## Keyboard shortcuts
+
+Navigate from the task list or detail pane. **`⌘`** is Command on macOS and Control on Windows/Linux.
+
+| Key | Action |
+| --- | ------ |
+| **j** / **↓** | Next task |
+| **k** / **↑** | Previous task |
+| **l** / **→** | Open subtasks *(task list focus)* |
+| **h** / **←** | Up one level |
+| **Backspace** | Leave detail pane, then up one level |
+| **⌘⇧]** | Next workspace |
+| **⌘⇧[** | Previous workspace |
+| **⌘B** | Toggle sidebar |
+| **⌘⌥T** | Cycle theme *(light → dark → auto)* |
+| **Esc** | Close Quick prompts menu |
+
+Hold **j** or **k** (or the arrow keys) to move continuously. Shortcuts are ignored while typing in a field, while focus is in the workspace sidebar, or while Quick prompts is open.
+
 ## Development
 
 ```sh

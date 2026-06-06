@@ -5,29 +5,31 @@ import {ExpandedWorkspaceSidebarBody} from '@/components/WorkspaceSidebar/Expand
 import {WorkspaceSidebarHeader} from '@/components/WorkspaceSidebar/WorkspaceSidebarHeader';
 import * as styles from '@/components/WorkspaceSidebar/workspaceSidebar.css';
 import {useWorkspaceSelection} from '@/hooks/useWorkspaceSelection';
+import {useAppStore} from '@/stores/appStore';
 
 /*
  * Component.
  */
 
 export function WorkspaceSidebar() {
-  const [isCollapsed, setIsCollapsed] = useState(true);
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+  const isCollapsed = useAppStore(state => state.isSidebarCollapsed);
+  const toggleSidebarCollapsed = useAppStore(state => state.toggleSidebarCollapsed);
   const {workspaces, activeWorkspaceId, isWorkspaceSwitching, selectError, selectWorkspace} =
     useWorkspaceSelection();
 
-  const toggleCollapsed = () => setIsCollapsed(collapsed => !collapsed);
-
   const openAddWorkspace = () => {
     setIsAddFormOpen(true);
-    setIsCollapsed(false);
+    if (isCollapsed) {
+      toggleSidebarCollapsed();
+    }
   };
 
   const asideClass = isCollapsed ? styles.sidebarCollapsed : styles.sidebar;
 
   return (
     <aside class={asideClass} data-workspace-sidebar aria-label="Workspaces">
-      <WorkspaceSidebarHeader isCollapsed={isCollapsed} onToggleCollapsed={toggleCollapsed} />
+      <WorkspaceSidebarHeader isCollapsed={isCollapsed} onToggleCollapsed={toggleSidebarCollapsed} />
       {isCollapsed ? (
         <CollapsedWorkspaceSidebarBody
           workspaces={workspaces}

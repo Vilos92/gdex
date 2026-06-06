@@ -64,6 +64,11 @@ export function checkHasAgentPromptMenu(): boolean {
   return document.querySelector('[role="menu"][aria-label="Quick prompts"]') !== null;
 }
 
+/** App-shell shortcuts, not list navigation — defer only while typing or the prompt menu owns the keyboard. */
+export function checkShouldHandleChromeShortcut(target: EventTarget | null): boolean {
+  return !checkHasAgentPromptMenu() && !checkIsEditableKeyboardTarget(target);
+}
+
 /** Clears sticky `:hover` on rows after keyboard navigation until the pointer moves over the board. */
 export function suppressBoardHoverUntilPointerMove(): void {
   const board = document.getElementById(TASK_BOARD_ID);
