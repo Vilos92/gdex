@@ -40,7 +40,19 @@ Living conventions for this repo. Ask whether new habits belong here vs `README.
 
 ## File layout (section comments)
 
-`/* Section name. */` blocks, blank line before/after. Top-down: entry first, **Helpers.** last.
+**TypeScript / Vanilla Extract** (`src/**/*.ts`, `*.tsx`, colocated `*.css.ts`): section markers are **multi-line block comments** (sentence-case label + period). Blank line before and after each block:
+
+```
+/*
+ * Types.
+ */
+```
+
+Do **not** collapse these to single-line `/* Types. */` — the TS tree uses the block form above (`TaskDetail.tsx`, `tokens.ts`, `*.css.ts`, etc.).
+
+**Rust** (`src-tauri/`): **single-line** section markers — `/* Types. */`, `/* Helpers. */`, etc. File-level docs use **`//!`** at the top. Do not use the TS multi-line block form in Rust sources.
+
+Top-down: entry first, **Helpers.** last.
 
 **Order** (omit unused; no empty **Types.** / **Helpers.**):
 
@@ -61,10 +73,12 @@ Living conventions for this repo. Ask whether new habits belong here vs `README.
 
 - **Why** over **what**. Short **JSDoc** when the contract is non-obvious.
 - In prose, backtick **identifiers** (`invoke`), not section headers.
+- **Section blocks** (see **File layout**) label structure only — no extra explanation inside the marker.
 
 ## Naming
 
 - **Booleans:** predicate prefixes (`is`, `has`, `did`, `should`, `can`, …) for locals, props, and fields — not bare adjectives or state nouns (`open` → `isOpen`, `loading` → `isLoading`).
+- **Boolean helpers** (non–type-guard functions): **`check`** prefix — e.g. `checkIsLongDescription`, not `isLongDescription`. Reserve **`is` / `has` / …** on functions for type guards only.
 - **Locals:** readable names (`taskId`), not `e` / `x` unless scope is tiny.
 
 ## Fail fast
@@ -80,6 +94,7 @@ Living conventions for this repo. Ask whether new habits belong here vs `README.
 
 - **`rust-toolchain.toml`** pins channel + **rustfmt** / **clippy** (keep in sync with `.github/actions/install-rust`).
 - Touching **`src-tauri/`**: **`bun run fmt:rust:check`** and **`bun run clippy`** (`-D warnings`). No custom **`clippy.toml`** yet—document any future **`allow`** here.
+- **Section comments:** single-line `/* Types. */` markers (see **File layout**) — not the TS multi-line block form.
 
 ## Validation
 

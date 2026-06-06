@@ -204,7 +204,7 @@ function TaskDetailFields({task, blockers, hasChildTasks}: TaskDetailFieldsProps
       {task.description !== undefined ? (
         <details
           class={disclosureStyles.panelDisclosureDetails}
-          open={isDescriptionInitiallyOpen(task.description, hasChildTasks)}
+          open={checkIsDescriptionInitiallyOpen(task.description, hasChildTasks)}
         >
           <summary class={disclosureStyles.panelDisclosureSummary}>Description</summary>
           <div class={styles.descriptionScroll}>
@@ -314,7 +314,7 @@ function statusLabel(status: TaskStatus): string {
   }
 }
 
-function isDescriptionInitiallyOpen(description: string, hasChildTasks: boolean): boolean {
+function checkIsDescriptionInitiallyOpen(description: string, hasChildTasks: boolean): boolean {
   if (!hasChildTasks) {
     return true;
   }
