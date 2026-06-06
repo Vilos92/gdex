@@ -4,6 +4,14 @@ import {panelIconButton} from '@/styles/iconButton.css';
 import {fonts, palette} from '@/styles/tokens';
 
 /*
+ * Constants.
+ */
+
+/** Cap prompt text at ~5 lines. `max-height` tracks `lineHeight` below. */
+const QUICK_PROMPT_CODE_MAX_LINES = 5;
+const QUICK_PROMPT_CODE_LINE_HEIGHT = 1.55;
+
+/*
  * Styles.
  */
 
@@ -113,11 +121,28 @@ export const quickPromptCodeText = style({
   padding: '0.5rem 0.4rem 0.5rem 0.55rem',
   fontFamily: fonts.mono,
   fontSize: '0.8125rem',
-  lineHeight: 1.55,
+  lineHeight: QUICK_PROMPT_CODE_LINE_HEIGHT,
+  maxHeight: `calc(1em * ${QUICK_PROMPT_CODE_LINE_HEIGHT} * ${QUICK_PROMPT_CODE_MAX_LINES})`,
+  overflowY: 'auto',
+  scrollbarWidth: 'thin',
+  scrollbarColor: `${palette.border} transparent`,
   whiteSpace: 'pre-wrap',
   wordBreak: 'break-word',
   color: palette.codeBlockText,
-  ...inDarkScheme({
-    color: palette.codeBlockTextDark
-  })
+  selectors: {
+    '&::-webkit-scrollbar': {
+      width: '6px'
+    },
+    '&::-webkit-scrollbar-thumb': {
+      backgroundColor: palette.border,
+      borderRadius: '3px'
+    },
+    [darkSelector('&::-webkit-scrollbar-thumb')]: {
+      backgroundColor: palette.borderDark
+    },
+    [darkSelector()]: {
+      color: palette.codeBlockTextDark,
+      scrollbarColor: `${palette.borderDark} transparent`
+    }
+  }
 });

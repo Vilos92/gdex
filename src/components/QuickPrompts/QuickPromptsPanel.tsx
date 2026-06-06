@@ -18,7 +18,6 @@ export type QuickPromptOption<TId extends string> = {
 export type QuickPromptsPanelProps<TId extends string> = {
   prompts: readonly QuickPromptOption<TId>[];
   defaultPromptId: TId;
-  isInitiallyOpen?: boolean;
 };
 
 /*
@@ -27,8 +26,7 @@ export type QuickPromptsPanelProps<TId extends string> = {
 
 export function QuickPromptsPanel<TId extends string>({
   prompts,
-  defaultPromptId,
-  isInitiallyOpen = false
+  defaultPromptId
 }: QuickPromptsPanelProps<TId>) {
   const [selectedId, setSelectedId] = useState<TId>(() =>
     resolveQuickPromptSelection(prompts, defaultPromptId, defaultPromptId)
@@ -44,7 +42,7 @@ export function QuickPromptsPanel<TId extends string>({
   }
 
   return (
-    <details class={disclosureStyles.panelDisclosureDetails} open={isInitiallyOpen || undefined}>
+    <details class={disclosureStyles.panelDisclosureDetails} open>
       <summary class={disclosureStyles.panelDisclosureSummary}>Quick prompts</summary>
       <div class={styles.quickPromptStack}>
         <select

@@ -31,6 +31,7 @@ type TaskDetailHeaderProps = {
 type TaskDetailFieldsProps = {
   task: Task;
   blockers: BlockerEntry[];
+  hasChildTasks: boolean;
 };
 
 type TaskDetailChildTasksProps = {
@@ -54,7 +55,7 @@ type TaskDetailNoSelectionProps = {
  * Constants.
  */
 
-/** Description stays expanded at or below these limits; longer copy starts collapsed. */
+/** Long descriptions collapse only when subtasks follow — otherwise scroll inside the panel. */
 const LONG_DESCRIPTION_LINE_COUNT = 10;
 const LONG_DESCRIPTION_CHAR_COUNT = 500;
 
@@ -129,6 +130,7 @@ export function TaskDetail() {
 
   return (
     <TaskDetailContent
+      key={task.id}
       task={task}
       tasks={tasks}
       workspace={activeWorkspace}
@@ -159,14 +161,9 @@ function TaskDetailContent({task, tasks, workspace, onOpenChildTask}: TaskDetail
     <aside class={styles.panel} aria-label="Task details">
       <TaskDetailHeader id={task.id} name={task.name} status={status} />
       {workspace !== undefined ? (
-        <TaskDetailQuickPrompts
-          key={`${workspace.id}:${task.id}`}
-          workspace={workspace}
-          taskId={task.id}
-          status={status}
-        />
+        <TaskDetailQuickPrompts workspace={workspace} taskId={task.id} status={status} />
       ) : undefined}
-      <TaskDetailFields task={task} blockers={blockers} />
+      <TaskDetailFields task={task} blockers={blockers} hasChildTasks={childTasks.length > 0} />
       <TaskDetailChildTasks childTasks={childTasks} onOpenChildTask={onOpenChildTask} />
     </aside>
   );
@@ -201,13 +198,18 @@ function TaskDetailHeader({id, name, status}: TaskDetailHeaderProps) {
   );
 }
 
-function TaskDetailFields({task, blockers}: TaskDetailFieldsProps) {
+function TaskDetailFields({task, blockers, hasChildTasks}: TaskDetailFieldsProps) {
   return (
     <>
       {task.description !== undefined ? (
-        <details class={disclosureStyles.panelDisclosureDetails} open={!isLongDescription(task.description)}>
+        <details
+          class={disclosureStyles.panelDisclosureDetails}
+          open={isDescriptionInitiallyOpen(task.description, hasChildTasks)}
+        >
           <summary class={disclosureStyles.panelDisclosureSummary}>Description</summary>
-          <p class={styles.sectionBody}>{task.description}</p>
+          <div class={styles.descriptionScroll}>
+            <p class={styles.descriptionScrollText}>{task.description}</p>
+          </div>
         </details>
       ) : undefined}
 
@@ -310,6 +312,13 @@ function statusLabel(status: TaskStatus): string {
     default:
       return 'Pending';
   }
+}
+
+function isDescriptionInitiallyOpen(description: string, hasChildTasks: boolean): boolean {
+  if (!hasChildTasks) {
+    return true;
+  }
+  return !isLongDescription(description);
 }
 
 function isLongDescription(description: string): boolean {

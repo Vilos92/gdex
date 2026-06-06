@@ -7,6 +7,13 @@ import {palette} from '@/styles/tokens';
 export {section, sectionLabel} from '@/styles/panelSection.css';
 
 /*
+ * Constants.
+ */
+
+const DESCRIPTION_SCROLL_MAX_LINES = 10;
+const DESCRIPTION_LINE_HEIGHT = 1.55;
+
+/*
  * Styles.
  */
 
@@ -117,6 +124,43 @@ export const sectionBody = style({
   lineHeight: 1.55,
   whiteSpace: 'pre-wrap',
   wordBreak: 'break-word'
+});
+
+export const descriptionScroll = style({
+  borderRadius: '8px',
+  backgroundColor: palette.codeBlockBg,
+  overflow: 'hidden',
+  ...inDarkScheme({
+    backgroundColor: palette.codeBlockBgDark
+  })
+});
+
+export const descriptionScrollText = style({
+  margin: 0,
+  padding: '0.65rem 0.75rem',
+  maxHeight: `calc(1em * ${DESCRIPTION_LINE_HEIGHT} * ${DESCRIPTION_SCROLL_MAX_LINES})`,
+  overflowY: 'auto',
+  scrollbarWidth: 'thin',
+  scrollbarColor: `${palette.border} transparent`,
+  fontSize: '0.9375rem',
+  lineHeight: DESCRIPTION_LINE_HEIGHT,
+  whiteSpace: 'pre-wrap',
+  wordBreak: 'break-word',
+  selectors: {
+    '&::-webkit-scrollbar': {
+      width: '6px'
+    },
+    '&::-webkit-scrollbar-thumb': {
+      backgroundColor: palette.border,
+      borderRadius: '3px'
+    },
+    [darkSelector('&::-webkit-scrollbar-thumb')]: {
+      backgroundColor: palette.borderDark
+    },
+    [darkSelector()]: {
+      scrollbarColor: `${palette.borderDark} transparent`
+    }
+  }
 });
 
 export const blockedList = style({
