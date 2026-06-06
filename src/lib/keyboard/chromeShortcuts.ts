@@ -38,26 +38,39 @@ export function handleChromeShortcut(
 }
 
 function runChromeShortcutAction(action: ChromeKeyAction, context: ChromeShortcutContext): void {
-  switch (action) {
-    case 'toggleSidebar':
-      context.toggleSidebarCollapsed();
-      return;
-    case 'cycleTheme':
-      context.cycleThemeMode().catch(error => {
-        console.error('theme update failed', error);
-      });
-      return;
-    case 'nextWorkspace':
-      void switchAdjacentWorkspace(context, 'next');
-      return;
-    case 'prevWorkspace':
-      void switchAdjacentWorkspace(context, 'prev');
-      return;
-    default: {
-      const unexpected: never = action;
-      throw new Error(`Unhandled chrome shortcut action: ${unexpected}`);
-    }
+  if (action === 'toggleSidebar') {
+    runToggleSidebar(context);
+    return;
   }
+
+  if (action === 'cycleTheme') {
+    runCycleTheme(context);
+    return;
+  }
+
+  runWorkspaceCycle(action, context);
+}
+
+function runToggleSidebar(context: ChromeShortcutContext): void {
+  context.toggleSidebarCollapsed();
+}
+
+function runWorkspaceCycle(
+  action: Extract<ChromeKeyAction, 'nextWorkspace' | 'prevWorkspace'>,
+  context: ChromeShortcutContext
+): void {
+  if (action === 'nextWorkspace') {
+    void switchAdjacentWorkspace(context, 'next');
+    return;
+  }
+
+  void switchAdjacentWorkspace(context, 'prev');
+}
+
+function runCycleTheme(context: ChromeShortcutContext): void {
+  context.cycleThemeMode().catch(error => {
+    console.error('theme update failed', error);
+  });
 }
 
 async function switchAdjacentWorkspace(
