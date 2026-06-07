@@ -10,7 +10,7 @@ export type AutoThemeIconProps = {
  * Component.
  */
 
-/** Sun-with-rays glyph for follow-system (auto) theme. */
+/** Half-circle glyph for follow-system (auto) theme. */
 export function AutoThemeIcon(props: AutoThemeIconProps) {
   const {class: className} = props;
 
@@ -24,15 +24,9 @@ export function AutoThemeIcon(props: AutoThemeIconProps) {
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
-      <path
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.5"
-        d="M8 2.5v2M8 11.5v2M2.5 8h2M11.5 8h2M4.6 4.6l1.4 1.4M10 10l1.4 1.4M4.6 11.4 6 10M10 6l1.4-1.4"
-      />
-      <circle cx="8" cy="8" r="2.25" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path fill="currentColor" d="M8 2.5a5.5 5.5 0 0 0 0 11Z" />
+      <circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" d="M8 2.5v11" />
     </svg>
   );
 }
