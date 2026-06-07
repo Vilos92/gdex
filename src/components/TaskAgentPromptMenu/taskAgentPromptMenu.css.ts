@@ -83,7 +83,7 @@ export const menuItemLabel = style({
   textAlign: 'left'
 });
 
-/** Mirrors `panelIconButton` (code-block copy) when the menu row is hovered. */
+/** Clipboard hint on the trailing edge. Row hover handles background feedback. */
 export const menuItemIconWrap = style({
   display: 'inline-flex',
   alignItems: 'center',
@@ -91,20 +91,15 @@ export const menuItemIconWrap = style({
   flexShrink: 0,
   width: '1.75rem',
   height: '1.75rem',
-  borderRadius: '6px',
   color: palette.textMuted,
   selectors: {
     'button:hover:enabled &': {
-      backgroundColor: palette.surface,
-      boxShadow: `inset 0 0 0 1px ${palette.border}`,
       color: palette.text
     },
     'button:disabled &': {
       opacity: 0.45
     },
     [darkSelector('button:hover:enabled &')]: {
-      backgroundColor: palette.codeBlockBgDark,
-      boxShadow: `inset 0 0 0 1px ${palette.borderDark}`,
       color: palette.textDark
     },
     [darkSelector()]: {

@@ -17,9 +17,11 @@ Navigate from the task list or detail pane. **`⌘`** is Command on macOS and Co
 | **⌘⇧[** | Previous workspace |
 | **⌘B** | Toggle sidebar |
 | **⌘⌥T** | Cycle theme *(light → dark → auto)* |
+| **⌘1** … **⌘4** | Select quick prompt by slot *(task detail / workspace home)* |
+| **⌘C** | Copy selected quick prompt *(task detail / workspace home)* |
 | **Esc** | Close Quick prompts menu |
 
-Hold **j** or **k** (or the arrow keys) to move continuously. Shortcuts are ignored while typing in a field, while focus is in the workspace sidebar, or while Quick prompts is open.
+Hold **j** or **k** (or the arrow keys) to move continuously. Shortcuts are ignored while typing in a field, while focus is in the workspace sidebar, or while the Quick prompts context menu is open. Unavailable quick prompt slots ignore their number shortcut.
 
 ## Development
 
