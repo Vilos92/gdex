@@ -25,9 +25,7 @@ export function AgentPromptCodeBlock({text, isCopied, onCopy}: AgentPromptCodeBl
   return (
     <div class={styles.quickPromptCode}>
       <pre class={styles.quickPromptCodeText}>{text}</pre>
-      <div class={styles.quickPromptCodeToolbar}>
-        <QuickPromptCopyButton isCopied={isCopied} onCopy={onCopy} />
-      </div>
+      <QuickPromptCopyButton isCopied={isCopied} onCopy={onCopy} />
     </div>
   );
 }

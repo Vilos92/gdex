@@ -10,6 +10,14 @@ import {fonts, palette} from '@/styles/tokens';
 /** Cap prompt text at ~5 lines. `max-height` tracks `lineHeight` below. */
 const QUICK_PROMPT_CODE_MAX_LINES = 5;
 const QUICK_PROMPT_CODE_LINE_HEIGHT = 1.55;
+/** Matches `::-webkit-scrollbar` width and overlay copy inset below. */
+const QUICK_PROMPT_SCROLLBAR_WIDTH = '6px';
+const QUICK_PROMPT_COPY_BUTTON_SIZE = '1.75rem';
+/** Copy button `right` inset — clears the scrollbar track. */
+const QUICK_PROMPT_CODE_EDGE_INSET = '0.25rem';
+/** `<pre>` `padding-right` — flush with the overlay copy button. */
+const QUICK_PROMPT_CODE_TEXT_PADDING_RIGHT = QUICK_PROMPT_COPY_BUTTON_SIZE;
+const QUICK_PROMPT_COPY_BUTTON_INSET_RIGHT = `calc(${QUICK_PROMPT_SCROLLBAR_WIDTH} + ${QUICK_PROMPT_CODE_EDGE_INSET})`;
 
 /*
  * Styles.
@@ -65,24 +73,19 @@ export const quickPromptSelect = style({
 });
 
 export const quickPromptCode = style({
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'stretch',
+  position: 'relative',
   backgroundColor: 'transparent',
   overflow: 'hidden'
-});
-
-export const quickPromptCodeToolbar = style({
-  display: 'flex',
-  flexDirection: 'column',
-  flexShrink: 0,
-  alignItems: 'center',
-  padding: '0.2rem 0.25rem 0.2rem 0'
 });
 
 export const quickPromptCopyButton = style([
   panelIconButton,
   {
+    position: 'absolute',
+    top: '0.2rem',
+    right: QUICK_PROMPT_COPY_BUTTON_INSET_RIGHT,
+    zIndex: 1,
+    backgroundColor: palette.codeBlockBg,
     selectors: {
       '&:hover': {
         backgroundColor: palette.surface,
@@ -94,6 +97,9 @@ export const quickPromptCopyButton = style([
         backgroundColor: palette.controlBgActive,
         borderColor: 'transparent',
         boxShadow: 'none'
+      },
+      [darkSelector()]: {
+        backgroundColor: palette.codeBlockBgDark
       },
       [darkSelector(':hover')]: {
         backgroundColor: palette.pageBgDark,
@@ -115,15 +121,14 @@ export const quickPromptCopyButtonCopied = style({
 });
 
 export const quickPromptCodeText = style({
-  flex: '1 1 auto',
-  minWidth: 0,
   margin: 0,
-  padding: '0.5rem 0.4rem 0.5rem 0.55rem',
+  padding: `0.5rem ${QUICK_PROMPT_CODE_TEXT_PADDING_RIGHT} 0.5rem 0.55rem`,
   fontFamily: fonts.mono,
   fontSize: '0.8125rem',
   lineHeight: QUICK_PROMPT_CODE_LINE_HEIGHT,
   maxHeight: `calc(1em * ${QUICK_PROMPT_CODE_LINE_HEIGHT} * ${QUICK_PROMPT_CODE_MAX_LINES})`,
   overflowY: 'auto',
+  scrollbarGutter: 'stable',
   scrollbarWidth: 'thin',
   scrollbarColor: `${palette.border} transparent`,
   whiteSpace: 'pre-wrap',
