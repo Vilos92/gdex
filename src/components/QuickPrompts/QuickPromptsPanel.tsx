@@ -1,7 +1,15 @@
-import {useEffect, useState} from 'preact/hooks';
+import {useEffect, useRef, useState} from 'preact/hooks';
+import {tinykeys} from 'tinykeys';
 
 import {AgentPromptCodeBlock} from '@/components/TaskDetail/QuickPrompts/AgentPromptCodeBlock';
 import * as styles from '@/components/TaskDetail/QuickPrompts/taskDetailQuickPrompts.css';
+import {useClipboardCopy} from '@/hooks/useClipboardCopy';
+import {
+  checkShouldHandleQuickPromptShortcut,
+  QUICK_PROMPT_KEY_BINDINGS,
+  resolveActiveQuickPromptText,
+  resolveQuickPromptSlotSelection
+} from '@/lib/keyboard/quickPromptShortcuts';
 import * as disclosureStyles from '@/styles/panelDisclosure.css';
 
 /*
@@ -31,10 +39,13 @@ export function QuickPromptsPanel<TId extends string>({
   const [selectedId, setSelectedId] = useState<TId>(() =>
     resolveQuickPromptSelection(prompts, defaultPromptId, defaultPromptId)
   );
+  const {isCopied, copy} = useClipboardCopy();
 
   useEffect(() => {
     setSelectedId(prevSelectedId => resolveQuickPromptSelection(prompts, prevSelectedId, defaultPromptId));
   }, [defaultPromptId, prompts]);
+
+  useQuickPromptKeyboard({prompts, selectedId, setSelectedId, copy});
 
   const activePrompt = prompts.find(prompt => prompt.id === selectedId) ?? prompts[0];
   if (activePrompt === undefined) {
@@ -57,10 +68,87 @@ export function QuickPromptsPanel<TId extends string>({
             </option>
           ))}
         </select>
-        <AgentPromptCodeBlock text={activePrompt.text} />
+        <AgentPromptCodeBlock
+          text={activePrompt.text}
+          isCopied={isCopied}
+          onCopy={() => void copy(activePrompt.text)}
+        />
       </div>
     </details>
   );
+}
+
+/*
+ * Hooks.
+ */
+
+function useQuickPromptKeyboard<TId extends string>({
+  prompts,
+  selectedId,
+  setSelectedId,
+  copy
+}: {
+  prompts: readonly QuickPromptOption<TId>[];
+  selectedId: TId;
+  setSelectedId: (value: TId | ((previous: TId) => TId)) => void;
+  copy: (text: string) => Promise<boolean>;
+}): void {
+  const promptsRef = useRef(prompts);
+  const selectedIdRef = useRef(selectedId);
+  const setSelectedIdRef = useRef(setSelectedId);
+  const copyRef = useRef(copy);
+
+  promptsRef.current = prompts;
+  selectedIdRef.current = selectedId;
+  setSelectedIdRef.current = setSelectedId;
+  copyRef.current = copy;
+
+  useEffect(() => {
+    const handleQuickPromptSlot = (slotIndex: number): void => {
+      const nextId = resolveQuickPromptSlotSelection(promptsRef.current, slotIndex);
+      if (nextId === undefined) {
+        return;
+      }
+
+      setSelectedIdRef.current(nextId);
+    };
+
+    const handleQuickPromptCopy = (): void => {
+      const text = resolveActiveQuickPromptText(promptsRef.current, selectedIdRef.current);
+      if (text === undefined) {
+        return;
+      }
+
+      void copyRef.current(text);
+    };
+
+    const handleQuickPromptBinding = (
+      event: KeyboardEvent,
+      binding: (typeof QUICK_PROMPT_KEY_BINDINGS)[number]
+    ): void => {
+      if (!checkShouldHandleQuickPromptShortcut(event.target)) {
+        return;
+      }
+
+      event.preventDefault();
+
+      if ('slotIndex' in binding) {
+        handleQuickPromptSlot(binding.slotIndex);
+        return;
+      }
+
+      handleQuickPromptCopy();
+    };
+
+    const keyMap = Object.fromEntries(
+      QUICK_PROMPT_KEY_BINDINGS.map(binding => [
+        binding.tinykey,
+        (event: KeyboardEvent) => handleQuickPromptBinding(event, binding)
+      ])
+    ) as Record<string, (event: KeyboardEvent) => void>;
+
+    return tinykeys(window, keyMap);
+  }, []);
 }
 
 /*
