@@ -8,22 +8,6 @@ import {computeTaskDepth, MAX_TASK_DEPTH, sortedTasksAtLevel} from '@/lib/taskLe
  * Constants.
  */
 
-function depthProbeTask(overrides: Partial<Task> & Pick<Task, 'id'>): Task {
-  return {
-    parentId: undefined,
-    name: overrides.id,
-    description: undefined,
-    priority: 1,
-    completed: false,
-    result: undefined,
-    startedAt: undefined,
-    completedAt: undefined,
-    children: [],
-    blockedBy: [],
-    ...overrides
-  };
-}
-
 const DEPTH_ROOT = depthProbeTask({id: 'root'});
 const DEPTH_CHILD = depthProbeTask({id: 'child', parentId: 'root'});
 const DEPTH_GRANDCHILD = depthProbeTask({id: 'grandchild', parentId: 'child'});
@@ -79,3 +63,23 @@ describe('sortedTasksAtLevel', () => {
     expect(sortedTasksAtLevel(SAMPLE_TASKS, 'a').map(task => task.id)).toEqual(['a1']);
   });
 });
+
+/*
+ * Helpers.
+ */
+
+function depthProbeTask(overrides: Partial<Task> & Pick<Task, 'id'>): Task {
+  return {
+    parentId: undefined,
+    name: overrides.id,
+    description: undefined,
+    priority: 1,
+    completed: false,
+    result: undefined,
+    startedAt: undefined,
+    completedAt: undefined,
+    children: [],
+    blockedBy: [],
+    ...overrides
+  };
+}
