@@ -26,9 +26,13 @@ export function computeTaskDepth(tasks: Tasks, taskId: string): number {
     if (visited.has(currentId)) {
       break;
     }
+    const node = byId.get(currentId);
+    if (node === undefined) {
+      break;
+    }
     visited.add(currentId);
     depth += 1;
-    currentId = byId.get(currentId)?.parentId;
+    currentId = node.parentId;
   }
 
   return depth;

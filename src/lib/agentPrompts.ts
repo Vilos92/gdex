@@ -8,7 +8,7 @@ import type {Workspace} from '@/lib/workspaceApi';
  * Types.
  */
 
-type AgentPromptId = 'view' | 'add-subtask' | 'start' | 'complete' | 'delete';
+export type AgentPromptId = 'view' | 'add-subtask' | 'start' | 'complete' | 'delete';
 
 export type WorkspaceAgentPromptId = 'list' | 'create';
 
@@ -17,7 +17,7 @@ export const DEFAULT_AGENT_PROMPT_ID = 'view' as const;
 export const DEFAULT_WORKSPACE_AGENT_PROMPT_ID = 'list' as const;
 
 export type AgentPrompt = {
-  id: 'view' | 'add-subtask' | 'start' | 'complete' | 'delete';
+  id: AgentPromptId;
   label: string;
   text: string;
   isAvailable: boolean;

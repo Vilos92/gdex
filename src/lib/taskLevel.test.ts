@@ -62,7 +62,7 @@ describe('computeTaskDepth', () => {
   });
 
   test('stops when parentId points to a missing task', () => {
-    expect(computeTaskDepth([ORPHAN_PARENT], 'orphan')).toBe(2);
+    expect(computeTaskDepth([ORPHAN_PARENT], 'orphan')).toBe(1);
   });
 
   test('returns 0 for a missing task id', () => {
