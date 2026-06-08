@@ -121,7 +121,7 @@ export function TaskList({
           />
         ))}
       </div>
-      {renderTaskListContextMenu(workspace, contextMenu)}
+      {renderTaskListContextMenu(workspace, tasks, contextMenu)}
     </>
   );
 }
@@ -159,7 +159,11 @@ function checkIsTaskTabStop(
   return selectedTaskId === undefined || !selectedExists;
 }
 
-function renderTaskListContextMenu(workspace: Workspace, contextMenu: TaskListProps['contextMenu']) {
+function renderTaskListContextMenu(
+  workspace: Workspace,
+  tasks: Tasks,
+  contextMenu: TaskListProps['contextMenu']
+) {
   if (contextMenu === undefined) {
     return undefined;
   }
@@ -168,6 +172,7 @@ function renderTaskListContextMenu(workspace: Workspace, contextMenu: TaskListPr
     <TaskAgentPromptMenu
       workspace={workspace}
       task={contextMenu.task}
+      tasks={tasks}
       position={{x: contextMenu.x, y: contextMenu.y}}
       onClose={contextMenu.onClose}
     />,

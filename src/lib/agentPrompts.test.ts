@@ -50,11 +50,46 @@ describe('buildWorkspaceAgentPrompts', () => {
 });
 
 describe('buildAgentPrompts', () => {
+  test('includes add-subtask prompt with parent flag in dex command', () => {
+    const prompts = buildAgentPrompts({
+      workspace: sampleWorkspace,
+      taskId: sampleTaskId,
+      status: 'pending',
+      taskDepth: 2
+    });
+    const ids = prompts.map(prompt => prompt.id);
+
+    expect(ids).toEqual(['view', 'add-subtask', 'start', 'complete', 'delete']);
+
+    const addSubtaskPrompt = prompts.find(prompt => prompt.id === 'add-subtask');
+
+    expect(addSubtaskPrompt?.isAvailable).toBe(true);
+    expect(addSubtaskPrompt?.text).toContain(`under dex task \`${sampleTaskId}\``);
+    expect(addSubtaskPrompt?.text).toContain(`create 'TASK_TITLE'`);
+    expect(addSubtaskPrompt?.text).toContain(`--parent '${sampleTaskId}'`);
+    expect(addSubtaskPrompt?.text).toContain('show <new-id> --full');
+    expect(addSubtaskPrompt?.text).toContain('Agree on title and description with the user first');
+    expect(addSubtaskPrompt?.text).toContain('Do not start or complete the new subtask unless the user asks');
+  });
+
+  test('disables add-subtask at max dex depth', () => {
+    const prompts = buildAgentPrompts({
+      workspace: sampleWorkspace,
+      taskId: sampleTaskId,
+      status: 'pending',
+      taskDepth: 3
+    });
+    const addSubtaskPrompt = prompts.find(prompt => prompt.id === 'add-subtask');
+
+    expect(addSubtaskPrompt?.isAvailable).toBe(false);
+  });
+
   test('complete prompt reminds human to review and commit before complete', () => {
     const prompts = buildAgentPrompts({
       workspace: sampleWorkspace,
       taskId: sampleTaskId,
-      status: 'in_progress'
+      status: 'in_progress',
+      taskDepth: 1
     });
     const completePrompt = prompts.find(prompt => prompt.id === 'complete');
 

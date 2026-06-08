@@ -1,13 +1,14 @@
 import dedent from 'ts-dedent';
 
 import type {TaskStatus} from '@/lib/taskApi';
+import {MAX_TASK_DEPTH} from '@/lib/taskLevel';
 import type {Workspace} from '@/lib/workspaceApi';
 
 /*
  * Types.
  */
 
-type AgentPromptId = 'view' | 'start' | 'complete' | 'delete';
+export type AgentPromptId = 'view' | 'add-subtask' | 'start' | 'complete' | 'delete';
 
 export type WorkspaceAgentPromptId = 'list' | 'create';
 
@@ -16,7 +17,7 @@ export const DEFAULT_AGENT_PROMPT_ID = 'view' as const;
 export const DEFAULT_WORKSPACE_AGENT_PROMPT_ID = 'list' as const;
 
 export type AgentPrompt = {
-  id: 'view' | 'start' | 'complete' | 'delete';
+  id: AgentPromptId;
   label: string;
   text: string;
   isAvailable: boolean;
@@ -47,6 +48,7 @@ type WorkspaceAgentPromptDefinition = {
 
 const AGENT_PROMPT_DEFINITIONS: readonly AgentPromptDefinition[] = [
   {id: 'view', label: 'Look at task', buildText: buildViewPrompt},
+  {id: 'add-subtask', label: 'Add subtask', buildText: buildAddSubtaskPrompt},
   {id: 'start', label: 'Start task', buildText: buildStartPrompt},
   {id: 'complete', label: 'Mark complete', buildText: buildCompletePrompt},
   {id: 'delete', label: 'Delete task', buildText: buildDeletePrompt}
@@ -57,10 +59,16 @@ const WORKSPACE_AGENT_PROMPT_DEFINITIONS: readonly WorkspaceAgentPromptDefinitio
   {id: 'create', label: 'Create root task', buildText: buildWorkspaceCreatePrompt}
 ];
 
-const visibilityByPromptId: Record<AgentPromptId, (status: TaskStatus) => boolean> = {
+type AgentPromptAvailabilityInput = {
+  status: TaskStatus;
+  taskDepth: number;
+};
+
+const availabilityByPromptId: Record<AgentPromptId, (input: AgentPromptAvailabilityInput) => boolean> = {
   view: () => true,
-  start: status => status === 'pending',
-  complete: status => status !== 'done',
+  'add-subtask': ({taskDepth}) => taskDepth < MAX_TASK_DEPTH,
+  start: ({status}) => status === 'pending',
+  complete: ({status}) => status !== 'done',
   delete: () => true
 };
 
@@ -73,14 +81,16 @@ export function buildAgentPrompts(input: {
   workspace: Workspace;
   taskId: string;
   status: TaskStatus;
+  taskDepth: number;
 }): readonly AgentPrompt[] {
-  const {workspace, taskId, status} = input;
+  const {workspace, taskId, status, taskDepth} = input;
+  const availabilityInput: AgentPromptAvailabilityInput = {status, taskDepth};
 
   return AGENT_PROMPT_DEFINITIONS.map(definition => ({
     id: definition.id,
     label: definition.label,
     text: definition.buildText(workspace, taskId),
-    isAvailable: visibilityByPromptId[definition.id](status)
+    isAvailable: availabilityByPromptId[definition.id](availabilityInput)
   }));
 }
 
@@ -163,6 +173,19 @@ function buildWorkspaceCreatePrompt(workspace: Workspace): string {
     Create a new root-level dex task in workspace \`${workspace.name}\`.
     Agree on title and description with the user first, then run \`${baseCommand} create ${titlePlaceholder} --description ${descriptionPlaceholder}\` (replace placeholders with the agreed values).
     Run \`${baseCommand} show <new-id> --full\` to confirm creation and share the new task ID. Do not start or complete the task unless the user asks.
+  `;
+}
+
+function buildAddSubtaskPrompt(workspace: Workspace, taskId: string): string {
+  const baseCommand = dexBaseCommand(workspace);
+  const parentId = quoteCliArg(taskId);
+  const titlePlaceholder = quoteCliArg('TASK_TITLE');
+  const descriptionPlaceholder = quoteCliArg('TASK_DESCRIPTION');
+
+  return agentPromptText`
+    Create a new subtask under dex task \`${taskId}\` in workspace \`${workspace.name}\`.
+    Agree on title and description with the user first, then run \`${baseCommand} create ${titlePlaceholder} --description ${descriptionPlaceholder} --parent ${parentId}\` (replace placeholders with the agreed values).
+    Run \`${baseCommand} show <new-id> --full\` to confirm creation and share the new task ID. Do not start or complete the new subtask unless the user asks.
   `;
 }
 

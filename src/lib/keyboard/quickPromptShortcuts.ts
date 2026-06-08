@@ -13,6 +13,7 @@ export const QUICK_PROMPT_KEY_BINDINGS = [
   {tinykey: '$mod+2', slotIndex: 1},
   {tinykey: '$mod+3', slotIndex: 2},
   {tinykey: '$mod+4', slotIndex: 3},
+  {tinykey: '$mod+5', slotIndex: 4},
   {tinykey: '$mod+c', action: 'copy' as const}
 ] as const;
 

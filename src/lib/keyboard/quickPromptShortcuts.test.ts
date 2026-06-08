@@ -16,8 +16,9 @@ type TestPrompt<TId extends string> = {
   isAvailable: boolean;
 };
 
-const TASK_PROMPTS: readonly TestPrompt<'view' | 'start' | 'complete' | 'delete'>[] = [
+const TASK_PROMPTS: readonly TestPrompt<'view' | 'add-subtask' | 'start' | 'complete' | 'delete'>[] = [
   {id: 'view', label: 'Look at task', text: 'view text', isAvailable: true},
+  {id: 'add-subtask', label: 'Add subtask', text: 'add subtask text', isAvailable: true},
   {id: 'start', label: 'Start task', text: 'start text', isAvailable: false},
   {id: 'complete', label: 'Mark complete', text: 'complete text', isAvailable: true},
   {id: 'delete', label: 'Delete task', text: 'delete text', isAvailable: true}
@@ -31,12 +32,14 @@ const WORKSPACE_PROMPTS: readonly TestPrompt<'list' | 'create'>[] = [
 describe('resolveQuickPromptSlotSelection', () => {
   test('maps slot index to display-order prompt id', () => {
     expect(resolveQuickPromptSlotSelection(TASK_PROMPTS, 0)).toBe('view');
-    expect(resolveQuickPromptSlotSelection(TASK_PROMPTS, 2)).toBe('complete');
+    expect(resolveQuickPromptSlotSelection(TASK_PROMPTS, 1)).toBe('add-subtask');
+    expect(resolveQuickPromptSlotSelection(TASK_PROMPTS, 3)).toBe('complete');
+    expect(resolveQuickPromptSlotSelection(TASK_PROMPTS, 4)).toBe('delete');
     expect(resolveQuickPromptSlotSelection(WORKSPACE_PROMPTS, 1)).toBe('create');
   });
 
   test('returns undefined when the slot prompt is unavailable', () => {
-    expect(resolveQuickPromptSlotSelection(TASK_PROMPTS, 1)).toBeUndefined();
+    expect(resolveQuickPromptSlotSelection(TASK_PROMPTS, 2)).toBeUndefined();
   });
 
   test('returns undefined for unused slots', () => {

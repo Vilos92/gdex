@@ -3,7 +3,8 @@ import {useEffect, useRef} from 'preact/hooks';
 import {TaskAgentPromptMenuItem} from '@/components/TaskAgentPromptMenu/TaskAgentPromptMenuItem';
 import * as styles from '@/components/TaskAgentPromptMenu/taskAgentPromptMenu.css';
 import {buildAgentPrompts} from '@/lib/agentPrompts';
-import {type Task, taskStatus} from '@/lib/taskApi';
+import {type Task, type Tasks, taskStatus} from '@/lib/taskApi';
+import {computeTaskDepth} from '@/lib/taskLevel';
 import type {Workspace} from '@/lib/workspaceApi';
 
 /*
@@ -13,6 +14,7 @@ import type {Workspace} from '@/lib/workspaceApi';
 export type TaskAgentPromptMenuProps = {
   workspace: Workspace;
   task: Task;
+  tasks: Tasks;
   position: {x: number; y: number};
   onClose: () => void;
 };
@@ -21,12 +23,13 @@ export type TaskAgentPromptMenuProps = {
  * Component.
  */
 
-export function TaskAgentPromptMenu({workspace, task, position, onClose}: TaskAgentPromptMenuProps) {
+export function TaskAgentPromptMenu({workspace, task, tasks, position, onClose}: TaskAgentPromptMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const prompts = buildAgentPrompts({
     workspace,
     taskId: task.id,
-    status: taskStatus(task)
+    status: taskStatus(task),
+    taskDepth: computeTaskDepth(tasks, task.id)
   });
   const {x, y} = clampMenuPosition(position.x, position.y);
 

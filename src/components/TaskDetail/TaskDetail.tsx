@@ -161,7 +161,7 @@ function TaskDetailContent({task, tasks, workspace, onOpenChildTask}: TaskDetail
     <aside class={styles.panel} aria-label="Task details">
       <TaskDetailHeader id={task.id} name={task.name} status={status} />
       {workspace !== undefined ? (
-        <TaskDetailQuickPrompts workspace={workspace} taskId={task.id} status={status} />
+        <TaskDetailQuickPrompts workspace={workspace} taskId={task.id} status={status} tasks={tasks} />
       ) : undefined}
       <TaskDetailFields task={task} blockers={blockers} hasChildTasks={childTasks.length > 0} />
       <TaskDetailChildTasks childTasks={childTasks} onOpenChildTask={onOpenChildTask} />
