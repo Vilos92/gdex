@@ -1,11 +1,19 @@
 import {z} from 'zod';
 
 /*
+ * Types.
+ */
+
+export type ResolvedTheme = 'light' | 'dark';
+
+/*
  * Schemas.
  */
 
 export const themeModeSchema = z.enum(['light', 'dark', 'auto']);
 
-export type ThemeMode = z.infer<typeof themeModeSchema>;
+/*
+ * Inferred types.
+ */
 
-export type ResolvedTheme = 'light' | 'dark';
+export type ThemeMode = z.infer<typeof themeModeSchema>;

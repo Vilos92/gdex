@@ -4,7 +4,7 @@ import {useState} from 'preact/hooks';
  * Hooks.
  */
 
-export function useFormOpenState(isOpenProp?: boolean, onOpenChange?: (open: boolean) => void) {
+export function useFormOpenState(isOpenProp?: boolean, onOpenChange?: (isOpen: boolean) => void) {
   const [isOpenInternal, setIsOpenInternal] = useState(false);
   const hasOpenProp = isOpenProp !== undefined;
   const hasChangeHandler = onOpenChange !== undefined;

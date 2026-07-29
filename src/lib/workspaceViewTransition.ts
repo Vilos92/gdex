@@ -34,10 +34,14 @@ type WorkspaceTaskPaneReveal = WorkspaceTaskPaneState & {
 };
 
 /*
- * Helpers.
+ * Scratch.
  */
 
 let tasksLoadRequestId = 0;
+
+/*
+ * Helpers.
+ */
 
 /** Bumps and returns the current task-load generation (stale loads bail when a newer switch wins). */
 export function bumpTaskLoadRequest(): number {

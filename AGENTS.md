@@ -62,13 +62,18 @@ Top-down: entry first, **Helpers.** last.
 
 **Order** (omit unused; no empty **Types.** / **Helpers.**):
 
-1. **Types.** · **Constants.**
-2. **Schemas.** (or inline single-schema in one file)
-3. Entry: **Script.** | **Component.** | **Styles.** | **Config.**
-4. **Hooks.**
-5. **Helpers.**
+1. **Types.** · **Constants.** — **Types.** precedes **Constants.** unless a type derives from a constant and declaration order requires the swap
+2. **Schemas.** (or inline single-schema in one file) · **Inferred types.** (see **Runtime validation**)
+3. **Scratch.** — module-scope state that gets mutated, including a `const` whose properties are mutated; sits directly above the entry section
+4. Entry: **Script.** | **Component.** | **Styles.** | **Config.**
+5. **Hooks.**
+6. **Helpers.**
+
+**Config files** (`vite.config.ts`): **Constants.** → **Config.** (default export). Module-level `const` above the entry; only `function` helpers may follow (hoisting).
 
 **Tests:** colocate **`{module}.test.ts`**; **Constants.** (fixtures) → **Tests.** when the file uses section blocks.
+
+**Test-support modules:** helpers shared across suites cannot be `*.test.ts` files (vitest collects those as suites), so colocate them with their domain as **`{name}.fixture.ts`** (`sampleTasks.fixture.ts`). Fixture modules are reachable only from tests and never ship.
 
 ## Code style
 
@@ -83,6 +88,9 @@ Top-down: entry first, **Helpers.** last.
 - **Layer once.** Put shared why on a constant, type field, or entry closure. Do not repeat the same rationale at every call site.
 - **JSDoc** on exports and non-trivial helpers when the contract is not obvious—often one crisp line is enough. Do not document module-private types (see **Exports**).
 - In prose, backtick **identifiers** (`invoke`), not section headers.
+- Default to **separate sentences** over semicolons or em dashes joining clauses. Either is fine occasionally for a tight parenthetical, but overuse gives the codebase a heavy editorial voice.
+- **Balance line widths** in multi-line comments, and never wrap mid-token.
+- **A comment carries its own why** — never a pointer to `AGENTS.md` or other contributor docs. Referencing other code (a sibling function, another module) is fine.
 - **Section blocks** (see **File layout**) label structure only — no extra explanation inside the marker.
 
 ## Naming
@@ -92,11 +100,20 @@ Top-down: entry first, **Helpers.** last.
 - **`compute` / `calc`** for calculated non-boolean results (`computeDueLabel`).
 - **Locals:** readable names (`taskId`), not `e` / `x` unless scope is tiny.
 - **Name for what a thing is, not where it lives.** When a folder or module already conveys context, do not restate it as an identifier prefix.
+- **`.tsx` modules whose entry is a component are PascalCase**, named for the component they export (`TaskDetail.tsx`), and their colocated `.css.ts` matches (`TaskDetail.css.ts`). The `main.tsx` bootstrap is exempt.
 
 ## Fail fast
 
 - Throw with a clear message rather than run in a misleading state. Rust command boundaries: **`Result`**, not panic in user-facing paths.
 - Avoid plausible-looking placeholders for values the app cannot function without.
+
+## Runtime validation
+
+Untrusted data — `invoke` results, store and file reads, watcher payloads — is parsed once at the trust boundary with **zod** schemas, then flows inward as typed data. Zod is the repo's one schema library; do not introduce another validator.
+
+- **Placement:** a schema with a single consumer colocates in that module under its **Schemas.** section. Schemas imported across files live in **`src/schemas/`**.
+- **Every schema value sits in Schemas.** — private sub-schemas included, not just the exported composites. **Constants.** holds only plain values (bounds, value lists) that schemas read.
+- **Inferred types live beside their schema**, in the same module, under an **Inferred types.** section directly below **Schemas.** A type derived via `z.infer<typeof fooSchema>` never sits in **Types.** (hand-authored shapes only) or inside the **Schemas.** section.
 
 ## Tauri
 

@@ -1,3 +1,6 @@
+//! Wires up the Tauri app: manages shared state for the dex CLI and
+//! task watcher, and registers the commands the frontend invokes.
+
 mod commands;
 mod dex;
 mod dex_client;

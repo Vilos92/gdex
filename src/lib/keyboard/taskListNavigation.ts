@@ -110,8 +110,9 @@ function resolveMoveTargetId(
 }
 
 /**
- * `→`/`l`: from home with no selection, select the first root task; with a row selected, drill into subtasks
- * (first child by sort). No-op when the row has no children so extra presses do not re-trigger focus styling.
+ * `→`/`l`: from home with no selection, selects the first root task.
+ * With a row selected, drills into its subtasks (first child by sort).
+ * No-op when the row has no children, so extra presses do not re-trigger focus styling.
  */
 function patchForZoomIn(state: NavigationState): NavigationPatch | undefined {
   const levelTasks = sortedTasksAtLevel(state.tasks, state.zoomParentId);

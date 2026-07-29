@@ -1,6 +1,5 @@
 import preact from '@preact/preset-vite';
 import {vanillaExtractPlugin} from '@vanilla-extract/vite-plugin';
-import tsconfigPaths from 'vite-tsconfig-paths';
 import {defineConfig} from 'vitest/config';
 
 /*
@@ -15,7 +14,12 @@ const host = process.env.TAURI_DEV_HOST;
 
 // https://vite.dev/config/
 export default defineConfig(async () => ({
-  plugins: [tsconfigPaths(), vanillaExtractPlugin(), preact()],
+  plugins: [vanillaExtractPlugin(), preact()],
+
+  // Vite 8 resolves tsconfig `paths` natively, replacing the vite-tsconfig-paths plugin.
+  resolve: {
+    tsconfigPaths: true
+  },
 
   test: {
     environment: 'node',
