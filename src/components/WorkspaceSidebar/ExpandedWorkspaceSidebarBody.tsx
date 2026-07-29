@@ -13,7 +13,7 @@ export type ExpandedWorkspaceSidebarBodyProps = {
   isWorkspaceSwitching: boolean;
   selectError: string | undefined;
   isAddFormOpen: boolean;
-  onAddFormOpenChange: (open: boolean) => void;
+  onAddFormOpenChange: (isOpen: boolean) => void;
   onSelect: (workspaceId: string) => void;
 };
 

@@ -15,7 +15,7 @@ import {useAppStore} from '@/stores/appStore';
 
 export type AddWorkspacePanelProps = {
   isFormOpen?: boolean;
-  onFormOpenChange?: (open: boolean) => void;
+  onFormOpenChange?: (isOpen: boolean) => void;
 };
 
 /*

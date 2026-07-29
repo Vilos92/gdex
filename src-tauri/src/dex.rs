@@ -1,3 +1,6 @@
+//! Locates the `dex` CLI binary so gdex can shell out to it even when launched from Finder,
+//! where GUI apps inherit a minimal `PATH` that skips shell profile customizations.
+
 use std::env;
 use std::ffi::{OsStr, OsString};
 use std::fs;

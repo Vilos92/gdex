@@ -1,4 +1,4 @@
-import {globalStyle, style} from '@vanilla-extract/css';
+import {createGlobalVar, fallbackVar, style} from '@vanilla-extract/css';
 
 import {inDarkScheme} from '@/styles/darkScheme';
 import {palette} from '@/styles/tokens';
@@ -7,11 +7,12 @@ import {palette} from '@/styles/tokens';
  * Styles.
  */
 
-globalStyle('@property --task-board-width', {
+// Typed registration means `taskBoardWidth.ts` reads a resolved length from the start.
+const taskBoardWidth = createGlobalVar('--task-board-width', {
   syntax: '<length>',
   inherits: false,
   initialValue: '13rem'
-} as unknown as Parameters<typeof globalStyle>[1]);
+});
 
 export const splash = style({
   minHeight: '100vh',
@@ -72,7 +73,7 @@ export const workspaceMain = style({
   minHeight: 0,
   minWidth: 0,
   overflow: 'hidden',
-  gridTemplateColumns: 'var(--task-board-width, 13rem) auto 1fr',
+  gridTemplateColumns: `${fallbackVar(taskBoardWidth, '13rem')} auto 1fr`,
   columnGap: '1rem'
 });
 
