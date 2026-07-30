@@ -25,7 +25,10 @@ export type BackResult = 'focusList' | NavigationPatch;
  * Helpers.
  */
 
-/** Maps a bound key action to the next store patch; `undefined` means the key is a no-op (caller may still `preventDefault`). */
+/**
+ * Maps a bound key action to the next store patch; `undefined`
+ * means the key is a no-op (caller may still `preventDefault`).
+ */
 export function applyKeyAction(
   state: NavigationState,
   action: 'moveUp' | 'moveDown' | 'zoomIn' | 'zoomOut'
@@ -42,7 +45,10 @@ export function applyKeyAction(
   }
 }
 
-/** Skips re-applying state and re-focusing when the patch would not change anything (avoids a double highlight on repeated `→`). */
+/**
+ * Skips re-applying state and re-focusing when the patch would
+ * not change anything (avoids a double highlight on repeated `→`).
+ */
 export function checkIsRedundantNavigationPatch(state: NavigationState, patch: NavigationPatch): boolean {
   return state.zoomParentId === patch.zoomParentId && state.selectedTaskId === patch.selectedTaskId;
 }
