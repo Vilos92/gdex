@@ -11,7 +11,10 @@ export const MAX_TASK_DEPTH = 3;
  * Helpers.
  */
 
-/** Levels from workspace root (1 = root task). Returns 0 when `taskId` is missing. Stops on cycles or missing parents. */
+/**
+ * Levels from workspace root (1 = root task). Returns 0 when
+ * `taskId` is missing. Stops on cycles or missing parents.
+ */
 export function computeTaskDepth(tasks: Tasks, taskId: string): number {
   const byId = new Map(tasks.map(task => [task.id, task]));
   if (byId.get(taskId) === undefined) {
