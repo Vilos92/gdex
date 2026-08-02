@@ -22,6 +22,7 @@
         "@preact/preset-vite": "^2.10.6",
         "@tauri-apps/cli": "^2.11.4",
         "@vanilla-extract/vite-plugin": "^5.2.5",
+        "comment-fmt": "^0.1.4",
         "fallow": "3.7.1",
         "typescript": "~7.0.2",
         "vite": "^8.1.5",
@@ -412,6 +413,8 @@
     "caniuse-lite": ["caniuse-lite@1.0.30001793", "", {}, "sha512-iwSsYWaCOoh26cV8NwNRViHlrfUvYsHDfRVcbtmw0Kg6PJIZZXwMkj1442FYLBGkeUf1juAsU3DTfxW579mrPA=="],
 
     "chai": ["chai@6.2.2", "", {}, "sha512-NUPRluOfOiTKBKvWPtSD4PhFvWCqOi0BGStNWs57X9js7XGTprSmFoz5F0tWhR4WPjNeR9jXqdC7/UpSJTnlRg=="],
+
+    "comment-fmt": ["comment-fmt@0.1.4", "", { "bin": { "comment-fmt": "dist/cli/index.mjs" } }, "sha512-koowyRo1MIROWlqfZPLXLu9oNLXPpjDL+T4yW6eITkN8DuAiF0uq/U9FM4eXXwAfIYDYQHT6SUAJVc37sSPW1Q=="],
 
     "confbox": ["confbox@0.1.8", "", {}, "sha512-RMtmw0iFkeR4YV+fUOSucriAQNb9g8zFR52MWCtl+cCZOFRNL6zeB395vPzFhEjjn4fMxXudmELnl/KF/WrK6w=="],
 
