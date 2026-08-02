@@ -55,7 +55,7 @@
     "vitest": "^4.1.10"
   },
   "simple-git-hooks": {
-    "pre-commit": "npx lint-staged"
+    "pre-commit": "bunx --bun lint-staged"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
