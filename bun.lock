@@ -22,7 +22,7 @@
         "@preact/preset-vite": "^2.10.6",
         "@tauri-apps/cli": "^2.11.4",
         "@vanilla-extract/vite-plugin": "^5.2.5",
-        "comment-fmt": "^0.1.4",
+        "comment-fmt": "^0.1.5",
         "fallow": "3.7.1",
         "lint-staged": "^17.2.0",
         "simple-git-hooks": "^2.13.1",
@@ -416,7 +416,7 @@
 
     "chai": ["chai@6.2.2", "", {}, "sha512-NUPRluOfOiTKBKvWPtSD4PhFvWCqOi0BGStNWs57X9js7XGTprSmFoz5F0tWhR4WPjNeR9jXqdC7/UpSJTnlRg=="],
 
-    "comment-fmt": ["comment-fmt@0.1.4", "", { "bin": { "comment-fmt": "dist/cli/index.mjs" } }, "sha512-koowyRo1MIROWlqfZPLXLu9oNLXPpjDL+T4yW6eITkN8DuAiF0uq/U9FM4eXXwAfIYDYQHT6SUAJVc37sSPW1Q=="],
+    "comment-fmt": ["comment-fmt@0.1.5", "", { "bin": { "comment-fmt": "dist/cli/index.mjs" } }, "sha512-vxO+3iKBj+5n8dJdZmI05I71kgDLJyMV4lleBJmA9LPm+Ddth6V3VwILmxBc/I9/vKlsP3hWF3jzXZQTIuRQiw=="],
 
     "confbox": ["confbox@0.1.8", "", {}, "sha512-RMtmw0iFkeR4YV+fUOSucriAQNb9g8zFR52MWCtl+cCZOFRNL6zeB395vPzFhEjjn4fMxXudmELnl/KF/WrK6w=="],
 
