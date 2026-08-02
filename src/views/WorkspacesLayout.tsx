@@ -33,7 +33,10 @@ export function WorkspacesLayout() {
  * Hooks.
  */
 
-/** Runs once on mount so the first workspace gets an enter transition without duplicating the sidebar switch flow. */
+/**
+ * Runs once on mount so the first workspace gets an enter
+ * transition without duplicating the sidebar switch flow.
+ */
 function useWorkspaceTasksSync() {
   const loadActiveWorkspaceTasks = useAppStore(state => state.loadActiveWorkspaceTasks);
   const initTasksListener = useAppStore(state => state.initTasksListener);

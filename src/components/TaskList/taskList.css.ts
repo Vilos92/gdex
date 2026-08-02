@@ -35,7 +35,10 @@ export const list = style({
   overflowY: 'auto'
 });
 
-/** Task-board selected row. Selection border is the focus indicator. Suppress the base row outline to avoid a double ring on repeated `→`. */
+/**
+ * Task-board selected row. Selection border is the focus indicator. Suppress the base row outline to
+ * avoid a double ring on repeated `→`.
+ */
 export const taskButtonSelected = style([
   listRowButtonSelected,
   {
@@ -46,7 +49,8 @@ export const taskButtonSelected = style([
   }
 ]);
 
-// Keyboard navigation leaves `:hover` stuck on the last mouse-targeted row. See `suppressBoardHoverUntilPointerMove`.
+// Keyboard navigation leaves `:hover` stuck on the last mouse-targeted row. See
+// `suppressBoardHoverUntilPointerMove`.
 const suppressHoverWhileKeyboardDriving = {
   [`#${TASK_BOARD_ID}[data-suppress-hover] &:hover:not(.${taskButtonSelected})`]: {
     backgroundColor: palette.surface,

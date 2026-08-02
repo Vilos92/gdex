@@ -3,3 +3,7 @@
 # Only install versions published at least 7 days ago (supply-chain mitigation).
 # https://bun.sh/docs/runtime/bunfig#install-minimumreleaseage
 minimumReleaseAge = 604_800
+# comment-fmt is self-authored and self-published (Vilos92/comment-fmt), not a third-party
+# dependency this policy is meant to guard against. Exempted so a fresh release doesn't block
+# installing our own tool immediately after publishing it.
+minimumReleaseAgeExcludes = ["comment-fmt"]

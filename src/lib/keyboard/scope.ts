@@ -64,7 +64,9 @@ export function checkHasAgentPromptMenu(): boolean {
   return document.querySelector('[role="menu"][aria-label="Quick prompts"]') !== null;
 }
 
-/** App-shell shortcuts, not list navigation — defer only while typing or the prompt menu owns the keyboard. */
+/**
+ * App-shell shortcuts, not list navigation — defer only while typing or the prompt menu owns the keyboard.
+ */
 export function checkShouldHandleChromeShortcut(target: EventTarget | null): boolean {
   return !checkHasAgentPromptMenu() && !checkIsEditableKeyboardTarget(target);
 }
