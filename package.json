@@ -46,7 +46,7 @@
     "@preact/preset-vite": "^2.10.6",
     "@tauri-apps/cli": "^2.11.4",
     "@vanilla-extract/vite-plugin": "^5.2.5",
-    "comment-fmt": "^0.1.6",
+    "comment-fmt": "^0.1.7",
     "fallow": "3.7.1",
     "lint-staged": "^17.2.0",
     "simple-git-hooks": "^2.13.1",
